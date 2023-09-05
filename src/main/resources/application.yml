@@ -1,0 +1,38 @@
+spring:
+#  autoconfigure:
+#    exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+  devtools:
+    remote:
+      secret: mysecret
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    properties:
+      hibernate:
+       ddl-auto: update
+       dialect: org.hibernate.dialect.PostgreSQLDialect
+
+logging:
+  level:
+    jdbc:
+      sqltiming: DEBUG
+      resultsettable: DEBUG
+spotify:
+  clientId: ${CLIENT_ID}
+  clientSecret: ${CLIENT_SECRET}
+  redirectUri: ${REDIRECT_URI}
+  scopes:
+    - user-follow-read
+    - user-read-email
+    - playlist-read-private
+    - playlist-read-collaborative
+    - user-read-email
+    - streaming
+    - user-read-private
+    - user-library-read
+    - user-top-read
+    - user-read-playback-state
+    - user-read-recently-played

@@ -1,6 +1,5 @@
 # Use the official Maven with JDK 17 image as the build image
 FROM maven:3.9.3 AS build
-
 # Set the current working directory inside the container
 WORKDIR /app
 
@@ -8,7 +7,6 @@ WORKDIR /app
 COPY ./pom.xml ./
 
 # Download project dependencies
-# (this separate step will prevent re-downloading of dependencies if only source code changes)
 RUN mvn dependency:go-offline -B
 
 # Copy the rest of the application source code
@@ -29,5 +27,5 @@ EXPOSE 8080
 # Set application's JAR file
 COPY --from=build /app/target/*.jar app.jar
 
-# Run the application
+# Set the entrypoint script as the entrypoint for the container
 ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/app.jar"]
