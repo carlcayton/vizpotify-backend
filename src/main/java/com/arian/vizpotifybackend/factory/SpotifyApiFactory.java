@@ -1,8 +1,7 @@
-package com.arian.vizpotifybackend.factories;
+package com.arian.vizpotifybackend.factory;
 
 import com.arian.vizpotifybackend.properties.SpotifyProperties;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import se.michaelthelin.spotify.SpotifyApi;
 import se.michaelthelin.spotify.SpotifyHttpManager;

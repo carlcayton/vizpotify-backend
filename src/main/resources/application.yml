@@ -12,11 +12,21 @@ spring:
   jpa:
     properties:
       hibernate:
-       ddl-auto: update
+#       ddl-auto: create-drop
+       ddl-auto: validate
        dialect: org.hibernate.dialect.PostgreSQLDialect
+       default_schema: public
+    show-sql: true
 
 logging:
   level:
+    org:
+      hibernate:
+        SQL: DEBUG
+        type:
+          descriptor:
+            sql:  TRACE
+
     jdbc:
       sqltiming: DEBUG
       resultsettable: DEBUG
@@ -26,13 +36,13 @@ spotify:
   redirectUri: ${REDIRECT_URI}
   scopes:
     - user-follow-read
-    - user-read-email
     - playlist-read-private
     - playlist-read-collaborative
-    - user-read-email
-    - streaming
-    - user-read-private
     - user-library-read
     - user-top-read
     - user-read-playback-state
     - user-read-recently-played
+#    - user-read-private
+jwt:
+  secretKey: 3qRU5Tu7qho8Wj/GjKLzoc8laOPJHERxHu9NnL8dzYbcwOS2XWftAZ2jNjoNbSvR
+  validityInMs: 3600000
