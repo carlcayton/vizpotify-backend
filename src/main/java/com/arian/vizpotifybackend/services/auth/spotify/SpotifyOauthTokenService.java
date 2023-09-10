@@ -3,7 +3,7 @@ package com.arian.vizpotifybackend.services.auth.spotify;
 
 import com.arian.vizpotifybackend.factory.SpotifyApiFactory;
 import com.arian.vizpotifybackend.model.SpotifyAuthToken;
-import com.arian.vizpotifybackend.model.User;
+import com.arian.vizpotifybackend.model.UserDetail;
 import com.arian.vizpotifybackend.properties.SpotifyProperties;
 import com.arian.vizpotifybackend.util.SpotifyUtil;
 import lombok.RequiredArgsConstructor;
@@ -17,19 +17,20 @@ import se.michaelthelin.spotify.requests.authorization.authorization_code.Author
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 @Service
 @RequiredArgsConstructor
-public class SpotifyOauthtTokenService {
+public class SpotifyOauthTokenService {
 
     private final SpotifyUtil spotifyUtil;
     private final SpotifyProperties spotifyProperties;
     private final SpotifyApiFactory spotifyApiFactory;
 
-    private static final Logger logger = LoggerFactory.getLogger(SpotifyOauthtTokenService.class);
+    private static final Logger logger = LoggerFactory.getLogger(SpotifyOauthTokenService.class);
 
 
-    public CompletableFuture<String> getURIRequest() {
+    public String getURIRequest() {
         SpotifyApi spotifyApi = spotifyApiFactory.createSpotifyApiForAuth();
         String scopeAsCSV = spotifyUtil.convertScopeListToCSV(spotifyProperties.getScopes());
         AuthorizationCodeUriRequest authorizationCodeRequest = spotifyApi.authorizationCodeUri()
@@ -37,13 +38,17 @@ public class SpotifyOauthtTokenService {
                 .show_dialog(true)
                 .build();
 
-        return authorizationCodeRequest.executeAsync()
-                .thenApply(URI::toString)
-                .exceptionally(ex -> {
-                    logger.error("Error: {}", ex.getMessage());
-                    return null;
-                });
+        try {
+
+            return authorizationCodeRequest.executeAsync()
+                    .thenApply(URI::toString)
+                    .join();
+        } catch (CompletionException ex) {
+            logger.error("Error: {}", ex.getCause().getMessage());
+            return null;
+        }
     }
+
 
 
     public CompletableFuture<Object[]> getApiInstance(String userCode) {
@@ -61,13 +66,13 @@ public class SpotifyOauthtTokenService {
     }
 
 
-    public SpotifyAuthToken createSpotifyAuthToken(User user, String accessToken,
-                                  String refreshToken,
-                                  Integer expiresIn,
-                                  LocalDateTime lastUpdated) {
+    public SpotifyAuthToken createSpotifyAuthToken(UserDetail userDetail, String accessToken,
+                                                   String refreshToken,
+                                                   Integer expiresIn,
+                                                   LocalDateTime lastUpdated) {
 
         return SpotifyAuthToken.builder()
-                .user(user)
+                .userDetail(userDetail)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .expiresIn(expiresIn)
