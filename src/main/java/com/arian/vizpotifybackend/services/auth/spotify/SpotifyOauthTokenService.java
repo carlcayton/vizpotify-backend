@@ -1,0 +1,77 @@
+package com.arian.vizpotifybackend.services.auth.spotify;
+
+
+import com.arian.vizpotifybackend.factory.SpotifyApiFactory;
+import com.arian.vizpotifybackend.model.SpotifyAuthToken;
+import com.arian.vizpotifybackend.model.User;
+import com.arian.vizpotifybackend.properties.SpotifyProperties;
+import com.arian.vizpotifybackend.util.SpotifyUtil;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import se.michaelthelin.spotify.SpotifyApi;
+import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
+import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
+
+import java.net.URI;
+import java.time.LocalDateTime;
+import java.util.concurrent.CompletableFuture;
+
+@Service
+@RequiredArgsConstructor
+public class SpotifyOauthtTokenService {
+
+    private final SpotifyUtil spotifyUtil;
+    private final SpotifyProperties spotifyProperties;
+    private final SpotifyApiFactory spotifyApiFactory;
+
+    private static final Logger logger = LoggerFactory.getLogger(SpotifyOauthtTokenService.class);
+
+
+    public CompletableFuture<String> getURIRequest() {
+        SpotifyApi spotifyApi = spotifyApiFactory.createSpotifyApiForAuth();
+        String scopeAsCSV = spotifyUtil.convertScopeListToCSV(spotifyProperties.getScopes());
+        AuthorizationCodeUriRequest authorizationCodeRequest = spotifyApi.authorizationCodeUri()
+                .scope(scopeAsCSV)
+                .show_dialog(true)
+                .build();
+
+        return authorizationCodeRequest.executeAsync()
+                .thenApply(URI::toString)
+                .exceptionally(ex -> {
+                    logger.error("Error: {}", ex.getMessage());
+                    return null;
+                });
+    }
+
+
+    public CompletableFuture<Object[]> getApiInstance(String userCode) {
+        SpotifyApi spotifyApi = spotifyApiFactory.createSpotifyApiForAuth();
+        AuthorizationCodeRequest authorizationCodeRequest = spotifyApi.authorizationCode(userCode).build();
+
+        return authorizationCodeRequest.executeAsync().thenApply(authorizationCodeCredentials -> {
+            spotifyApi.setAccessToken(authorizationCodeCredentials.getAccessToken());
+            spotifyApi.setRefreshToken(authorizationCodeCredentials.getRefreshToken());
+            return new Object[]{spotifyApi, authorizationCodeCredentials.getExpiresIn()};
+        }).exceptionally(ex -> {
+            System.out.println("Error: " + ex.getCause().getMessage());
+            return null;
+        });
+    }
+
+
+    public SpotifyAuthToken createSpotifyAuthToken(User user, String accessToken,
+                                  String refreshToken,
+                                  Integer expiresIn,
+                                  LocalDateTime lastUpdated) {
+
+        return SpotifyAuthToken.builder()
+                .user(user)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .expiresIn(expiresIn)
+                .lastUpdated(lastUpdated)
+                .build();
+    }
+}

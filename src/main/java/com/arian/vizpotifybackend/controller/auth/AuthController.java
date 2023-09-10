@@ -40,9 +40,8 @@ public class AuthController {
                         .body("Error occurred: "+ ex.getMessage()));
     }
 
-    @GetMapping(value="/get-user-code")
+    @GetMapping(value="/get-user-code/")
     public CompletableFuture<ResponseEntity<SpotifyApi>> getSpotifyUserCode(@RequestParam("code") String userCode, HttpServletResponse response) throws IOException {
-
         response.sendRedirect("http://localhost:3000/dashboard");
 
         return authTokenService.getApiInstance(userCode)
