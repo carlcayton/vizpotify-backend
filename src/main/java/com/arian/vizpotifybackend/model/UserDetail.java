@@ -25,6 +25,9 @@ public class UserDetail {
     private String spotifyId;
 
     @Column
+    private String email;
+
+    @Column
     private String country;
 
     @Column

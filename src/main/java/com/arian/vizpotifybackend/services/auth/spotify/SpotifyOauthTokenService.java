@@ -39,7 +39,6 @@ public class SpotifyOauthTokenService {
                 .build();
 
         try {
-
             return authorizationCodeRequest.executeAsync()
                     .thenApply(URI::toString)
                     .join();
@@ -66,13 +65,13 @@ public class SpotifyOauthTokenService {
     }
 
 
-    public SpotifyAuthToken createSpotifyAuthToken(UserDetail userDetail, String accessToken,
+    public SpotifyAuthToken createSpotifyAuthToken(String userSpotifyId, String accessToken,
                                                    String refreshToken,
                                                    Integer expiresIn,
                                                    LocalDateTime lastUpdated) {
 
         return SpotifyAuthToken.builder()
-                .userDetail(userDetail)
+                .userSpotifyId(userSpotifyId)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .expiresIn(expiresIn)

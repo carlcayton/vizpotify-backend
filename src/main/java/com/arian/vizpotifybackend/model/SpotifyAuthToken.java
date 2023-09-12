@@ -20,9 +20,8 @@ public class SpotifyAuthToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // Assuming you're using a Long type for primary keys. Adjust if needed.
 
-    @OneToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private UserDetail userDetail;
+    @Column(nullable = false)
+    private String userSpotifyId;
 
     @Column(nullable = false)
     private String accessToken;

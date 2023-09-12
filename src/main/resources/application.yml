@@ -42,7 +42,8 @@ spotify:
     - user-top-read
     - user-read-playback-state
     - user-read-recently-played
-#    - user-read-private
+    - user-read-private
+    - user-read-email
 jwt:
   secretKey: 3qRU5Tu7qho8Wj/GjKLzoc8laOPJHERxHu9NnL8dzYbcwOS2XWftAZ2jNjoNbSvR
   validityInMs: 3600000

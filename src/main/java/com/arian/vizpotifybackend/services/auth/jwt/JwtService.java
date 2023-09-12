@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
@@ -35,23 +36,41 @@ public class JwtService {
                 .compact();
     }
 
-    public Claims parseToken(String token) {
-        return Jwts.parser()
-                .setSigningKey(jwtConfig.getSecretKey())
-                .parseClaimsJws(token)
-                .getBody();
+
+
+    public boolean isTokenValid(String token, UserDetail userDetail) {
+        String spotifyId= extractSpotifyId(token);
+        return !isTokenExpired(token) && spotifyId.equals(userDetail.getSpotifyId());
     }
 
-    public boolean validateToken(String token) {
-        try {
-            Jwts.parser().setSigningKey(jwtConfig.getSecretKey()).parseClaimsJws(token);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
-        }
+
+    public boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
     }
+
+    public String extractSpotifyId(String token) {
+        return extractClaim(token, Claims::getSubject);
+    }
+
+    private Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
+    }
+
     private Key getSignInKey(){
         byte[] keyBytes  = Decoders.BASE64.decode(jwtConfig.getSecretKey());
         return Keys.hmacShaKeyFor(keyBytes);
     }
+    public <T> T extractClaim(String token, Function<Claims,T> claimsResolver){
+        final Claims claims = extractAllClaims(token);
+        return claimsResolver.apply(claims);
+    }
+
+    private Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSignInKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
 }
