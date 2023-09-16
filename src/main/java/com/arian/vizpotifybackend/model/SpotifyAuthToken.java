@@ -17,9 +17,6 @@ import java.time.LocalDateTime;
 public class SpotifyAuthToken {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // Assuming you're using a Long type for primary keys. Adjust if needed.
-
     @Column(nullable = false)
     private String userSpotifyId;
 

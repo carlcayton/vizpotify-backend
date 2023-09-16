@@ -10,7 +10,6 @@ import com.arian.vizpotifybackend.services.auth.jwt.JwtService;
 import com.arian.vizpotifybackend.services.auth.spotify.SpotifyOauthTokenService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import se.michaelthelin.spotify.SpotifyApi;
 import se.michaelthelin.spotify.model_objects.specification.User;
@@ -24,7 +23,7 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final SpotifyOauthTokenService spotifyOauthtTokenService;
+    private final SpotifyOauthTokenService spotifyOauthTokenService;
     private final JwtService jwtService;
     private final SpotifyAuthTokenRepository spotifyAuthTokenRepository;
     private final UserRepository userRepository;
@@ -33,7 +32,7 @@ public class UserService {
     public JwtResponse handleUserRegistration(String userCode) {
         SpotifyApi spotifyApi = null;
         int expiresIn = 0;
-        Object[] result= spotifyOauthtTokenService.getApiInstance(userCode).join();
+        Object[] result= spotifyOauthTokenService.getApiInstance(userCode).join();
         if (result != null && result.length == 2) {
             spotifyApi = (SpotifyApi) result[0];
             expiresIn = (int) result[1];
@@ -42,17 +41,17 @@ public class UserService {
         }
         User spotifyUser = getUserProfile(spotifyApi).join();
         UserDetail userDetail = processSpotifyUser(spotifyUser);
-        SpotifyAuthToken spotifyAuthToken = spotifyOauthtTokenService.createSpotifyAuthToken(
+        SpotifyAuthToken spotifyAuthToken = spotifyOauthTokenService.createSpotifyAuthToken(
                 userDetail.getSpotifyId(),
                 spotifyApi.getAccessToken(),
                 spotifyApi.getRefreshToken(),
                 expiresIn,
                 LocalDateTime.now()
         );
+
         spotifyAuthTokenRepository.save(spotifyAuthToken);
         String accessToken = jwtService.createToken(userDetail);
         return new JwtResponse(accessToken);
-
     }
     public UserDetail lodUserDetailBySpotifyId(String spotifyId){
         Optional<UserDetail> optionalUserDetail = userRepository.findBySpotifyId(spotifyId);
@@ -91,6 +90,7 @@ public class UserService {
                 .profileHref(spotifyUser.getHref())
                 .product(spotifyUser.getProduct()==null? "": spotifyUser.getProduct().getType())
                 .profileType(spotifyUser.getType().getType())
+                .profilePictureUrl(spotifyUser.getImages().length>0? spotifyUser.getImages()[0].getUrl():"")
                 .profileUri(spotifyUser.getUri())
                 .isDisplayNamePublic(true) // or any default setting you'd like
                 .isProfilePublic(true) // or any default setting you'd like

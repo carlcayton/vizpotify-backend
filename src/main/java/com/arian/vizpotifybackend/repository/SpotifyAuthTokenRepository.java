@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface SpotifyAuthTokenRepository extends JpaRepository<SpotifyAuthToken, Integer> {
+public interface SpotifyAuthTokenRepository extends JpaRepository<SpotifyAuthToken, Long> {
 
 
 

@@ -46,4 +46,6 @@ spotify:
     - user-read-email
 jwt:
   secretKey: 3qRU5Tu7qho8Wj/GjKLzoc8laOPJHERxHu9NnL8dzYbcwOS2XWftAZ2jNjoNbSvR
-  validityInMs: 3600000
+  validityInMs: 36000000
+misc:
+  frontendUrl: http://localhost:3000

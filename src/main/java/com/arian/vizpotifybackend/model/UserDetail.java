@@ -18,9 +18,6 @@ import java.time.LocalDateTime;
 public class UserDetail {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
-
     @Column(unique = true, nullable = false)
     private String spotifyId;
 
@@ -50,6 +47,9 @@ public class UserDetail {
 
     @Column
     private String profileType;
+
+    @Column
+    private String profilePictureUrl;
 
     @Column
     private String profileUri;
