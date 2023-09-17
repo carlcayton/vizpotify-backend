@@ -22,10 +22,10 @@ logging:
   level:
     org:
       hibernate:
-        SQL: DEBUG
+        SQL:
         type:
           descriptor:
-            sql:  TRACE
+            sql:
 
     jdbc:
       sqltiming: DEBUG

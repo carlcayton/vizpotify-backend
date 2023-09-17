@@ -5,6 +5,7 @@ import com.arian.vizpotifybackend.factory.SpotifyApiFactory;
 import com.arian.vizpotifybackend.model.SpotifyAuthToken;
 import com.arian.vizpotifybackend.model.UserDetail;
 import com.arian.vizpotifybackend.properties.SpotifyProperties;
+import com.arian.vizpotifybackend.repository.SpotifyAuthTokenRepository;
 import com.arian.vizpotifybackend.util.SpotifyUtil;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -16,6 +17,7 @@ import se.michaelthelin.spotify.requests.authorization.authorization_code.Author
 
 import java.net.URI;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
@@ -26,6 +28,7 @@ public class SpotifyOauthTokenService {
     private final SpotifyUtil spotifyUtil;
     private final SpotifyProperties spotifyProperties;
     private final SpotifyApiFactory spotifyApiFactory;
+    private final SpotifyAuthTokenRepository spotifyAuthTokenRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(SpotifyOauthTokenService.class);
 
@@ -49,7 +52,6 @@ public class SpotifyOauthTokenService {
     }
 
 
-
     public CompletableFuture<Object[]> getApiInstance(String userCode) {
         SpotifyApi spotifyApi = spotifyApiFactory.createSpotifyApiForAuth();
         AuthorizationCodeRequest authorizationCodeRequest = spotifyApi.authorizationCode(userCode).build();
@@ -63,6 +65,10 @@ public class SpotifyOauthTokenService {
             return null;
         });
     }
+
+
+
+
 
 
     public SpotifyAuthToken createSpotifyAuthToken(String userSpotifyId, String accessToken,

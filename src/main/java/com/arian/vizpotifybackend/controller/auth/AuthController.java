@@ -28,13 +28,11 @@ public class AuthController {
 
     @GetMapping("/login")
     public ResponseEntity<String> getUriForLogin() {
-        System.out.println("hit_login");
         return ResponseEntity.ok(spotifyOauthTokenService.getURIRequest());
     }
 
     @GetMapping(value = "/callback/")
     public ResponseEntity<String> registerUser(@RequestParam("code") String userCode, HttpServletResponse response) throws IOException {
-        System.out.println("hit_callback");
         JwtResponse jwtResponse = userService.handleUserRegistration(userCode);
         Cookie jwtCookie = new Cookie("JWT_TOKEN",jwtResponse.getAccessToken());
         jwtCookie.setHttpOnly(true);

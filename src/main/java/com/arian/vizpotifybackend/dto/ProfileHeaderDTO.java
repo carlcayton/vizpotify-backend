@@ -2,19 +2,19 @@ package com.arian.vizpotifybackend.dto;
 
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ProfileHeaderDTO {
 
-    private Integer followedArtistCount;
-    private Integer followerCount;
-    private Integer playlistCount;
-
-    private String profilePictureUrl;
-    private String spotifyId;
-//    private String userDisplayName;
+        private String spotifyId;
+        private String userDisplayName;
+        private String profilePictureUrl;
+        private Integer followedArtistCount;
+        private Integer followerCount;
+        private Integer playlistCount;
 }
