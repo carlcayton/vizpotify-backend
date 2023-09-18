@@ -1,6 +1,7 @@
 package com.arian.vizpotifybackend.controller.dashboard;
 
 import com.arian.vizpotifybackend.dto.ProfileHeaderDTO;
+import com.arian.vizpotifybackend.dto.artist.TopArtistsDTO;
 import com.arian.vizpotifybackend.model.UserDetail;
 import com.arian.vizpotifybackend.model.UserHeaderStat;
 import com.arian.vizpotifybackend.services.user.ProfileHeaderService;
@@ -33,4 +34,11 @@ public class CurrentUserInfoController {
         return ResponseEntity.ok(profileHeaderDTO);
     }
 
+    @GetMapping("/topArtists")
+    public ResponseEntity<TopArtistsDTO> getTopArtists(
+            HttpServletResponse response,
+            Authentication auth) throws IOException {
+
+        return ResponseEntity.ok(null);
     }
+}

@@ -3,21 +3,20 @@ package com.arian.vizpotifybackend.services.user;
 import com.arian.vizpotifybackend.exception.SpotifyIdNotFoundException;
 import com.arian.vizpotifybackend.model.JwtResponse;
 import com.arian.vizpotifybackend.repository.SpotifyAuthTokenRepository;
-import com.arian.vizpotifybackend.repository.UserRepository;
+import com.arian.vizpotifybackend.repository.UserDetailRepository;
 import com.arian.vizpotifybackend.model.SpotifyAuthToken;
 import com.arian.vizpotifybackend.model.UserDetail;
 import com.arian.vizpotifybackend.services.auth.jwt.JwtService;
 import com.arian.vizpotifybackend.services.auth.spotify.SpotifyOauthTokenService;
+import com.arian.vizpotifybackend.services.spotify.SpotifyService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import se.michaelthelin.spotify.SpotifyApi;
 import se.michaelthelin.spotify.model_objects.specification.User;
-import se.michaelthelin.spotify.requests.data.users_profile.GetCurrentUsersProfileRequest;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +25,8 @@ public class UserService {
     private final SpotifyOauthTokenService spotifyOauthTokenService;
     private final JwtService jwtService;
     private final SpotifyAuthTokenRepository spotifyAuthTokenRepository;
-    private final UserRepository userRepository;
+    private final UserDetailRepository userDetailRepository;
+    private final SpotifyService spotifyService;
 
     @Transactional
     public JwtResponse handleUserRegistration(String userCode) {
@@ -39,7 +39,7 @@ public class UserService {
         }else{
             throw new RuntimeException("Failed to fetch Spotify userDetail profile.");
         }
-        User spotifyUser = getUserProfile(spotifyApi).join();
+        User spotifyUser = spotifyService.getUserProfile(spotifyApi);
         UserDetail userDetail = processSpotifyUser(spotifyUser);
         SpotifyAuthToken spotifyAuthToken = spotifyOauthTokenService.createSpotifyAuthToken(
                 userDetail.getSpotifyId(),
@@ -54,7 +54,7 @@ public class UserService {
         return new JwtResponse(accessToken);
     }
     public UserDetail lodUserDetailBySpotifyId(String spotifyId){
-        Optional<UserDetail> optionalUserDetail = userRepository.findBySpotifyId(spotifyId);
+        Optional<UserDetail> optionalUserDetail = userDetailRepository.findBySpotifyId(spotifyId);
         if(optionalUserDetail.isPresent()){
             return optionalUserDetail.get();
         }else{
@@ -62,17 +62,13 @@ public class UserService {
         }
     }
 
-    private CompletableFuture<User> getUserProfile(SpotifyApi spotifyApi) {
-        GetCurrentUsersProfileRequest request = spotifyApi.getCurrentUsersProfile().build();
-        return request.executeAsync();
-    }
 
     private UserDetail processSpotifyUser(User spotifyUser) {
         UserDetail userDetail = mapSpotifyUserToEntity(spotifyUser);
-        Optional<UserDetail> existingUserOpt = userRepository.findBySpotifyId(userDetail.getSpotifyId());
+        Optional<UserDetail> existingUserOpt = userDetailRepository.findBySpotifyId(userDetail.getSpotifyId());
         if (existingUserOpt.isEmpty()) {
             userDetail.setCreatedAt(LocalDateTime.now());
-            userRepository.save(userDetail);
+            userDetailRepository.save(userDetail);
         }
 
         return userDetail;
