@@ -79,4 +79,7 @@ public class SpotifyOauthTokenService {
                 .lastUpdated(lastUpdated)
                 .build();
     }
+    public void save(SpotifyAuthToken spotifyAuthToken){
+        spotifyAuthTokenRepository.save(spotifyAuthToken);
+    }
 }

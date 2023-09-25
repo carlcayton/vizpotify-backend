@@ -1,5 +1,6 @@
 package com.arian.vizpotifybackend.services.spotify;
 
+import com.arian.vizpotifybackend.enums.TimeRange;
 import com.arian.vizpotifybackend.factory.SpotifyApiFactory;
 import com.arian.vizpotifybackend.model.ArtistDetail;
 import com.arian.vizpotifybackend.model.SpotifyAuthToken;
@@ -68,11 +69,11 @@ public class SpotifyService {
         return request.executeAsync().join();
     }
 
-    public Map<String, Paging<Artist>> getUserTopArtistsForAllTimeRange(String spotifyId){
-        Map<String, Paging<Artist>> output = new HashMap<>();
+    public Map<TimeRange, Paging<Artist>> getUserTopArtistsForAllTimeRange(String spotifyId){
+        Map<TimeRange, Paging<Artist>> output = new HashMap<>();
         SpotifyApi spotifyApi = getSpotifyApi(spotifyId);
-        for (String timeRange: TIME_RANGES){
-            output.put(timeRange, getUserTopArtists(spotifyApi,timeRange));
+        for (TimeRange timeRange: TimeRange.values()){
+            output.put(timeRange, getUserTopArtists(spotifyApi,timeRange.getValue()));
         }
         return output;
     }

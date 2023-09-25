@@ -1,20 +1,20 @@
 package com.arian.vizpotifybackend.controller.dashboard;
 
 import com.arian.vizpotifybackend.dto.ProfileHeaderDTO;
-import com.arian.vizpotifybackend.dto.artist.TopArtistsDTO;
+import com.arian.vizpotifybackend.dto.artist.ArtistDTO;
+import com.arian.vizpotifybackend.dto.artist.UserTopArtistsDTO;
 import com.arian.vizpotifybackend.model.UserDetail;
-import com.arian.vizpotifybackend.model.UserHeaderStat;
 import com.arian.vizpotifybackend.services.user.ProfileHeaderService;
 import com.arian.vizpotifybackend.services.user.UserTopArtistService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.Optional;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/me")
@@ -37,15 +37,16 @@ public class CurrentUserInfoController {
     }
 
     @GetMapping("/userTopArtist")
-    public ResponseEntity<TopArtistsDTO> getTopArtists(
+    public ResponseEntity<Map<String, List<ArtistDTO>>> getTopArtists(
             HttpServletResponse response,
             Authentication auth) throws IOException {
 //        UserDetail userDetail = (UserDetail) auth.getPrincipal();
 
 
-        userTopArtistService.getUserTopArtists("ianc_arl");
+        Map<String, List<ArtistDTO>> result = userTopArtistService.getUserTopArtists("ianc_arl");
+        result.get("short_term").forEach(item-> System.out.println(item.toString()));
 //        userTopArtistService.getUserTopArtists(userDetail.getSpotifyId());
 
-        return ResponseEntity.ok(null);
+        return ResponseEntity.ok(result);
     }
 }

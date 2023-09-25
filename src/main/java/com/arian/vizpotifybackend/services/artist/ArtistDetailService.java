@@ -2,8 +2,10 @@ package com.arian.vizpotifybackend.services.artist;
 
 
 import com.arian.vizpotifybackend.dto.artist.ArtistDTO;
+import com.arian.vizpotifybackend.enums.TimeRange;
 import com.arian.vizpotifybackend.model.ArtistDetail;
 import com.arian.vizpotifybackend.model.Genre;
+import com.arian.vizpotifybackend.model.UserTopArtist;
 import com.arian.vizpotifybackend.repository.ArtistDetailRepository;
 import com.arian.vizpotifybackend.services.GenreService;
 import jakarta.transaction.Transactional;
@@ -22,10 +24,9 @@ public class ArtistDetailService {
     private final ArtistDetailRepository artistDetailRepository;
     private final GenreService genreService;
     private final CommonArtistService commonArtistService;
-    private final RelatedArtistService relatedArtistService;
 
     @Transactional
-    public List<ArtistDTO> processAndStoreNewArtistDetails(Map<String, Paging<Artist>> userTopArtistsForAllTimeRange) {
+    public void processAndStoreNewArtistDetails(Map<TimeRange, Paging<Artist>> userTopArtistsForAllTimeRange) {
 
         Set<Artist> allUniqueArtists = extractUniqueArtists(userTopArtistsForAllTimeRange);
         List<Artist> artistsNotInTable = commonArtistService.extractArtistNotInArtistTable(allUniqueArtists);
@@ -36,15 +37,14 @@ public class ArtistDetailService {
 
         genreService.saveNewGenresGivenArtists(artistDetails);
         artistDetailRepository.saveAll(artistDetails);
-
-        return artistDetails.stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+    }
+    public ArtistDetail findById(String artistId){
+        return artistDetailRepository.findById(artistId).orElse(null);
     }
 
-    private Set<Artist> extractUniqueArtists(Map<String, Paging<Artist>> artistPagingMap) {
+    private Set<Artist> extractUniqueArtists(Map<TimeRange, Paging<Artist>> artistPagingMap) {
         Set<Artist> allUniqueArtists = new HashSet<>();
-        for (Map.Entry<String, Paging<Artist>> entry : artistPagingMap.entrySet()) {
+        for (Map.Entry<TimeRange, Paging<Artist>> entry : artistPagingMap.entrySet()) {
             Artist[] artists = entry.getValue().getItems();
             allUniqueArtists.addAll(Arrays.asList(artists));
         }
@@ -52,7 +52,7 @@ public class ArtistDetailService {
     }
 
 
-    public ArtistDTO convertToDTO(ArtistDetail artistDetail) {
+    public ArtistDTO convertArtistDetailToArtistDTO(ArtistDetail artistDetail) {
         List<String> genreNames = artistDetail.getGenres().stream()
                 .map(Genre::getName)  // Assuming Genre has a getName() method.
                 .collect(Collectors.toList());
@@ -68,6 +68,11 @@ public class ArtistDetailService {
                 .build();
     }
 
+   public ArtistDTO convertArtistToArtistDTO(Artist artist) {
+        return convertArtistDetailToArtistDTO(commonArtistService.convertArtistToArtistDetail(artist));
+    }
 
-
+    public List<ArtistDetail> getArtistsByIds(List<String> ids) {
+        return artistDetailRepository.findByIdIn(ids);
+    }
 }

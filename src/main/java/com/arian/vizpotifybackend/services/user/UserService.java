@@ -22,11 +22,12 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserService {
 
+    private final UserDetailRepository userDetailRepository;
+
     private final SpotifyOauthTokenService spotifyOauthTokenService;
     private final JwtService jwtService;
-    private final SpotifyAuthTokenRepository spotifyAuthTokenRepository;
-    private final UserDetailRepository userDetailRepository;
     private final SpotifyService spotifyService;
+
 
     @Transactional
     public JwtResponse handleUserRegistration(String userCode) {
@@ -49,7 +50,7 @@ public class UserService {
                 LocalDateTime.now()
         );
 
-        spotifyAuthTokenRepository.save(spotifyAuthToken);
+        spotifyOauthTokenService.save(spotifyAuthToken);
         String accessToken = jwtService.createToken(userDetail);
         return new JwtResponse(accessToken);
     }
@@ -89,8 +90,8 @@ public class UserService {
                 .profileType(spotifyUser.getType().getType())
                 .profilePictureUrl(spotifyUser.getImages().length>0? spotifyUser.getImages()[0].getUrl():"")
                 .profileUri(spotifyUser.getUri())
-                .isDisplayNamePublic(true) // or any default setting you'd like
-                .isProfilePublic(true) // or any default setting you'd like
+                .isDisplayNamePublic(true)
+                .isProfilePublic(true)
                 .build();
     }
 }

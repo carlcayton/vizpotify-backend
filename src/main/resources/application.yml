@@ -1,9 +1,9 @@
 spring:
 #  autoconfigure:
 #    exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
-  devtools:
-    remote:
-      secret: mysecret
+#  devtools:
+#    remote:
+#      secret: mysecret
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
@@ -16,6 +16,9 @@ spring:
        ddl-auto: validate
        dialect: org.hibernate.dialect.PostgreSQLDialect
        default_schema: public
+#       generate_statistics: true
+       jdbc:
+         batch_size: 20
     show-sql: true
   cache:
     type: none
@@ -24,18 +27,18 @@ spring:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
 
-logging:
-  level:
-    org:
-      hibernate:
-        SQL:
-        type:
-          descriptor:
-            sql:
-
-    jdbc:
-      sqltiming: DEBUG
-      resultsettable: DEBUG
+#logging:
+#  level:
+#    org:
+#      hibernate:
+#        SQL:
+#        type:
+#          descriptor:
+#            sql:
+#
+#    jdbc:
+#      sqltiming: DEBUG
+#      resultsettable: DEBUG
 spotify:
   clientId: ${CLIENT_ID}
   clientSecret: ${CLIENT_SECRET}
