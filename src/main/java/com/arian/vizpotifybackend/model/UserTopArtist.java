@@ -1,11 +1,13 @@
 package com.arian.vizpotifybackend.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.util.Date;
 
 @Entity
 @Table(name = "user_top_artist")
+@Data
 public class UserTopArtist {
 
     @Id
@@ -16,9 +18,8 @@ public class UserTopArtist {
     @JoinColumn(name = "user_spotify_id")
     private UserDetail userDetail;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "artist_id")
-    private ArtistDetail artist;
+    @Column
+    private String artistId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "period", nullable = false)

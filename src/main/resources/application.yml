@@ -17,6 +17,12 @@ spring:
        dialect: org.hibernate.dialect.PostgreSQLDialect
        default_schema: public
     show-sql: true
+  cache:
+    type: none
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
 
 logging:
   level:

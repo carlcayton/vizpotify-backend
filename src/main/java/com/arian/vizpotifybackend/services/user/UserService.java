@@ -65,6 +65,7 @@ public class UserService {
 
     private UserDetail processSpotifyUser(User spotifyUser) {
         UserDetail userDetail = mapSpotifyUserToEntity(spotifyUser);
+        System.out.println(userDetail.toString());
         Optional<UserDetail> existingUserOpt = userDetailRepository.findBySpotifyId(userDetail.getSpotifyId());
         if (existingUserOpt.isEmpty()) {
             userDetail.setCreatedAt(LocalDateTime.now());

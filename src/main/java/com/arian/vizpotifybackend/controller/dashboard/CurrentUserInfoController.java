@@ -5,6 +5,7 @@ import com.arian.vizpotifybackend.dto.artist.TopArtistsDTO;
 import com.arian.vizpotifybackend.model.UserDetail;
 import com.arian.vizpotifybackend.model.UserHeaderStat;
 import com.arian.vizpotifybackend.services.user.ProfileHeaderService;
+import com.arian.vizpotifybackend.services.user.UserTopArtistService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +23,7 @@ import java.util.Optional;
 public class CurrentUserInfoController {
 
     private final ProfileHeaderService profileHeaderService;
+    private final UserTopArtistService userTopArtistService;
 
     @GetMapping("/profileHeader")
       public ResponseEntity<ProfileHeaderDTO> getProfileHeader(
@@ -30,14 +32,19 @@ public class CurrentUserInfoController {
         UserDetail userDetail = (UserDetail) auth.getPrincipal();
        ProfileHeaderDTO profileHeaderDTO = profileHeaderService
                .getProfileHeaderDTO(userDetail.getSpotifyId());
-        System.out.println(profileHeaderDTO);
+
         return ResponseEntity.ok(profileHeaderDTO);
     }
 
-    @GetMapping("/topArtists")
+    @GetMapping("/userTopArtist")
     public ResponseEntity<TopArtistsDTO> getTopArtists(
             HttpServletResponse response,
             Authentication auth) throws IOException {
+//        UserDetail userDetail = (UserDetail) auth.getPrincipal();
+
+
+        userTopArtistService.getUserTopArtists("ianc_arl");
+//        userTopArtistService.getUserTopArtists(userDetail.getSpotifyId());
 
         return ResponseEntity.ok(null);
     }

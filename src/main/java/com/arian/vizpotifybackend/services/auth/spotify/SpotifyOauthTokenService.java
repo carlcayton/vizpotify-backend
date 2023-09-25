@@ -66,11 +66,6 @@ public class SpotifyOauthTokenService {
         });
     }
 
-
-
-
-
-
     public SpotifyAuthToken createSpotifyAuthToken(String userSpotifyId, String accessToken,
                                                    String refreshToken,
                                                    Integer expiresIn,

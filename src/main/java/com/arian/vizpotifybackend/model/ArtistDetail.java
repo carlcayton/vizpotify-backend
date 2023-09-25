@@ -2,40 +2,38 @@ package com.arian.vizpotifybackend.model;
 
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Entity
-@Table(name = "artist")
+@Table(name = "artist_detail")
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ArtistDetail {
 
     @Id
     private String id;
 
-    @Column(name = "spotify_url")
-    private String spotifyUrl;
-
-    @Column(name = "followers_href")
-    private String followersHref;
-
     @Column(name = "followers_total")
     private Integer followersTotal;
 
-    @Column(name = "spotify_href")
-    private String spotifyHref;
-
+    @Column(name = "name")
     private String name;
 
+    @Column(name = "popularity")
     private Integer popularity;
 
-    private String type;
+    @Column(name = "external_url")
+    private String externalUrl;
 
-    private String uri;
-
-    @OneToMany(mappedBy = "artist", cascade = CascadeType.ALL)
-    private List<ArtistImage> images;
+    @Column(name = "image_url")
+    private String imageUrl;
 
     @ManyToMany
     @JoinTable(
