@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "artist_detail")
@@ -35,12 +36,13 @@ public class ArtistDetail {
     @Column(name = "image_url")
     private String imageUrl;
 
+//    @ManyToMany(fetch = FetchType.LAZY)
     @ManyToMany
     @JoinTable(
             name = "artist_genre",
             joinColumns = @JoinColumn(name = "artist_id"),
             inverseJoinColumns = @JoinColumn(name = "genre_id")
     )
-    private List<Genre> genres;
+    private Set<Genre> genres;
 
 }

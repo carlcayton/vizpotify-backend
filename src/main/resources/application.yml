@@ -19,13 +19,13 @@ spring:
 #       generate_statistics: true
        jdbc:
          batch_size: 20
+         fetch_size: 20
     show-sql: true
   cache:
     type: none
-  data:
-    redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
+redis:
+  host: ${REDIS_HOST}
+  port: ${REDIS_PORT}
 
 #logging:
 #  level:

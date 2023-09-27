@@ -1,5 +1,6 @@
 package com.arian.vizpotifybackend.services.artist;
 
+import com.arian.vizpotifybackend.dto.artist.ArtistDTO;
 import com.arian.vizpotifybackend.model.ArtistDetail;
 import com.arian.vizpotifybackend.model.RelatedArtist;
 import com.arian.vizpotifybackend.model.composite.RelatedArtistId;
@@ -26,6 +27,16 @@ public class RelatedArtistService {
         Set<String> uniqueArtistDetailsId = commonArtistService.extractIdsFromArtistDetails(artistDetailList);
         return null;
     }
+
+    public List<ArtistDTO> getRelatedArtists(String artistId){
+
+        return null;
+    }
+
+//    private boolean hasRelatedArtists(String spotifyId){
+//
+//    }
+
 
 
 

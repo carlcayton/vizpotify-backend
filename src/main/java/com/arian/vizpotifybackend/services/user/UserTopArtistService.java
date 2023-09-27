@@ -7,6 +7,7 @@ import com.arian.vizpotifybackend.model.UserTopArtist;
 import com.arian.vizpotifybackend.repository.UserTopArtistRepository;
 import com.arian.vizpotifybackend.services.artist.ArtistDetailService;
 import com.arian.vizpotifybackend.services.artist.CommonArtistService;
+import com.arian.vizpotifybackend.services.redis.ArtistAccessCounterService;
 import com.arian.vizpotifybackend.services.spotify.SpotifyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,8 @@ public class UserTopArtistService {
     private final UserTopArtistRepository userTopArtistRepository;
     private final SpotifyService spotifyService;
     private final ArtistDetailService artistDetailService;
+    private final ArtistAccessCounterService counterService;
+    private final CommonArtistService commonArtistService;
 
     public Map<String, List<ArtistDTO>> getUserTopArtists(String userSpotifyId) {
         boolean userExists = userTopArtistRepository.existsByUserSpotifyId(userSpotifyId);
@@ -32,25 +35,45 @@ public class UserTopArtistService {
             return fetchFromSpotifyAndStoreUserTopArtists(userSpotifyId);
         }
     }
-    // This method fetches ArtistDetail entities for a user
     private Map<String, List<ArtistDTO>> fetchArtistDetailsForUser(String userSpotifyId) {
         Map<String, List<ArtistDTO>> artistDetailsForUser = new HashMap<>();
-        for(String timeRange: TimeRange.getValuesAsList()){
-            List<UserTopArtist> userTopArtists =
-                    userTopArtistRepository.findByUserSpotifyIdAndTimeRange(userSpotifyId, timeRange);
 
-            List<ArtistDetail> artistDetails = artistDetailService.getArtistsByIds(
-                    userTopArtists
-                            .stream()
-                            .map(UserTopArtist::getArtistId)
-                            .collect(Collectors.toList())
-            );
-            List<ArtistDTO> artistDTOS = artistDetails
-                        .stream()
-                        .map(artistDetailService::convertArtistDetailToArtistDTO)
-                        .toList();
-            artistDetailsForUser.put(timeRange,artistDTOS);
+        // 1. Get a consolidated set of all unique artist IDs across all time ranges.
+        Map<String, Set<String>> timeRangeToArtistIdsMap = new HashMap<>();
+        Set<String> allUniqueArtistIds = new HashSet<>();
+
+        for (String timeRange : TimeRange.getValuesAsList()) {
+            List<UserTopArtist> userTopArtists = userTopArtistRepository.findByUserSpotifyIdAndTimeRange(userSpotifyId, timeRange);
+
+            Set<String> artistIdsForTimeRange = userTopArtists
+                    .stream()
+                    .map(UserTopArtist::getArtistId)
+                    .collect(Collectors.toSet());
+
+            timeRangeToArtistIdsMap.put(timeRange, artistIdsForTimeRange);
+            allUniqueArtistIds.addAll(artistIdsForTimeRange);
         }
+        allUniqueArtistIds.forEach(counterService::incrementArtistAccessCount);
+
+
+        // 2. Fetch ArtistDetail objects for these unique artist IDs.
+        List<ArtistDetail> allArtistDetails = artistDetailService.getArtistsByIds(new ArrayList<>(allUniqueArtistIds));
+        Map<String, ArtistDTO> artistIdToDTOsMap = allArtistDetails.stream()
+                .collect(Collectors.toMap(
+                        ArtistDetail::getId,
+                        artistDetailService::convertArtistDetailToArtistDTO
+                ));
+
+        // 3. Loop through each time range again and map the already fetched ArtistDetail objects back to each time range.
+        for (String timeRange : TimeRange.getValuesAsList()) {
+            List<ArtistDTO> artistDTOsForTimeRange = timeRangeToArtistIdsMap.get(timeRange)
+                    .stream()
+                    .map(artistIdToDTOsMap::get)
+                    .collect(Collectors.toList());
+
+            artistDetailsForUser.put(formatTimeRangeForDTO(timeRange), artistDTOsForTimeRange);
+        }
+
 
         return artistDetailsForUser;
     }
@@ -58,7 +81,11 @@ public class UserTopArtistService {
 
     private Map<String, List<ArtistDTO>> fetchFromSpotifyAndStoreUserTopArtists(String spotifyId) {
         Map<TimeRange, Paging<Artist>> userTopArtistsForAllTimeRange = spotifyService.getUserTopArtistsForAllTimeRange(spotifyId);
-        artistDetailService.processAndStoreNewArtistDetails(userTopArtistsForAllTimeRange);
+        Set<Artist> allArtistsAsSet =
+                artistDetailService
+                        .extractUniqueArtists(userTopArtistsForAllTimeRange);
+
+        artistDetailService.processAndStoreNewArtistDetails(allArtistsAsSet);
 
         Map<String, List<ArtistDTO>> output = new HashMap<>();
         for (Map.Entry<TimeRange, Paging<Artist>> entry : userTopArtistsForAllTimeRange.entrySet()) {
@@ -98,6 +125,18 @@ public class UserTopArtistService {
                 .rank(rank)
                 .lastUpdated(new Date())
                 .build();
+    }
+    private String formatTimeRangeForDTO(String timeRange) {
+        switch (timeRange) {
+            case "short_term":
+                return "shortTerm";
+            case "medium_term":
+                return "mediumTerm";
+            case "long_term":
+                return "longTerm";
+            default:
+                return "";
+        }
     }
 
 }

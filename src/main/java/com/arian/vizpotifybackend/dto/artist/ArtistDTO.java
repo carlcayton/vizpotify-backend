@@ -1,13 +1,20 @@
 package com.arian.vizpotifybackend.dto.artist;
 
 
+import com.arian.vizpotifybackend.model.ArtistDetail;
+import com.arian.vizpotifybackend.model.Genre;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ArtistDTO {
 
     private String id;
@@ -16,7 +23,5 @@ public class ArtistDTO {
     private Integer popularity;
     private String externalUrl;
     private String imageUrl;
-    private List<String> genres;  // Represented as strings instead of Genre entities.
-
-    // getters, setters, etc.
+    private Set<Genre> genres;  // Represented as strings instead of Genre entities.
 }

@@ -4,8 +4,6 @@ package com.arian.vizpotifybackend.services.artist;
 import com.arian.vizpotifybackend.dto.artist.ArtistDTO;
 import com.arian.vizpotifybackend.enums.TimeRange;
 import com.arian.vizpotifybackend.model.ArtistDetail;
-import com.arian.vizpotifybackend.model.Genre;
-import com.arian.vizpotifybackend.model.UserTopArtist;
 import com.arian.vizpotifybackend.repository.ArtistDetailRepository;
 import com.arian.vizpotifybackend.services.GenreService;
 import jakarta.transaction.Transactional;
@@ -26,23 +24,23 @@ public class ArtistDetailService {
     private final CommonArtistService commonArtistService;
 
     @Transactional
-    public void processAndStoreNewArtistDetails(Map<TimeRange, Paging<Artist>> userTopArtistsForAllTimeRange) {
+    public void processAndStoreNewArtistDetails(Set<Artist> allArtistDetails) {
 
-        Set<Artist> allUniqueArtists = extractUniqueArtists(userTopArtistsForAllTimeRange);
-        List<Artist> artistsNotInTable = commonArtistService.extractArtistNotInArtistTable(allUniqueArtists);
+        Set<Artist> artistsNotInTable = commonArtistService.extractArtistNotInArtistTable(allArtistDetails);
 
-        List<ArtistDetail> artistDetails = artistsNotInTable.stream()
+        Set<ArtistDetail> newArtists= artistsNotInTable.stream()
                 .map(commonArtistService::convertArtistToArtistDetail)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
 
-        genreService.saveNewGenresGivenArtists(artistDetails);
-        artistDetailRepository.saveAll(artistDetails);
+        genreService.saveNewGenresGivenArtists(newArtists);
+        artistDetailRepository.saveAll(newArtists);
     }
-    public ArtistDetail findById(String artistId){
+
+    public ArtistDetail getArtistById(String artistId){
         return artistDetailRepository.findById(artistId).orElse(null);
     }
 
-    private Set<Artist> extractUniqueArtists(Map<TimeRange, Paging<Artist>> artistPagingMap) {
+    public Set<Artist> extractUniqueArtists(Map<TimeRange, Paging<Artist>> artistPagingMap) {
         Set<Artist> allUniqueArtists = new HashSet<>();
         for (Map.Entry<TimeRange, Paging<Artist>> entry : artistPagingMap.entrySet()) {
             Artist[] artists = entry.getValue().getItems();
@@ -52,10 +50,8 @@ public class ArtistDetailService {
     }
 
 
+
     public ArtistDTO convertArtistDetailToArtistDTO(ArtistDetail artistDetail) {
-        List<String> genreNames = artistDetail.getGenres().stream()
-                .map(Genre::getName)  // Assuming Genre has a getName() method.
-                .collect(Collectors.toList());
 
         return ArtistDTO.builder()
                 .id(artistDetail.getId())
@@ -64,7 +60,7 @@ public class ArtistDetailService {
                 .popularity(artistDetail.getPopularity())
                 .externalUrl(artistDetail.getExternalUrl())
                 .imageUrl(artistDetail.getImageUrl())
-                .genres(genreNames)
+                .genres(artistDetail.getGenres())
                 .build();
     }
 

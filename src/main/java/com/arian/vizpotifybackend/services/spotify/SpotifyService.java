@@ -32,7 +32,6 @@ public class SpotifyService {
 
     private final SpotifyApiFactory spotifyApiFactory;
     private final SpotifyAuthTokenRepository spotifyAuthTokenRepository;
-    private final List<String> TIME_RANGES  = List.of("short_term", "medium_term", "long_term");
 
     public Paging<PlaylistSimplified> getPlaylist(String spotifyId){
         SpotifyApi spotifyApi = getSpotifyApi(spotifyId);
@@ -110,7 +109,7 @@ public class SpotifyService {
         try{
             GetUsersTopArtistsRequest getUsersTopArtistsRequest = spotifyApi.getUsersTopArtists()
           .time_range(timeRange)
-                    .limit(10)
+                    .limit(30)
                     .build();
             final CompletableFuture<Paging<Artist>> pagingFuture = getUsersTopArtistsRequest.executeAsync();
             return pagingFuture.join();

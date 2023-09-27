@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface RelatedArtistRepository extends JpaRepository<RelatedArtist, RelatedArtistId> {
     List<RelatedArtist> findByRelatedArtistId_PrimaryArtistId(String primaryArtistId);
+
 }

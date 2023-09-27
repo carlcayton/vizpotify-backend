@@ -32,7 +32,7 @@ public class CurrentUserInfoController {
         UserDetail userDetail = (UserDetail) auth.getPrincipal();
        ProfileHeaderDTO profileHeaderDTO = profileHeaderService
                .getProfileHeaderDTO(userDetail.getSpotifyId());
-
+        System.out.println("profileHeader");
         return ResponseEntity.ok(profileHeaderDTO);
     }
 
@@ -40,13 +40,9 @@ public class CurrentUserInfoController {
     public ResponseEntity<Map<String, List<ArtistDTO>>> getTopArtists(
             HttpServletResponse response,
             Authentication auth) throws IOException {
-//        UserDetail userDetail = (UserDetail) auth.getPrincipal();
-
-
-        Map<String, List<ArtistDTO>> result = userTopArtistService.getUserTopArtists("ianc_arl");
-        result.get("short_term").forEach(item-> System.out.println(item.toString()));
-//        userTopArtistService.getUserTopArtists(userDetail.getSpotifyId());
-
+        UserDetail userDetail = (UserDetail) auth.getPrincipal();
+        Map<String, List<ArtistDTO>> result = userTopArtistService.getUserTopArtists(userDetail.getSpotifyId());
+        System.out.println("userTopArtist");
         return ResponseEntity.ok(result);
     }
 }

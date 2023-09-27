@@ -21,7 +21,7 @@ public class CommonArtistService {
     private final GenreService genreService;
 
 
-    public List<Artist> extractArtistNotInArtistTable(Set<Artist> artists) {
+    public Set<Artist> extractArtistNotInArtistTable(Set<Artist> artists) {
 
         Set<String> artistsId = new HashSet<String>();
         for(Artist artist: artists){
@@ -33,7 +33,7 @@ public class CommonArtistService {
 
         return artists.stream()
                 .filter(artist -> artistsId.contains(artist.getId()))
-                .toList();
+                .collect(Collectors.toSet());
     }
     public ArtistDetail convertArtistToArtistDetail(Artist artist) {
         return ArtistDetail.builder()
