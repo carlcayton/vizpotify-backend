@@ -7,12 +7,25 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
+@Table(name = "related_artist")
+@IdClass(RelatedArtistId.class)
 public class RelatedArtist {
 
-    @EmbeddedId
-    private RelatedArtistId relatedArtistId;
+    @Id
+    @Column(name = "primary_artist_id")
+    private String primaryArtistId;
 
+    @Id
+    @Column(name = "related_artist_id")
+    private String relatedArtistId;
+
+    @ManyToOne
+    @JoinColumn(name = "primary_artist_id", insertable = false, updatable = false)
+    private ArtistDetail primaryArtist;
+
+    @ManyToOne
+    @JoinColumn(name = "related_artist_id", insertable = false, updatable = false)
+    private ArtistDetail relatedArtist;
+
+    // ... getters and setters ...
 }

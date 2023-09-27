@@ -11,5 +11,5 @@ import java.util.Set;
 
 public interface GenreRepository extends JpaRepository<Genre, String> {
     @Query("SELECT g.name FROM Genre as g WHERE g.name IN :genres")
-    Set<Genre> findExistingGenres(@Param("genres") Set<Genre> genres);
+    Set<String> findExistingGenres(@Param("genres") Set<String> genres);
 }

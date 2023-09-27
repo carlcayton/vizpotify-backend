@@ -27,7 +27,6 @@ public class ArtistDetailService {
     public void processAndStoreNewArtistDetails(Set<Artist> allArtistDetails) {
 
         Set<Artist> artistsNotInTable = commonArtistService.extractArtistNotInArtistTable(allArtistDetails);
-
         Set<ArtistDetail> newArtists= artistsNotInTable.stream()
                 .map(commonArtistService::convertArtistToArtistDetail)
                 .collect(Collectors.toSet());

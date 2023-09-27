@@ -26,40 +26,35 @@ public class GenreService {
         return output;
     }
 
-    public List<String> convertGenresToListString(List<Genre> genres){
-        List<String> output = new ArrayList<>();
-        for(Genre genre: genres){
-            output.add(genre.getName());
-        }
-        return output;
-    }
 
-    public Set<String> convertGenresToSetString(List<Genre> genres){
-        Set<String> output = new HashSet<>();
-        for(Genre genre: genres){
-            output.add(genre.getName());
-        }
-        return output;
+    public Set<String> convertGenresToSetString(Set<Genre> genres){
+        return genres.stream().map(Genre::getName).collect(Collectors.toSet());
     }
 
     public void saveNewGenresGivenArtists(Set<ArtistDetail> artistDetailList){
-        Set<Genre> allNewGenres = new HashSet<>();
-        for(ArtistDetail artistDetail:artistDetailList){
-            allNewGenres.addAll(artistDetail.getGenres());
-        }
+        Set<Genre> allNewGenres= artistDetailList.stream()
+                .flatMap(artistDetail -> artistDetail.getGenres().stream())
+                .collect(Collectors.toSet());
 
-        Set<Genre> existingGenres = genreRepository.findExistingGenres(allNewGenres);
-        if(allNewGenres.size()==existingGenres.size()){
+        Set<String> allNewGenresAsString = allNewGenres
+                .stream().map(Genre::getName).collect(Collectors.toSet());
+        Set<String> existingGenresNames = genreRepository.findExistingGenres(allNewGenresAsString);
+
+        if(allNewGenresAsString.size() == existingGenresNames.size()){
             return;
         }
-        existingGenres.forEach(allNewGenres::remove);
+
+        allNewGenres.removeIf(genre -> existingGenresNames.contains(genre.getName()));
         genreRepository.saveAll(allNewGenres);
     }
 
     public void saveNewGenresGivenArtist(ArtistDetail artistDetail){
-        Set<Genre> genres = artistDetail.getGenres();
-        Set<Genre> existingGenres = genreRepository.findExistingGenres(genres);
-        existingGenres.forEach(genres::remove);
-        genreRepository.saveAll(genres);
+        Set<Genre> allNewGenres= artistDetail.getGenres();
+        Set<String> existingGenres = genreRepository.findExistingGenres(convertGenresToSetString(allNewGenres));
+        if(allNewGenres.size() == existingGenres.size()){
+            return;
+        }
+        allNewGenres.removeIf(genre -> existingGenres.contains(genre.getName()));
+        genreRepository.saveAll(allNewGenres);
     }
 }
