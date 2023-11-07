@@ -1,8 +1,6 @@
 package com.arian.vizpotifybackend.controller.dashboard;
 
 import com.arian.vizpotifybackend.dto.artist.ArtistDTO;
-import com.arian.vizpotifybackend.dto.artist.RelatedArtistsDTO;
-import com.arian.vizpotifybackend.services.artist.ArtistDetailService;
 import com.arian.vizpotifybackend.services.artist.RelatedArtistService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

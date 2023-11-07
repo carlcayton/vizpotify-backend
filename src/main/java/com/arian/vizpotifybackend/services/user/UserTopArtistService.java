@@ -7,7 +7,7 @@ import com.arian.vizpotifybackend.model.UserTopArtist;
 import com.arian.vizpotifybackend.repository.UserTopArtistRepository;
 import com.arian.vizpotifybackend.services.artist.ArtistDetailService;
 import com.arian.vizpotifybackend.services.artist.CommonArtistService;
-import com.arian.vizpotifybackend.services.redis.ArtistAccessCounterService;
+import com.arian.vizpotifybackend.services.redis.ArtistCacheService;
 import com.arian.vizpotifybackend.services.spotify.SpotifyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,7 +24,7 @@ public class UserTopArtistService {
     private final UserTopArtistRepository userTopArtistRepository;
     private final SpotifyService spotifyService;
     private final ArtistDetailService artistDetailService;
-    private final ArtistAccessCounterService counterService;
+    private final ArtistCacheService artistCacheService;
     private final CommonArtistService commonArtistService;
 
     public Map<String, List<ArtistDTO>> getUserTopArtists(String userSpotifyId) {
@@ -53,7 +53,7 @@ public class UserTopArtistService {
             timeRangeToArtistIdsMap.put(timeRange, artistIdsForTimeRange);
             allUniqueArtistIds.addAll(artistIdsForTimeRange);
         }
-        allUniqueArtistIds.forEach(counterService::incrementArtistAccessCount);
+        allUniqueArtistIds.forEach(artistCacheService::incrementArtistAccessCount);
 
 
         // 2. Fetch ArtistDetail objects for these unique artist IDs.

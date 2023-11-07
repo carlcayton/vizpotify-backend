@@ -62,10 +62,31 @@ public class ArtistDetailService {
                 .genres(artistDetail.getGenres())
                 .build();
     }
+    public ArtistDTO convertArtistDetailToArtistDTOForRelatedArtists(ArtistDetail artistDetail) {
+        // Only setting id, name, externalUrl, and imageUrl.
+        // Assuming genres are a set of strings and not a complex object here,
+        // as your DTO suggests they are presented as strings.
+        // If not, you need to transform the genres accordingly.
 
-   public ArtistDTO convertArtistToArtistDTO(Artist artist) {
+        return ArtistDTO.builder()
+                .id(artistDetail.getId())
+                .name(artistDetail.getName())
+                .externalUrl(artistDetail.getExternalUrl())
+                .imageUrl(artistDetail.getImageUrl())
+                .build();
+    }
+
+
+    public ArtistDTO convertArtistToArtistDTO(Artist artist) {
         return convertArtistDetailToArtistDTO(commonArtistService.convertArtistToArtistDetail(artist));
     }
+
+    public ArtistDTO convertArtistToArtistDTOForRelatedArtists(Artist artist) {
+        return convertArtistDetailToArtistDTOForRelatedArtists(commonArtistService.convertArtistToArtistDetail(artist));
+    }
+
+
+
 
     public List<ArtistDetail> getArtistsByIds(List<String> ids) {
         return artistDetailRepository.findByIdIn(ids);
