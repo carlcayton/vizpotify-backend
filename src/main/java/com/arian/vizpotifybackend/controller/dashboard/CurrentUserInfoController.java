@@ -1,8 +1,7 @@
 package com.arian.vizpotifybackend.controller.dashboard;
 
 import com.arian.vizpotifybackend.dto.ProfileHeaderDTO;
-import com.arian.vizpotifybackend.dto.artist.ArtistDTO;
-import com.arian.vizpotifybackend.dto.artist.UserTopArtistsDTO;
+import com.arian.vizpotifybackend.dto.ArtistDTO;
 import com.arian.vizpotifybackend.model.UserDetail;
 import com.arian.vizpotifybackend.services.user.ProfileHeaderService;
 import com.arian.vizpotifybackend.services.user.UserTopArtistService;
@@ -32,7 +31,6 @@ public class CurrentUserInfoController {
         UserDetail userDetail = (UserDetail) auth.getPrincipal();
        ProfileHeaderDTO profileHeaderDTO = profileHeaderService
                .getProfileHeaderDTO(userDetail.getSpotifyId());
-        System.out.println("profileHeader");
         return ResponseEntity.ok(profileHeaderDTO);
     }
 
@@ -42,7 +40,6 @@ public class CurrentUserInfoController {
             Authentication auth) throws IOException {
         UserDetail userDetail = (UserDetail) auth.getPrincipal();
         Map<String, List<ArtistDTO>> result = userTopArtistService.getUserTopArtists(userDetail.getSpotifyId());
-        System.out.println("userTopArtist");
         return ResponseEntity.ok(result);
     }
 }

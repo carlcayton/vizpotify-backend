@@ -1,4 +1,4 @@
-package com.arian.vizpotifybackend.dto.artist;
+package com.arian.vizpotifybackend.dto;
 
 
 import com.arian.vizpotifybackend.model.ArtistDetail;

@@ -1,7 +1,7 @@
 package com.arian.vizpotifybackend.services.artist;
 
 
-import com.arian.vizpotifybackend.dto.artist.ArtistDTO;
+import com.arian.vizpotifybackend.dto.ArtistDTO;
 import com.arian.vizpotifybackend.enums.TimeRange;
 import com.arian.vizpotifybackend.model.ArtistDetail;
 import com.arian.vizpotifybackend.repository.ArtistDetailRepository;
@@ -48,8 +48,6 @@ public class ArtistDetailService {
         return allUniqueArtists;
     }
 
-
-
     public ArtistDTO convertArtistDetailToArtistDTO(ArtistDetail artistDetail) {
 
         return ArtistDTO.builder()
@@ -62,12 +60,8 @@ public class ArtistDetailService {
                 .genres(artistDetail.getGenres())
                 .build();
     }
-    public ArtistDTO convertArtistDetailToArtistDTOForRelatedArtists(ArtistDetail artistDetail) {
-        // Only setting id, name, externalUrl, and imageUrl.
-        // Assuming genres are a set of strings and not a complex object here,
-        // as your DTO suggests they are presented as strings.
-        // If not, you need to transform the genres accordingly.
 
+    public ArtistDTO convertArtistDetailToArtistDTOForRelatedArtists(ArtistDetail artistDetail) {
         return ArtistDTO.builder()
                 .id(artistDetail.getId())
                 .name(artistDetail.getName())
@@ -84,9 +78,6 @@ public class ArtistDetailService {
     public ArtistDTO convertArtistToArtistDTOForRelatedArtists(Artist artist) {
         return convertArtistDetailToArtistDTOForRelatedArtists(commonArtistService.convertArtistToArtistDetail(artist));
     }
-
-
-
 
     public List<ArtistDetail> getArtistsByIds(List<String> ids) {
         return artistDetailRepository.findByIdIn(ids);

@@ -1,6 +1,6 @@
 package com.arian.vizpotifybackend.services.redis;
 
-import com.arian.vizpotifybackend.dto.artist.ArtistDTO;
+import com.arian.vizpotifybackend.dto.ArtistDTO;
 import com.arian.vizpotifybackend.services.artist.ArtistDetailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -34,11 +35,13 @@ public class ArtistCacheService {
 
     public void cacheRelatedArtists(String artistId, List<ArtistDTO> relatedArtists) {
         String key = RELATED_KEY_PREFIX + artistId;
+        System.out.println(artistId);
         jsonRedisTemplate.opsForValue().set(key, relatedArtists, 1, TimeUnit.DAYS); // Adjust cache duration as needed
     }
 
     public Optional<List<ArtistDTO>> getRelatedArtistsFromCache(String artistId) {
         String key = RELATED_KEY_PREFIX + artistId;
+        System.out.println(artistId);
         return Optional.ofNullable((List<ArtistDTO>) jsonRedisTemplate.opsForValue().get(key));
     }
 

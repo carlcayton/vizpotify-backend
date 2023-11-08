@@ -1,12 +1,11 @@
 package com.arian.vizpotifybackend.services.user;
 
-import com.arian.vizpotifybackend.dto.artist.ArtistDTO;
+import com.arian.vizpotifybackend.dto.ArtistDTO;
 import com.arian.vizpotifybackend.enums.TimeRange;
 import com.arian.vizpotifybackend.model.ArtistDetail;
 import com.arian.vizpotifybackend.model.UserTopArtist;
 import com.arian.vizpotifybackend.repository.UserTopArtistRepository;
 import com.arian.vizpotifybackend.services.artist.ArtistDetailService;
-import com.arian.vizpotifybackend.services.artist.CommonArtistService;
 import com.arian.vizpotifybackend.services.redis.ArtistCacheService;
 import com.arian.vizpotifybackend.services.spotify.SpotifyService;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +24,6 @@ public class UserTopArtistService {
     private final SpotifyService spotifyService;
     private final ArtistDetailService artistDetailService;
     private final ArtistCacheService artistCacheService;
-    private final CommonArtistService commonArtistService;
 
     public Map<String, List<ArtistDTO>> getUserTopArtists(String userSpotifyId) {
         boolean userExists = userTopArtistRepository.existsByUserSpotifyId(userSpotifyId);
