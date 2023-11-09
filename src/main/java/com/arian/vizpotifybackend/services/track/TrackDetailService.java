@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TrackDetailService {
 
+
+
     public TrackDTO convertTrackToTrackDTO(Track track) {
         ArtistSimplified[] artistNamesTemp = track.getArtists();
         Set<String> artistNames =  Arrays.stream(artistNamesTemp)

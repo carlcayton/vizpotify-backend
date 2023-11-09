@@ -18,12 +18,15 @@ import se.michaelthelin.spotify.requests.data.artists.GetArtistsRelatedArtistsRe
 import se.michaelthelin.spotify.requests.data.artists.GetArtistsTopTracksRequest;
 import se.michaelthelin.spotify.requests.data.follow.GetUsersFollowedArtistsRequest;
 import se.michaelthelin.spotify.requests.data.personalization.simplified.GetUsersTopArtistsRequest;
+import se.michaelthelin.spotify.requests.data.personalization.simplified.GetUsersTopTracksRequest;
 import se.michaelthelin.spotify.requests.data.playlists.GetListOfCurrentUsersPlaylistsRequest;
 import se.michaelthelin.spotify.requests.data.users_profile.GetCurrentUsersProfileRequest;
 
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 @Service
 @RequiredArgsConstructor
@@ -33,12 +36,10 @@ public class SpotifyService {
     private final SpotifyApiFactory spotifyApiFactory;
     private final SpotifyAuthTokenRepository spotifyAuthTokenRepository;
 
-    public Paging<PlaylistSimplified> getPlaylist(String spotifyId){
+    public Paging<PlaylistSimplified> getPlaylist(String spotifyId) {
         SpotifyApi spotifyApi = getSpotifyApi(spotifyId);
         try {
-            final GetListOfCurrentUsersPlaylistsRequest getListOfCurrentUsersPlaylistsRequest = spotifyApi.getListOfCurrentUsersPlaylists()
-                    .limit(1)
-                    .build();
+            final GetListOfCurrentUsersPlaylistsRequest getListOfCurrentUsersPlaylistsRequest = spotifyApi.getListOfCurrentUsersPlaylists().limit(1).build();
             final CompletableFuture<Paging<PlaylistSimplified>> pagingFuture = getListOfCurrentUsersPlaylistsRequest.executeAsync();
             return pagingFuture.join();
         } catch (Exception e) {
@@ -47,13 +48,10 @@ public class SpotifyService {
         return null;
     }
 
-    public PagingCursorbased<Artist> getFollowedArtists(String spotifyId){
+    public PagingCursorbased<Artist> getFollowedArtists(String spotifyId) {
         SpotifyApi spotifyApi = getSpotifyApi(spotifyId);
         try {
-            final GetUsersFollowedArtistsRequest getUsersFollowedArtistsRequest= spotifyApi.getUsersFollowedArtists(ModelObjectType.ARTIST)
-                    .after("0LcJLqbBmaGUft1e9Mm8HV")
-                    .limit(1)
-                    .build();
+            final GetUsersFollowedArtistsRequest getUsersFollowedArtistsRequest = spotifyApi.getUsersFollowedArtists(ModelObjectType.ARTIST).after("0LcJLqbBmaGUft1e9Mm8HV").limit(1).build();
             final CompletableFuture<PagingCursorbased<Artist>> pagingCursorBasedFuture = getUsersFollowedArtistsRequest.executeAsync();
 
             return pagingCursorBasedFuture.join();
@@ -68,63 +66,87 @@ public class SpotifyService {
         return request.executeAsync().join();
     }
 
-    public Map<TimeRange, Paging<Artist>> getUserTopArtistsForAllTimeRange(String spotifyId){
+    public Map<TimeRange, Paging<Artist>> getUserTopArtistsForAllTimeRange(String spotifyId) {
         Map<TimeRange, Paging<Artist>> output = new HashMap<>();
         SpotifyApi spotifyApi = getSpotifyApi(spotifyId);
-        for (TimeRange timeRange: TimeRange.values()){
-            output.put(timeRange, getUserTopArtists(spotifyApi,timeRange.getValue()));
+        for (TimeRange timeRange : TimeRange.values()) {
+            output.put(timeRange, getUserTopArtists(spotifyApi, timeRange.getValue()));
         }
         return output;
     }
+    public Map<TimeRange, Paging<Track>> getUserTopTracksForAllTimeRange(String spotifyId) {
+        Map<TimeRange, Paging<Track>> output = new HashMap<>();
+        SpotifyApi spotifyApi = getSpotifyApi(spotifyId); // Method to create or retrieve SpotifyApi instance
 
-    public Artist[] getRelatedArtists(String artistId){
+        for (TimeRange timeRange : TimeRange.values()) {
+            Paging<Track> topTracksPaging = getUserTopTracks(spotifyApi, timeRange.getValue());
+            if (topTracksPaging != null) {
+                output.put(timeRange, topTracksPaging);
+            }
+        }
+
+        return output;
+    }
+
+    public Artist[] getRelatedArtists(String artistId) {
         SpotifyApi spotifyApi = spotifyApiFactory.createSpotifyApiWithClientCredentials();
         try {
-            final GetArtistsRelatedArtistsRequest getArtistsRelatedArtistsRequest = spotifyApi
-                    .getArtistsRelatedArtists(artistId)
-                    .build();
-            CompletableFuture<Artist[]> artistsFuture= getArtistsRelatedArtistsRequest.executeAsync();
+            final GetArtistsRelatedArtistsRequest getArtistsRelatedArtistsRequest = spotifyApi.getArtistsRelatedArtists(artistId).build();
+            CompletableFuture<Artist[]> artistsFuture = getArtistsRelatedArtistsRequest.executeAsync();
             return artistsFuture.join();
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
         return null;
     }
-    public Track[] getArtistTopTracks(String artistId){
+
+    public Track[] getArtistTopTracks(String artistId) {
 
         SpotifyApi spotifyApi = spotifyApiFactory.createSpotifyApiWithClientCredentials();
         try {
-            final GetArtistsTopTracksRequest getArtistsTopTracksRequest= spotifyApi
-                    .getArtistsTopTracks(artistId, CountryCode.US)
-                    .build();
-            CompletableFuture<Track[]> tracksFuture= getArtistsTopTracksRequest.executeAsync();
+            final GetArtistsTopTracksRequest getArtistsTopTracksRequest = spotifyApi.getArtistsTopTracks(artistId, CountryCode.US).build();
+            CompletableFuture<Track[]> tracksFuture = getArtistsTopTracksRequest.executeAsync();
             return tracksFuture.join();
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
         return null;
     }
 
-    private Paging<Artist> getUserTopArtists(SpotifyApi spotifyApi, String timeRange){
-        try{
+
+    private Paging<Artist> getUserTopArtists(SpotifyApi spotifyApi, String timeRange) {
+        try {
             GetUsersTopArtistsRequest getUsersTopArtistsRequest = spotifyApi.getUsersTopArtists()
-          .time_range(timeRange)
-                    .limit(30)
+                    .time_range(timeRange)
                     .build();
             final CompletableFuture<Paging<Artist>> pagingFuture = getUsersTopArtistsRequest.executeAsync();
             return pagingFuture.join();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
 
+    public Paging<Track> getUserTopTracks(SpotifyApi spotifyApi, String timeRange) {
+        try {
+
+            GetUsersTopTracksRequest getUsersTopTracksRequest = spotifyApi.getUsersTopTracks()
+                    .time_range("medium_term")
+                    .build();
+            final CompletableFuture<Paging<Track>> pagingFuture = getUsersTopTracksRequest.executeAsync();
+            return pagingFuture.join();
+
+        } catch (CompletionException e) {
+            System.out.println("Error: " + e.getCause().getMessage());
+        } catch (CancellationException e) {
+            System.out.println("Async operation cancelled.");
+        }
+        return null;
+    }
 
 
-    private SpotifyApi getSpotifyApi(String spotifyId){
-        SpotifyAuthToken spotifyAuthToken = spotifyAuthTokenRepository
-                .findById(spotifyId)
-                .orElseThrow(() -> new RuntimeException(""));
+    private SpotifyApi getSpotifyApi(String spotifyId) {
+        SpotifyAuthToken spotifyAuthToken = spotifyAuthTokenRepository.findById(spotifyId).orElseThrow(() -> new RuntimeException(""));
         return spotifyApiFactory.createSpotifyApiWithAccessToken(spotifyAuthToken.getAccessToken());
     }
 
