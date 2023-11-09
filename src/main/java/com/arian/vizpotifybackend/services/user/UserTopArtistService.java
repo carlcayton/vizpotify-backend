@@ -35,34 +35,24 @@ public class UserTopArtistService {
     }
     private Map<String, List<ArtistDTO>> fetchArtistDetailsForUser(String userSpotifyId) {
         Map<String, List<ArtistDTO>> artistDetailsForUser = new HashMap<>();
+        List<UserTopArtist> allUserTopArtists = userTopArtistRepository.findByUserSpotifyId(userSpotifyId);
 
-        // 1. Get a consolidated set of all unique artist IDs across all time ranges.
-        Map<String, Set<String>> timeRangeToArtistIdsMap = new HashMap<>();
-        Set<String> allUniqueArtistIds = new HashSet<>();
+        Map<String, Set<String>> timeRangeToArtistIdsMap = allUserTopArtists.stream()
+                .collect(Collectors.groupingBy(
+                        UserTopArtist::getTimeRange,
+                        Collectors.mapping(UserTopArtist::getArtistId, Collectors.toSet())
+                ));
 
-        for (String timeRange : TimeRange.getValuesAsList()) {
-            List<UserTopArtist> userTopArtists = userTopArtistRepository.findByUserSpotifyIdAndTimeRange(userSpotifyId, timeRange);
-
-            Set<String> artistIdsForTimeRange = userTopArtists
-                    .stream()
-                    .map(UserTopArtist::getArtistId)
-                    .collect(Collectors.toSet());
-
-            timeRangeToArtistIdsMap.put(timeRange, artistIdsForTimeRange);
-            allUniqueArtistIds.addAll(artistIdsForTimeRange);
-        }
-        allUniqueArtistIds.forEach(artistCacheService::incrementArtistAccessCount);
-
-
-        // 2. Fetch ArtistDetail objects for these unique artist IDs.
+        Set<String> allUniqueArtistIds = allUserTopArtists.stream()
+                .map(UserTopArtist::getArtistId)
+                .collect(Collectors.toSet());
         List<ArtistDetail> allArtistDetails = artistDetailService.getArtistsByIds(new ArrayList<>(allUniqueArtistIds));
+
         Map<String, ArtistDTO> artistIdToDTOsMap = allArtistDetails.stream()
                 .collect(Collectors.toMap(
                         ArtistDetail::getId,
                         artistDetailService::convertArtistDetailToArtistDTO
                 ));
-
-        // 3. Loop through each time range again and map the already fetched ArtistDetail objects back to each time range.
         for (String timeRange : TimeRange.getValuesAsList()) {
             List<ArtistDTO> artistDTOsForTimeRange = timeRangeToArtistIdsMap.get(timeRange)
                     .stream()
@@ -71,8 +61,6 @@ public class UserTopArtistService {
 
             artistDetailsForUser.put(formatTimeRangeForDTO(timeRange), artistDTOsForTimeRange);
         }
-
-
         return artistDetailsForUser;
     }
 
