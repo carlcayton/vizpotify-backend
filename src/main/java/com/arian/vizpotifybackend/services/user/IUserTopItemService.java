@@ -9,9 +9,9 @@ public interface IUserTopItemService<T, U> {
 
     boolean storeUserTopItems(String userId, Map<String, List<U>> topItems);
 
-    List<T> fetchDetailsForUser(String userId, String timeRange);
+    Map<String, List<T>> fetchUserTopItemsFromDB(String userId);
 
-    Map<String, List<T>> fetchFromSpotifyAndStore(String userId);
+    Map<String, List<T>> fetchUserTopItemsFromSpotifyAndSave(String userId);
 
     List<T> processItemsForTimeRange(String timeRange, String userId, List<U> items);
 

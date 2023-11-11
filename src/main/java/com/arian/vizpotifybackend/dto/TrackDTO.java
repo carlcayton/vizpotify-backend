@@ -20,7 +20,7 @@ public class TrackDTO {
 
     private Set<String> artists;
 
-    private String duration; // mm:ss
+    private int duration;
 
     private String albumName;
 

@@ -36,13 +36,10 @@ public class JwtService {
                 .compact();
     }
 
-
-
     public boolean isTokenValid(String token, UserDetail userDetail) {
         String spotifyId= extractSpotifyId(token);
         return !isTokenExpired(token) && spotifyId.equals(userDetail.getSpotifyId());
     }
-
 
     public boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());

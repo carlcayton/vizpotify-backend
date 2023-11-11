@@ -34,12 +34,10 @@ public class ArtistTopTracksService {
         if (tracks == null) {
             return Collections.emptyList();
         }
-        System.out.println(Arrays.toString(tracks));
         List<TrackDTO> trackDTOs = Arrays.stream(tracks)
                 .map(trackDetailService::convertTrackToTrackDTO)
                 .limit(5)
                 .collect(Collectors.toList());
-        System.out.println(trackDTOs);
         trackCacheService.cacheArtistTopTracks(artistId, trackDTOs);
         return trackDTOs;
     }

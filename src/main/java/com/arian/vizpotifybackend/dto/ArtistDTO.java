@@ -24,4 +24,5 @@ public class ArtistDTO {
     private String externalUrl;
     private String imageUrl;
     private Set<Genre> genres;  // Represented as strings instead of Genre entities.
+    private String rank;
 }
