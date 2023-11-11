@@ -9,6 +9,7 @@ import com.arian.vizpotifybackend.services.artist.ArtistDetailService;
 import com.arian.vizpotifybackend.services.redis.ArtistCacheService;
 import com.arian.vizpotifybackend.services.spotify.SpotifyService;
 import com.arian.vizpotifybackend.services.user.util.TopItemUtil;
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import se.michaelthelin.spotify.model_objects.specification.Artist;
@@ -24,47 +25,77 @@ public class UserTopArtistService {
     private final UserTopArtistRepository userTopArtistRepository;
     private final SpotifyService spotifyService;
     private final ArtistDetailService artistDetailService;
+    private final ArtistCacheService artistCacheService;
 
     public Map<String, List<ArtistDTO>> getUserTopArtists(String userSpotifyId) {
         boolean userExists = userTopArtistRepository.existsByUserSpotifyId(userSpotifyId);
         if (userExists) {
-            return fetchArtistDetailsForUser(userSpotifyId);
+            Map<String,List<ArtistDTO>> result = fetchUserTopItemsFromDB(userSpotifyId);
+            System.out.println(result);
+           return result;
         } else {
             return fetchFromSpotifyAndStoreUserTopArtists(userSpotifyId);
         }
     }
-    private Map<String, List<ArtistDTO>> fetchArtistDetailsForUser(String userSpotifyId) {
+    public Map<String, List<ArtistDTO>> fetchUserTopItemsFromDB(String userId) {
         Map<String, List<ArtistDTO>> artistDetailsForUser = new HashMap<>();
-        List<UserTopArtist> allUserTopArtists = userTopArtistRepository.findByUserSpotifyId(userSpotifyId);
+        List<UserTopArtist> allUserTopArtists = userTopArtistRepository.findByUserSpotifyId(userId);
 
-        Map<String, List<String>> timeRangeToArtistIdsMap = allUserTopArtists.stream()
-                .collect(Collectors.groupingBy(
-                        UserTopArtist::getTimeRange,
-                        Collectors.mapping(UserTopArtist::getArtistId, Collectors.toList())
-                ));
-        System.out.println("test");
-        System.out.println(timeRangeToArtistIdsMap);
-        System.out.println("test");
-        Set<String> allUniqueArtistIds = allUserTopArtists.stream()
+        // Extract all artist IDs associated with the user's top artists
+        List<String> artistIds = allUserTopArtists.stream()
                 .map(UserTopArtist::getArtistId)
-                .collect(Collectors.toSet());
-        List<ArtistDetail> allArtistDetails = artistDetailService.getArtistsByIds(new ArrayList<>(allUniqueArtistIds));
+                .collect(Collectors.toList());
 
-        Map<String, ArtistDTO> artistIdToDTOsMap = allArtistDetails.stream()
-                .collect(Collectors.toMap(
-                        ArtistDetail::getId,
-                        artistDetailService::convertArtistDetailToArtistDTO
-                ));
-        for (String timeRange : TimeRange.getValuesAsList()) {
-            List<ArtistDTO> artistDTOsForTimeRange = timeRangeToArtistIdsMap.get(timeRange)
-                    .stream()
-                    .map(artistIdToDTOsMap::get)
-                    .collect(Collectors.toList());
+        // Retrieve artist details for all artist IDs collected from the user's top artists
+        List<ArtistDetail> artistDetailsList = artistDetailService.getArtistsByIds(artistIds);
 
-            artistDetailsForUser.put(TopItemUtil.formatTimeRangeForDTO(timeRange), artistDTOsForTimeRange);
+        // Map each ArtistDetail to its ID for quick access during DTO conversion
+        Map<String, ArtistDetail> artistIdToDetailMap = artistDetailsList.stream()
+                .collect(Collectors.toMap(ArtistDetail::getId, Function.identity()));
+
+        // Build a DTO list for each time range category
+        for (UserTopArtist userTopArtist : allUserTopArtists) {
+            ArtistDetail artistDetail = artistIdToDetailMap.get(userTopArtist.getArtistId());
+            if (artistDetail != null) {
+                ArtistDTO artistDTO = artistDetailService.convertArtistDetailToArtistDTO(artistDetail);
+                String userArtistTimeRange = TopItemUtil.formatTimeRangeForDTO(userTopArtist.getTimeRange());
+                artistDetailsForUser.computeIfAbsent(userArtistTimeRange, k -> new ArrayList<>()).add(artistDTO);
+            }
         }
+
         return artistDetailsForUser;
     }
+//    private Map<String, List<ArtistDTO>> fetchArtistDetailsGroupedByTimeRangeForUser(String userSpotifyId) {
+//        Map<String, List<ArtistDTO>> groupedArtistDetailsByTimeRange = new HashMap<>();
+//        List<UserTopArtist> userTopArtistsList = userTopArtistRepository.findByUserSpotifyId(userSpotifyId);
+//
+//        Map<String, List<String>> timeRangeToArtistIds = userTopArtistsList.stream()
+//                .collect(Collectors.groupingBy(
+//                        UserTopArtist::getTimeRange,
+//                        Collectors.mapping(UserTopArtist::getArtistId, Collectors.toList())
+//                ));
+//
+//        Set<String> uniqueArtistIds = userTopArtistsList.stream()
+//                .map(UserTopArtist::getArtistId)
+//                .collect(Collectors.toSet());
+//
+//        List<ArtistDetail> artistDetailsList = artistDetailService.getArtistsByIds(new ArrayList<>(uniqueArtistIds));
+//
+//        Map<String, ArtistDTO> artistIdToDTO = artistDetailsList.stream()
+//                .collect(Collectors.toMap(
+//                        ArtistDetail::getId,
+//                        artistDetailService::convertArtistDetailToArtistDTO
+//                ));
+//
+//        for (String timeRangeKey : TimeRange.getValuesAsList()) {
+//            List<ArtistDTO> artistDTOsForCurrentTimeRange = timeRangeToArtistIds.getOrDefault(timeRangeKey, Collections.emptyList())
+//                    .stream()
+//                    .map(artistIdToDTO::get)
+//                    .collect(Collectors.toList());
+//            groupedArtistDetailsByTimeRange.put(TopItemUtil.formatTimeRangeForDTO(timeRangeKey), artistDTOsForCurrentTimeRange);
+//        }
+//        return groupedArtistDetailsByTimeRange;
+//    }
 
 
     private Map<String, List<ArtistDTO>> fetchFromSpotifyAndStoreUserTopArtists(String spotifyId) {
