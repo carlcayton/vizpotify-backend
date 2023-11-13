@@ -1,6 +1,7 @@
 package com.arian.vizpotifybackend.services.track;
 
 import com.arian.vizpotifybackend.dto.TrackDTO;
+import com.arian.vizpotifybackend.enums.TimeRange;
 import com.arian.vizpotifybackend.model.TrackDetail;
 import com.arian.vizpotifybackend.repository.TrackDetailRepository;
 import com.arian.vizpotifybackend.services.artist.CommonArtistService;
@@ -8,11 +9,10 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import se.michaelthelin.spotify.model_objects.specification.ArtistSimplified;
+import se.michaelthelin.spotify.model_objects.specification.Paging;
 import se.michaelthelin.spotify.model_objects.specification.Track;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,6 +54,15 @@ public class TrackDetailService {
                 .popularity(popularityScore)
                 .build();
     }
+    public Set<Track> extractUniqueTracks(Map<TimeRange, Paging<Track>> trackPagingMap) {
+        Set<Track> allUniqueTracks = new HashSet<>();
+        for (Map.Entry<TimeRange, Paging<Track>> entry : trackPagingMap.entrySet()) {
+            Track[] tracks = entry.getValue().getItems();
+            allUniqueTracks.addAll(Arrays.asList(tracks));
+        }
+        return allUniqueTracks;
+    }
+
     public TrackDTO convertTrackDetailToTrackDTO(TrackDetail trackDetail) {
         Set<String> artistNames = convertCSVToArtistList(trackDetail.getArtists());
 

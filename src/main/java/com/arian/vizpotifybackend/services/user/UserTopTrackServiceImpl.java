@@ -8,41 +8,32 @@ import com.arian.vizpotifybackend.repository.UserTopTrackRepository;
 import com.arian.vizpotifybackend.services.redis.TrackCacheService;
 import com.arian.vizpotifybackend.services.spotify.SpotifyService;
 import com.arian.vizpotifybackend.services.track.TrackDetailService;
-import com.arian.vizpotifybackend.services.user.util.TopItemUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import se.michaelthelin.spotify.model_objects.specification.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
 //
 @Service
 @RequiredArgsConstructor
-public class UserTopTrackServiceImpl implements IUserTopItemService<TrackDTO, UserTopTrack> {
+public class UserTopTrackServiceImpl {
     private final UserTopTrackRepository userTopTrackRepository;
     private final SpotifyService spotifyService;
     private final TrackDetailService trackDetailService;
     private final TrackCacheService trackCacheService;
 
-    @Override
     public Map<String, List<TrackDTO>> getUserTopItems(String userId) {
 
         boolean userExists =userTopTrackRepository.existsByUserSpotifyId(userId);
         if (userExists) {
             return fetchUserTopItemsFromDB(userId);
         } else {
-            return null;
-//            return fetchFromSpotifyAndStoreUserTopTracks(userSpotifyId);
+            return fetchUserTopItemsFromSpotifyAndSave(userId);
         }
     }
 
-    @Override
-    public boolean storeUserTopItems(String userId, Map<String, List<UserTopTrack>> topItems) {
-        return false;
-    }
-
-
-    @Override
     public Map<String, List<TrackDTO>> fetchUserTopItemsFromDB(String userId) {
         Map<String, List<TrackDTO>> trackDetailsForUser = new HashMap<>();
         List<UserTopTrack> allUserTopTracks = userTopTrackRepository.findByUserSpotifyId(userId);
@@ -71,19 +62,48 @@ public class UserTopTrackServiceImpl implements IUserTopItemService<TrackDTO, Us
     }
 
 
-    @Override
     public Map<String, List<TrackDTO>> fetchUserTopItemsFromSpotifyAndSave(String userId) {
+        Map<TimeRange, Paging<Track>> userTopTracksForAllTimeRange;
+        userTopTracksForAllTimeRange = spotifyService.getUserTopTracksForAllTimeRange(userId);
 
-        return null;
+        Set<Track> allTracksAsSet =
+                trackDetailService
+                        .extractUniqueTracks(userTopTracksForAllTimeRange);
+        trackDetailService.processAndStoreNewTrackDetails(allTracksAsSet);
+        Map<String, List<TrackDTO>> output = new HashMap<>();
+        for (Map.Entry<TimeRange, Paging<Track>> entry : userTopTracksForAllTimeRange.entrySet()) {
+            String currentTimeRange = entry.getKey().getValue();
+            List<TrackDTO> trackDTOs = processTracksForTimeRange(currentTimeRange, userId, entry.getValue());
+            output.put(currentTimeRange, trackDTOs);
+        }
+        return output;
+
+    }
+    private List<TrackDTO> processTracksForTimeRange(String timeRange, String spotifyId, Paging<Track> tracksPage) {
+        List<TrackDTO> trackDTOs = new ArrayList<>();
+        List<UserTopTrack> userTopTracks = new ArrayList<>();
+
+        Track[] tracks = tracksPage.getItems();
+
+        int rank = 1;
+        for (Track track : tracks) {
+            trackDTOs.add(trackDetailService.convertTrackToTrackDTO(track));
+
+            UserTopTrack userTopTrack = createUserTopTrack(spotifyId, track.getId(), timeRange, rank++);
+            userTopTracks.add(userTopTrack);
+        }
+        userTopTrackRepository.saveAll(userTopTracks);
+
+        return trackDTOs;
     }
 
-    @Override
-    public List<TrackDTO> processItemsForTimeRange(String timeRange, String userId, List<UserTopTrack> items) {
-        return null;
-    }
-
-    @Override
-    public UserTopTrack createTopItemObject(String userId, TrackDTO itemDTO, String timeRange, int rank) {
-        return null;
+    private UserTopTrack createUserTopTrack(String spotifyId, String trackId, String timeRange, int rank) {
+        return UserTopTrack.builder()
+                .userSpotifyId(spotifyId)
+                .trackId(trackId)
+                .timeRange(timeRange)
+                .rank(rank)
+                .lastUpdated(new Date())
+                .build();
     }
 }

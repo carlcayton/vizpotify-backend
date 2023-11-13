@@ -2,9 +2,11 @@ package com.arian.vizpotifybackend.controller.dashboard;
 
 import com.arian.vizpotifybackend.dto.ProfileHeaderDTO;
 import com.arian.vizpotifybackend.dto.ArtistDTO;
+import com.arian.vizpotifybackend.dto.TrackDTO;
 import com.arian.vizpotifybackend.model.UserDetail;
 import com.arian.vizpotifybackend.services.user.ProfileHeaderService;
 import com.arian.vizpotifybackend.services.user.UserTopArtistService;
+import com.arian.vizpotifybackend.services.user.UserTopTrackServiceImpl;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +25,7 @@ public class CurrentUserInfoController {
 
     private final ProfileHeaderService profileHeaderService;
     private final UserTopArtistService userTopArtistService;
+    private final UserTopTrackServiceImpl userTopTrackService;
 
     @GetMapping("/profileHeader")
       public ResponseEntity<ProfileHeaderDTO> getProfileHeader(
@@ -34,7 +37,7 @@ public class CurrentUserInfoController {
         return ResponseEntity.ok(profileHeaderDTO);
     }
 
-    @GetMapping("/userTopArtist")
+    @GetMapping("/userTopArtists")
     public ResponseEntity<Map<String, List<ArtistDTO>>> getTopArtists(
             HttpServletResponse response,
             Authentication auth) throws IOException {
@@ -42,4 +45,16 @@ public class CurrentUserInfoController {
         Map<String, List<ArtistDTO>> result = userTopArtistService.getUserTopArtists(userDetail.getSpotifyId());
         return ResponseEntity.ok(result);
     }
+
+    @GetMapping("/userTopSongs")
+    public ResponseEntity<Map<String,List<TrackDTO>>> getTopSongs(
+            HttpServletResponse response,
+            Authentication auth) throws IOException {
+
+        UserDetail userDetail = (UserDetail) auth.getPrincipal();
+        Map<String, List<TrackDTO>> result = userTopTrackService.getUserTopItems(userDetail.getSpotifyId());
+        System.out.println(result);
+        return ResponseEntity.ok(result);
+    }
+
 }

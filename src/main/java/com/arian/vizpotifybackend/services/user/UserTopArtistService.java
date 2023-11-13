@@ -30,9 +30,7 @@ public class UserTopArtistService {
     public Map<String, List<ArtistDTO>> getUserTopArtists(String userSpotifyId) {
         boolean userExists = userTopArtistRepository.existsByUserSpotifyId(userSpotifyId);
         if (userExists) {
-            Map<String,List<ArtistDTO>> result = fetchUserTopItemsFromDB(userSpotifyId);
-            System.out.println(result);
-           return result;
+            return fetchUserTopItemsFromDB(userSpotifyId);
         } else {
             return fetchFromSpotifyAndStoreUserTopArtists(userSpotifyId);
         }
@@ -65,38 +63,6 @@ public class UserTopArtistService {
 
         return artistDetailsForUser;
     }
-//    private Map<String, List<ArtistDTO>> fetchArtistDetailsGroupedByTimeRangeForUser(String userSpotifyId) {
-//        Map<String, List<ArtistDTO>> groupedArtistDetailsByTimeRange = new HashMap<>();
-//        List<UserTopArtist> userTopArtistsList = userTopArtistRepository.findByUserSpotifyId(userSpotifyId);
-//
-//        Map<String, List<String>> timeRangeToArtistIds = userTopArtistsList.stream()
-//                .collect(Collectors.groupingBy(
-//                        UserTopArtist::getTimeRange,
-//                        Collectors.mapping(UserTopArtist::getArtistId, Collectors.toList())
-//                ));
-//
-//        Set<String> uniqueArtistIds = userTopArtistsList.stream()
-//                .map(UserTopArtist::getArtistId)
-//                .collect(Collectors.toSet());
-//
-//        List<ArtistDetail> artistDetailsList = artistDetailService.getArtistsByIds(new ArrayList<>(uniqueArtistIds));
-//
-//        Map<String, ArtistDTO> artistIdToDTO = artistDetailsList.stream()
-//                .collect(Collectors.toMap(
-//                        ArtistDetail::getId,
-//                        artistDetailService::convertArtistDetailToArtistDTO
-//                ));
-//
-//        for (String timeRangeKey : TimeRange.getValuesAsList()) {
-//            List<ArtistDTO> artistDTOsForCurrentTimeRange = timeRangeToArtistIds.getOrDefault(timeRangeKey, Collections.emptyList())
-//                    .stream()
-//                    .map(artistIdToDTO::get)
-//                    .collect(Collectors.toList());
-//            groupedArtistDetailsByTimeRange.put(TopItemUtil.formatTimeRangeForDTO(timeRangeKey), artistDTOsForCurrentTimeRange);
-//        }
-//        return groupedArtistDetailsByTimeRange;
-//    }
-
 
     private Map<String, List<ArtistDTO>> fetchFromSpotifyAndStoreUserTopArtists(String spotifyId) {
         Map<TimeRange, Paging<Artist>> userTopArtistsForAllTimeRange = spotifyService.getUserTopArtistsForAllTimeRange(spotifyId);

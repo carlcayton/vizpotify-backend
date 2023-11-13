@@ -35,13 +35,11 @@ public class ArtistCacheService {
 
     public void cacheRelatedArtists(String artistId, List<ArtistDTO> relatedArtists) {
         String key = RELATED_KEY_PREFIX + artistId;
-        System.out.println(artistId);
         jsonRedisTemplate.opsForValue().set(key, relatedArtists, 1, TimeUnit.DAYS); // Adjust cache duration as needed
     }
 
     public Optional<List<ArtistDTO>> getRelatedArtistsFromCache(String artistId) {
         String key = RELATED_KEY_PREFIX + artistId;
-        System.out.println(artistId);
         return Optional.ofNullable((List<ArtistDTO>) jsonRedisTemplate.opsForValue().get(key));
     }
 

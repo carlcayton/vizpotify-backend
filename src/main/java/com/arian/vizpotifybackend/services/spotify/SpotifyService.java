@@ -2,17 +2,13 @@ package com.arian.vizpotifybackend.services.spotify;
 
 import com.arian.vizpotifybackend.enums.TimeRange;
 import com.arian.vizpotifybackend.factory.SpotifyApiFactory;
-import com.arian.vizpotifybackend.model.ArtistDetail;
 import com.arian.vizpotifybackend.model.SpotifyAuthToken;
 import com.arian.vizpotifybackend.repository.SpotifyAuthTokenRepository;
-import com.arian.vizpotifybackend.services.auth.spotify.SpotifyOauthTokenService;
 import com.neovisionaries.i18n.CountryCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import se.michaelthelin.spotify.SpotifyApi;
 import se.michaelthelin.spotify.enums.ModelObjectType;
-import se.michaelthelin.spotify.model_objects.IModelObject;
-import se.michaelthelin.spotify.model_objects.credentials.ClientCredentials;
 import se.michaelthelin.spotify.model_objects.specification.*;
 import se.michaelthelin.spotify.requests.data.artists.GetArtistsRelatedArtistsRequest;
 import se.michaelthelin.spotify.requests.data.artists.GetArtistsTopTracksRequest;
@@ -22,7 +18,6 @@ import se.michaelthelin.spotify.requests.data.personalization.simplified.GetUser
 import se.michaelthelin.spotify.requests.data.playlists.GetListOfCurrentUsersPlaylistsRequest;
 import se.michaelthelin.spotify.requests.data.users_profile.GetCurrentUsersProfileRequest;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
