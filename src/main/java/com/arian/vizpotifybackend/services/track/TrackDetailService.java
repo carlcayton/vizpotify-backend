@@ -2,8 +2,11 @@ package com.arian.vizpotifybackend.services.track;
 
 import com.arian.vizpotifybackend.dto.TrackDTO;
 import com.arian.vizpotifybackend.enums.TimeRange;
+import com.arian.vizpotifybackend.model.Genre;
 import com.arian.vizpotifybackend.model.TrackDetail;
 import com.arian.vizpotifybackend.repository.TrackDetailRepository;
+
+import com.arian.vizpotifybackend.services.GenreService;
 import com.arian.vizpotifybackend.services.artist.CommonArtistService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -28,14 +31,13 @@ public class TrackDetailService {
         Set<TrackDetail> newTracks = tracksNotInTable.stream()
                 .map(commonTrackService::convertTrackToTrackDetail)
                 .collect(Collectors.toSet());
-
         trackDetailRepository.saveAll(newTracks);
     }
-
 
     public List<TrackDetail> getTracksByIds(List<String> ids) {
         return trackDetailRepository.findByIdIn(ids);
     }
+
     public TrackDTO convertTrackToTrackDTO(Track track) {
         ArtistSimplified[] artistNamesTemp = track.getArtists();
         Set<String> artistNames =  Arrays.stream(artistNamesTemp)

@@ -63,8 +63,7 @@ public class UserTopTrackServiceImpl {
 
 
     public Map<String, List<TrackDTO>> fetchUserTopItemsFromSpotifyAndSave(String userId) {
-        Map<TimeRange, Paging<Track>> userTopTracksForAllTimeRange;
-        userTopTracksForAllTimeRange = spotifyService.getUserTopTracksForAllTimeRange(userId);
+        Map<TimeRange, Paging<Track>> userTopTracksForAllTimeRange = spotifyService.getUserTopTracksForAllTimeRange(userId);
 
         Set<Track> allTracksAsSet =
                 trackDetailService
@@ -88,7 +87,6 @@ public class UserTopTrackServiceImpl {
         int rank = 1;
         for (Track track : tracks) {
             trackDTOs.add(trackDetailService.convertTrackToTrackDTO(track));
-
             UserTopTrack userTopTrack = createUserTopTrack(spotifyId, track.getId(), timeRange, rank++);
             userTopTracks.add(userTopTrack);
         }

@@ -3,7 +3,7 @@ package com.arian.vizpotifybackend.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
+import java.util.Date;
 
 @Data
 @Builder
@@ -19,14 +19,17 @@ public class TrackDetail {
     private String name;
 
     @Column(name = "artists")
-    private String artists;
+    private String artists; // Assuming this is a CSV string of artist names
 
-    private int duration;
+    private int duration; // Track duration in milliseconds
 
     private String albumName;
 
     private String albumImageUrl;
 
-    private int popularity;
+    private int popularity; // Track popularity score
 
+    @Column(name = "release_date")
+    private Date releaseDate; // The release date of the track
 }
+

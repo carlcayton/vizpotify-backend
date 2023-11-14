@@ -7,10 +7,9 @@ import org.springframework.stereotype.Service;
 import se.michaelthelin.spotify.model_objects.specification.ArtistSimplified;
 import se.michaelthelin.spotify.model_objects.specification.Track;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,6 +32,7 @@ public class CommonTrackService {
                 .collect(Collectors.toSet());
     }
 
+
     public TrackDetail convertTrackToTrackDetail(Track track) {
         return TrackDetail.builder()
                 .id(track.getId())
@@ -42,8 +42,25 @@ public class CommonTrackService {
                 .albumName(track.getAlbum().getName())
                 .albumImageUrl(track.getAlbum().getImages()[0].getUrl())
                 .popularity(track.getPopularity())
+                .releaseDate(parseReleaseDate(track.getAlbum().getReleaseDate()))
                 .build();
     }
+
+    private Date parseReleaseDate(String releaseDateString) {
+        SimpleDateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy");
+
+        try {
+            return fullDateFormat.parse(releaseDateString);
+        } catch (ParseException e) {
+            try {
+                return yearFormat.parse(releaseDateString);
+            } catch (ParseException ex) {
+                return null;
+            }
+        }
+    }
+
 
 
     private String convertArtistsToCSV(ArtistSimplified[] artists) {

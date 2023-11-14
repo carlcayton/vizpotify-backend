@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -27,4 +28,6 @@ public class TrackDTO {
     private String albumImageUrl;
 
     private int popularity;
+
+    private Date releaseDate;
 }

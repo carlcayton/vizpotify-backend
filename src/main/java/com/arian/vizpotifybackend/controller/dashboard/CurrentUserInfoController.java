@@ -53,7 +53,6 @@ public class CurrentUserInfoController {
 
         UserDetail userDetail = (UserDetail) auth.getPrincipal();
         Map<String, List<TrackDTO>> result = userTopTrackService.getUserTopItems(userDetail.getSpotifyId());
-        System.out.println(result);
         return ResponseEntity.ok(result);
     }
 
