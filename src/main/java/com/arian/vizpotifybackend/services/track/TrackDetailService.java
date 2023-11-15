@@ -8,6 +8,7 @@ import com.arian.vizpotifybackend.repository.TrackDetailRepository;
 
 import com.arian.vizpotifybackend.services.GenreService;
 import com.arian.vizpotifybackend.services.artist.CommonArtistService;
+import com.arian.vizpotifybackend.util.SpotifyUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -54,6 +55,7 @@ public class TrackDetailService {
                 .albumName(track.getAlbum().getName())
                 .albumImageUrl(track.getAlbum().getImages()[0].getUrl())
                 .popularity(popularityScore)
+                .releaseDate(SpotifyUtil.parseReleaseDate(track.getAlbum().getReleaseDate()))
                 .build();
     }
     public Set<Track> extractUniqueTracks(Map<TimeRange, Paging<Track>> trackPagingMap) {
@@ -76,6 +78,7 @@ public class TrackDetailService {
                 .albumName(trackDetail.getAlbumName())
                 .albumImageUrl(trackDetail.getAlbumImageUrl())
                 .popularity(trackDetail.getPopularity())
+                .releaseDate(trackDetail.getReleaseDate())
                 .build();
     }
 

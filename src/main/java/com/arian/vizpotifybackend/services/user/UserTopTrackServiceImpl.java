@@ -8,6 +8,7 @@ import com.arian.vizpotifybackend.repository.UserTopTrackRepository;
 import com.arian.vizpotifybackend.services.redis.TrackCacheService;
 import com.arian.vizpotifybackend.services.spotify.SpotifyService;
 import com.arian.vizpotifybackend.services.track.TrackDetailService;
+import com.arian.vizpotifybackend.services.user.util.TopItemUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -54,7 +55,7 @@ public class UserTopTrackServiceImpl {
             if (trackDetail != null) {
                 TrackDTO trackDTO = trackDetailService.convertTrackDetailToTrackDTO(trackDetail);
                 String timeRangeKey = userTopTrack.getTimeRange();
-                trackDetailsForUser.computeIfAbsent(timeRangeKey, k -> new ArrayList<>()).add(trackDTO);
+                trackDetailsForUser.computeIfAbsent(TopItemUtil.formatTimeRangeForDTO(timeRangeKey), k -> new ArrayList<>()).add(trackDTO);
             }
         }
 
@@ -73,8 +74,9 @@ public class UserTopTrackServiceImpl {
         for (Map.Entry<TimeRange, Paging<Track>> entry : userTopTracksForAllTimeRange.entrySet()) {
             String currentTimeRange = entry.getKey().getValue();
             List<TrackDTO> trackDTOs = processTracksForTimeRange(currentTimeRange, userId, entry.getValue());
-            output.put(currentTimeRange, trackDTOs);
+            output.put(TopItemUtil.formatTimeRangeForDTO(currentTimeRange), trackDTOs);
         }
+
         return output;
 
     }

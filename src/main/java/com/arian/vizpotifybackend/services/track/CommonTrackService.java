@@ -2,6 +2,7 @@ package com.arian.vizpotifybackend.services.track;
 
 import com.arian.vizpotifybackend.model.TrackDetail;
 import com.arian.vizpotifybackend.repository.TrackDetailRepository;
+import com.arian.vizpotifybackend.util.SpotifyUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import se.michaelthelin.spotify.model_objects.specification.ArtistSimplified;
@@ -42,25 +43,9 @@ public class CommonTrackService {
                 .albumName(track.getAlbum().getName())
                 .albumImageUrl(track.getAlbum().getImages()[0].getUrl())
                 .popularity(track.getPopularity())
-                .releaseDate(parseReleaseDate(track.getAlbum().getReleaseDate()))
+                .releaseDate(SpotifyUtil.parseReleaseDate(track.getAlbum().getReleaseDate()))
                 .build();
     }
-
-    private Date parseReleaseDate(String releaseDateString) {
-        SimpleDateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy");
-
-        try {
-            return fullDateFormat.parse(releaseDateString);
-        } catch (ParseException e) {
-            try {
-                return yearFormat.parse(releaseDateString);
-            } catch (ParseException ex) {
-                return null;
-            }
-        }
-    }
-
 
 
     private String convertArtistsToCSV(ArtistSimplified[] artists) {

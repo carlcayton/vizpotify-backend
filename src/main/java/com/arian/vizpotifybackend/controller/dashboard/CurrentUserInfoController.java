@@ -46,7 +46,7 @@ public class CurrentUserInfoController {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/userTopSongs")
+    @GetMapping("/userTopTracks")
     public ResponseEntity<Map<String,List<TrackDTO>>> getTopSongs(
             HttpServletResponse response,
             Authentication auth) throws IOException {
