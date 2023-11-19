@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Builder
@@ -30,4 +31,6 @@ public class TrackDTO {
     private int popularity;
 
     private Date releaseDate;
+
+    private Map<String, Double> audioFeatures;
 }

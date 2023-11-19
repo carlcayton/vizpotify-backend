@@ -2,12 +2,10 @@ package com.arian.vizpotifybackend.services.track;
 
 import com.arian.vizpotifybackend.dto.TrackDTO;
 import com.arian.vizpotifybackend.enums.TimeRange;
-import com.arian.vizpotifybackend.model.Genre;
 import com.arian.vizpotifybackend.model.TrackDetail;
 import com.arian.vizpotifybackend.repository.TrackDetailRepository;
 
-import com.arian.vizpotifybackend.services.GenreService;
-import com.arian.vizpotifybackend.services.artist.CommonArtistService;
+import com.arian.vizpotifybackend.services.spotify.SpotifyService;
 import com.arian.vizpotifybackend.util.SpotifyUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +23,8 @@ public class TrackDetailService {
 
     private final TrackDetailRepository trackDetailRepository;
     private final CommonTrackService commonTrackService;
+    private final AudioFeatureService audioFeatureService;
+
 
     @Transactional
     public void processAndStoreNewTrackDetails(Set<Track> allTrackDetails) {
@@ -32,7 +32,14 @@ public class TrackDetailService {
         Set<TrackDetail> newTracks = tracksNotInTable.stream()
                 .map(commonTrackService::convertTrackToTrackDetail)
                 .collect(Collectors.toSet());
+
         trackDetailRepository.saveAll(newTracks);
+        List<String> trackIds = newTracks.stream()
+                .map(TrackDetail::getId)
+                .toList();
+       audioFeatureService.saveAudioFeaturesForSeveralTracks(trackIds);
+
+
     }
 
     public List<TrackDetail> getTracksByIds(List<String> ids) {

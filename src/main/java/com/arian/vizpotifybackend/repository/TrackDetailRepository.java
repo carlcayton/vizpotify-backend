@@ -16,4 +16,5 @@ public interface TrackDetailRepository extends JpaRepository<TrackDetail, String
     List<String> findExistingIds(@Param("ids") Set<String> ids);
 
     List<TrackDetail> findByIdIn(List<String> ids);
+    List<TrackDetail> findByPopularityGreaterThanEqual(int popularity);
 }

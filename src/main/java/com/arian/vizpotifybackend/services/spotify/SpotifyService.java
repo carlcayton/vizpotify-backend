@@ -16,6 +16,7 @@ import se.michaelthelin.spotify.requests.data.follow.GetUsersFollowedArtistsRequ
 import se.michaelthelin.spotify.requests.data.personalization.simplified.GetUsersTopArtistsRequest;
 import se.michaelthelin.spotify.requests.data.personalization.simplified.GetUsersTopTracksRequest;
 import se.michaelthelin.spotify.requests.data.playlists.GetListOfCurrentUsersPlaylistsRequest;
+import se.michaelthelin.spotify.requests.data.tracks.GetAudioFeaturesForSeveralTracksRequest;
 import se.michaelthelin.spotify.requests.data.users_profile.GetCurrentUsersProfileRequest;
 
 import java.util.*;
@@ -122,6 +123,24 @@ public class SpotifyService {
         return null;
     }
 
+    public AudioFeatures[] getAudioFeaturesForSeveralTracks(List<String> ids) {
+        SpotifyApi spotifyApi = spotifyApiFactory.createSpotifyApiWithClientCredentials();
+        try {
+            GetAudioFeaturesForSeveralTracksRequest
+                    getAudioFeaturesForSeveralTracksRequest =
+                    spotifyApi.getAudioFeaturesForSeveralTracks(listToCsv(ids))
+                            .build();
+            final CompletableFuture<AudioFeatures[]> audioFeaturesFuture = getAudioFeaturesForSeveralTracksRequest.executeAsync();
+            return audioFeaturesFuture.join();
+
+        } catch (CompletionException e) {
+            System.out.println("Error: " + e.getCause().getMessage());
+        } catch (CancellationException e) {
+            System.out.println("Async operation cancelled.");
+        }
+        return null;
+    }
+
     public Paging<Track> getUserTopTracks(SpotifyApi spotifyApi, String timeRange) {
         try {
 
@@ -143,6 +162,9 @@ public class SpotifyService {
     private SpotifyApi getSpotifyApi(String spotifyId) {
         SpotifyAuthToken spotifyAuthToken = spotifyAuthTokenRepository.findById(spotifyId).orElseThrow(() -> new RuntimeException(""));
         return spotifyApiFactory.createSpotifyApiWithAccessToken(spotifyAuthToken.getAccessToken());
+    }
+    public String listToCsv(List<String> ids) {
+        return String.join(",", ids);
     }
 
 

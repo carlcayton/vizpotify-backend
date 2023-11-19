@@ -33,7 +33,6 @@ public class CommonTrackService {
                 .collect(Collectors.toSet());
     }
 
-
     public TrackDetail convertTrackToTrackDetail(Track track) {
         return TrackDetail.builder()
                 .id(track.getId())
@@ -46,7 +45,6 @@ public class CommonTrackService {
                 .releaseDate(SpotifyUtil.parseReleaseDate(track.getAlbum().getReleaseDate()))
                 .build();
     }
-
 
     private String convertArtistsToCSV(ArtistSimplified[] artists) {
         return Arrays.stream(artists)
