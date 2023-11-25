@@ -1,9 +1,11 @@
 package com.arian.vizpotifybackend.controller.dashboard;
 
+import com.arian.vizpotifybackend.dto.AnalyticsDTO;
 import com.arian.vizpotifybackend.dto.ProfileHeaderDTO;
 import com.arian.vizpotifybackend.dto.ArtistDTO;
 import com.arian.vizpotifybackend.dto.TrackDTO;
 import com.arian.vizpotifybackend.model.UserDetail;
+import com.arian.vizpotifybackend.services.user.AnalyticsService;
 import com.arian.vizpotifybackend.services.user.ProfileHeaderService;
 import com.arian.vizpotifybackend.services.user.UserTopArtistService;
 import com.arian.vizpotifybackend.services.user.UserTopTrackServiceImpl;
@@ -26,6 +28,7 @@ public class CurrentUserInfoController {
     private final ProfileHeaderService profileHeaderService;
     private final UserTopArtistService userTopArtistService;
     private final UserTopTrackServiceImpl userTopTrackService;
+    private final AnalyticsService analyticsService;
 
     @GetMapping("/profileHeader")
       public ResponseEntity<ProfileHeaderDTO> getProfileHeader(
@@ -54,6 +57,11 @@ public class CurrentUserInfoController {
         UserDetail userDetail = (UserDetail) auth.getPrincipal();
         Map<String, List<TrackDTO>> result = userTopTrackService.getUserTopItems(userDetail.getSpotifyId());
         return ResponseEntity.ok(result);
+    }
+    @GetMapping("/analytics/{userId}")
+    public ResponseEntity<AnalyticsDTO> getUserAnalytics(@PathVariable String userId) {
+        AnalyticsDTO analytics = analyticsService.getAnalyticsForUser(userId);
+        return ResponseEntity.ok(analytics);
     }
 
 }

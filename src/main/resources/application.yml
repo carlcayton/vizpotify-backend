@@ -12,11 +12,9 @@ spring:
   jpa:
     properties:
       hibernate:
-#       ddl-auto: create-drop
        ddl-auto: validate
        dialect: org.hibernate.dialect.PostgreSQLDialect
        default_schema: public
-#       generate_statistics: true
        jdbc:
          batch_size: 20
          fetch_size: 20
@@ -26,7 +24,8 @@ spring:
 redis:
   host: ${REDIS_HOST}
   port: ${REDIS_PORT}
-
+fastapi:
+  base-url: http://localhost:8000
 #logging:
 #  level:
 #    org:

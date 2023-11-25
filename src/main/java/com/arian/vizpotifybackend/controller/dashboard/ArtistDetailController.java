@@ -21,7 +21,6 @@ public class ArtistDetailController {
 
     @GetMapping("/{artistId}")
     public ResponseEntity<Map<String, Object>> getArtistExtraInfo(@PathVariable String artistId){
-        System.out.println("hotdog");
         Map<String,Object> result = new HashMap<>();
         List<ArtistDTO> artistDTOS= relatedArtistService.getRelatedArtists(artistId);
         List<TrackDTO> trackDTOS =  artistTopTracksService.getArtistTopTracks(artistId);

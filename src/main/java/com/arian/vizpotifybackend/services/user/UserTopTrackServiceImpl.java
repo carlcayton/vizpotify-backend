@@ -5,7 +5,6 @@ import com.arian.vizpotifybackend.enums.TimeRange;
 import com.arian.vizpotifybackend.model.TrackDetail;
 import com.arian.vizpotifybackend.model.UserTopTrack;
 import com.arian.vizpotifybackend.repository.UserTopTrackRepository;
-import com.arian.vizpotifybackend.services.redis.TrackCacheService;
 import com.arian.vizpotifybackend.services.spotify.SpotifyService;
 import com.arian.vizpotifybackend.services.track.TrackDetailService;
 import com.arian.vizpotifybackend.services.user.util.TopItemUtil;
@@ -23,7 +22,6 @@ public class UserTopTrackServiceImpl {
     private final UserTopTrackRepository userTopTrackRepository;
     private final SpotifyService spotifyService;
     private final TrackDetailService trackDetailService;
-    private final TrackCacheService trackCacheService;
 
     public Map<String, List<TrackDTO>> getUserTopItems(String userId) {
 

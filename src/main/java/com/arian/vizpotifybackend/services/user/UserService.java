@@ -2,7 +2,6 @@ package com.arian.vizpotifybackend.services.user;
 
 import com.arian.vizpotifybackend.exception.SpotifyIdNotFoundException;
 import com.arian.vizpotifybackend.model.JwtResponse;
-import com.arian.vizpotifybackend.repository.SpotifyAuthTokenRepository;
 import com.arian.vizpotifybackend.repository.UserDetailRepository;
 import com.arian.vizpotifybackend.model.SpotifyAuthToken;
 import com.arian.vizpotifybackend.model.UserDetail;

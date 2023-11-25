@@ -17,7 +17,6 @@ public class TrackDetailController {
 
     @GetMapping("/audiofeature/{trackId}")
     public ResponseEntity<AudioFeature> getTrackAudioFeature(@PathVariable String trackId){
-        System.out.println("test");
         return audioFeatureService.getAudioFeature(trackId)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());

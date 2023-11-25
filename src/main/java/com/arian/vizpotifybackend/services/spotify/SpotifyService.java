@@ -114,6 +114,7 @@ public class SpotifyService {
         try {
             GetUsersTopArtistsRequest getUsersTopArtistsRequest = spotifyApi.getUsersTopArtists()
                     .time_range(timeRange)
+                    .limit(50)
                     .build();
             final CompletableFuture<Paging<Artist>> pagingFuture = getUsersTopArtistsRequest.executeAsync();
             return pagingFuture.join();
@@ -146,6 +147,7 @@ public class SpotifyService {
 
             GetUsersTopTracksRequest getUsersTopTracksRequest = spotifyApi.getUsersTopTracks()
                     .time_range(timeRange)
+                    .limit(50)
                     .build();
             final CompletableFuture<Paging<Track>> pagingFuture = getUsersTopTracksRequest.executeAsync();
             return pagingFuture.join();
