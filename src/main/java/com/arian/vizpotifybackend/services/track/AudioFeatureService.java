@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.scheduling.annotation.Scheduled;
 import se.michaelthelin.spotify.model_objects.specification.AudioFeatures;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -55,17 +56,30 @@ public class AudioFeatureService {
         trackCacheService.cacheAudioFeaturesBatch(audioFeatures);
     }
 
-    public void saveAudioFeaturesForSeveralTracks(List<String> ids){
-        AudioFeatures[] audioFeaturesArray = getAudioFeaturesForSeveralTracksFromSpotify(ids);
+    public void saveAudioFeaturesForSeveralTracks(List<String> ids) {
+        final int BATCH_SIZE = 20;
+        List<AudioFeature> allAudioFeatures = new ArrayList<>(ids.size());
 
-        if (audioFeaturesArray != null) {
-            List<AudioFeature> audioFeaturesList = Arrays.stream(audioFeaturesArray)
-                    .map(AudioFeatureService::toAudioFeature)
-                    .collect(Collectors.toList());
-            audioFeatureRepository.saveAll(audioFeaturesList);
+        for (int i = 0; i < ids.size(); i += BATCH_SIZE) {
+            List<String> batch = ids.subList(i, Math.min(ids.size(), i + BATCH_SIZE));
+
+            AudioFeatures[] audioFeaturesArray = getAudioFeaturesForSeveralTracksFromSpotify(batch);
+
+            if (audioFeaturesArray != null) {
+                List<AudioFeature> audioFeaturesList = Arrays.stream(audioFeaturesArray)
+                        .map(AudioFeatureService::toAudioFeature)
+                        .collect(Collectors.toList());
+                allAudioFeatures.addAll(audioFeaturesList);
+            }
         }
+
+        if (!allAudioFeatures.isEmpty()) {
+            audioFeatureRepository.saveAll(allAudioFeatures);
+        }
+
         preloadAudioFeatures();
     }
+
 
     private AudioFeatures[] getAudioFeaturesForSeveralTracksFromSpotify(List<String> ids){
         return spotifyService.getAudioFeaturesForSeveralTracks(ids);

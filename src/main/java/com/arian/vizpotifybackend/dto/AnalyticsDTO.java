@@ -26,8 +26,8 @@ public class AnalyticsDTO {
 @NoArgsConstructor
 @AllArgsConstructor
 class AudioFeatureDTO {
-    @JsonProperty("user_spotify_id")
-    private String userSpotifyId;
+//    @JsonProperty("user_spotify_id")
+//    private String userSpotifyId;
     private Double acousticness;
     private Double danceability;
     private Double energy;
@@ -35,7 +35,7 @@ class AudioFeatureDTO {
     private Double liveness;
     private Double speechiness;
     private Double valence;
-    private Double tempo;
+//    private Double tempo;
 }
 
 @Data

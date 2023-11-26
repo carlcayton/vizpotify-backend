@@ -32,8 +32,8 @@ public class CurrentUserInfoController {
 
     @GetMapping("/profileHeader")
       public ResponseEntity<ProfileHeaderDTO> getProfileHeader(
-            HttpServletResponse response,
             Authentication auth) throws IOException {
+        System.out.println("hist");
         UserDetail userDetail = (UserDetail) auth.getPrincipal();
        ProfileHeaderDTO profileHeaderDTO = profileHeaderService
                .getProfileHeaderDTO(userDetail.getSpotifyId());
@@ -42,7 +42,6 @@ public class CurrentUserInfoController {
 
     @GetMapping("/userTopArtists")
     public ResponseEntity<Map<String, List<ArtistDTO>>> getTopArtists(
-            HttpServletResponse response,
             Authentication auth) throws IOException {
         UserDetail userDetail = (UserDetail) auth.getPrincipal();
         Map<String, List<ArtistDTO>> result = userTopArtistService.getUserTopArtists(userDetail.getSpotifyId());
@@ -58,10 +57,14 @@ public class CurrentUserInfoController {
         Map<String, List<TrackDTO>> result = userTopTrackService.getUserTopItems(userDetail.getSpotifyId());
         return ResponseEntity.ok(result);
     }
-    @GetMapping("/analytics/{userId}")
-    public ResponseEntity<AnalyticsDTO> getUserAnalytics(@PathVariable String userId) {
-        AnalyticsDTO analytics = analyticsService.getAnalyticsForUser(userId);
+    @GetMapping("/analytics")
+    public ResponseEntity<AnalyticsDTO> getUserAnalytics(
+            HttpServletResponse response,
+            Authentication auth) throws IOException {
+        UserDetail userDetail = (UserDetail) auth.getPrincipal();
+            AnalyticsDTO analytics = analyticsService.getAnalyticsForUser(userDetail.getSpotifyId());
         return ResponseEntity.ok(analytics);
     }
+
 
 }

@@ -15,7 +15,6 @@ import se.michaelthelin.spotify.model_objects.specification.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-//
 @Service
 @RequiredArgsConstructor
 public class UserTopTrackServiceImpl {

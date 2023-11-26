@@ -32,7 +32,7 @@ public class SecurityConfig {
                 auth.
                 requestMatchers(antMatcher("/api/v1/auth/**")).permitAll()
                 .requestMatchers(antMatcher("/**")).permitAll()
-//                .requestMatchers(antMatcher(HttpMethod.OPTIONS,"/**")).permitAll()
+                .requestMatchers(antMatcher(HttpMethod.OPTIONS,"/**")).permitAll()
 //                .anyRequest().authenticated()
                 );
     http.addFilterBefore(jwtAuthenticationFilter, BasicAuthenticationFilter.class);

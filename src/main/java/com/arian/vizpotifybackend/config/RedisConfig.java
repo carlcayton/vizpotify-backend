@@ -34,7 +34,6 @@ public class RedisConfig {
         return new JedisConnectionFactory(configuration);
     }
 
-    // Bean for operations on strings
     @Bean
     public RedisTemplate<String, String> myStringRedisTemplate() {
         RedisTemplate<String, String> template = new RedisTemplate<>();
@@ -54,7 +53,6 @@ public class RedisConfig {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
 
-        // Set  the polymorphic type validator for default typing
         PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
                 .allowIfBaseType(Object.class)
                 .build();
