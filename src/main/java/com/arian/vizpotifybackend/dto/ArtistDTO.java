@@ -2,7 +2,6 @@ package com.arian.vizpotifybackend.dto;
 
 
 import com.arian.vizpotifybackend.model.ArtistDetail;
-import com.arian.vizpotifybackend.model.Genre;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,6 +22,6 @@ public class ArtistDTO {
     private Integer popularity;
     private String externalUrl;
     private String imageUrl;
-    private Set<Genre> genres;  // Represented as strings instead of Genre entities.
+    private List<String> genres;  // Represented as strings instead of Genre entities.
     private String rank;
 }

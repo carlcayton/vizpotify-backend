@@ -13,4 +13,5 @@ public interface UserTopArtistRepository extends JpaRepository<UserTopArtist, Lo
     boolean existsByUserSpotifyId(String spotifyId);
 
     List<UserTopArtist> findByUserSpotifyIdAndTimeRange(String userSpotifyId, String timeRange);
+
 }

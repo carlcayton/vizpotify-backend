@@ -5,7 +5,6 @@ import com.arian.vizpotifybackend.dto.ArtistDTO;
 import com.arian.vizpotifybackend.enums.TimeRange;
 import com.arian.vizpotifybackend.model.ArtistDetail;
 import com.arian.vizpotifybackend.repository.ArtistDetailRepository;
-import com.arian.vizpotifybackend.services.GenreService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,7 +19,6 @@ import java.util.stream.Collectors;
 public class ArtistDetailService {
 
     private final ArtistDetailRepository artistDetailRepository;
-    private final GenreService genreService;
     private final CommonArtistService commonArtistService;
 
     @Transactional
@@ -31,7 +29,6 @@ public class ArtistDetailService {
                 .map(commonArtistService::convertArtistToArtistDetail)
                 .collect(Collectors.toSet());
 
-        genreService.saveNewGenresGivenArtists(newArtists);
         artistDetailRepository.saveAll(newArtists);
     }
 
@@ -57,7 +54,7 @@ public class ArtistDetailService {
                 .popularity(artistDetail.getPopularity())
                 .externalUrl(artistDetail.getExternalUrl())
                 .imageUrl(artistDetail.getImageUrl())
-                .genres(artistDetail.getGenres())
+                .genres( artistDetail.getGenres())
                 .build();
     }
 

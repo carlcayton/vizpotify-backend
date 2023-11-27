@@ -40,11 +40,11 @@ public class AudioFeatureService {
         }
         return Optional.empty();
     }
-    @Scheduled(fixedRate = 1000*60*60*24) // Preload everyday
+    @Scheduled(fixedRate = 1000*60*60)
     public void preloadAudioFeatures() {
         List<String> trackIds = getTracksForPreloading();
 
-        final int BATCH_SIZE = 100; // Set an appropriate batch size
+        final int BATCH_SIZE = 100;
         for (int i = 0; i < trackIds.size(); i += BATCH_SIZE) {
             List<String> batch = trackIds.subList(i, Math.min(i + BATCH_SIZE, trackIds.size()));
             fetchAndCacheBatch(batch);

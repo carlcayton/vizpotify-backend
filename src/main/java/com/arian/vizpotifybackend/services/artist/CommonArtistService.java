@@ -2,7 +2,6 @@ package com.arian.vizpotifybackend.services.artist;
 
 import com.arian.vizpotifybackend.model.ArtistDetail;
 import com.arian.vizpotifybackend.repository.ArtistDetailRepository;
-import com.arian.vizpotifybackend.services.GenreService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import se.michaelthelin.spotify.model_objects.specification.Artist;
@@ -18,7 +17,6 @@ public class CommonArtistService {
 
 
     private final ArtistDetailRepository artistDetailRepository;
-    private final GenreService genreService;
 
 
     public Set<Artist> extractArtistNotInArtistTable(Set<Artist> artists) {
@@ -43,7 +41,7 @@ public class CommonArtistService {
                 .name(artist.getName())
                 .popularity(artist.getPopularity())
                 .imageUrl(artist.getImages()[0].getUrl())
-                .genres(genreService.convertStringArrGenreToGenreObj(artist.getGenres()))
+                .genres(List.of((artist.getGenres())))
                 .build();
     }
 
@@ -52,6 +50,5 @@ public class CommonArtistService {
                 .map(ArtistDetail::getId)
                 .collect(Collectors.toSet());
     }
-
 
 }

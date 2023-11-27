@@ -36,13 +36,9 @@ public class ArtistDetail {
     @Column(name = "image_url")
     private String imageUrl;
 
-//    @ManyToMany(fetch = FetchType.LAZY)
-    @ManyToMany
-    @JoinTable(
-            name = "artist_genre",
-            joinColumns = @JoinColumn(name = "artist_id"),
-            inverseJoinColumns = @JoinColumn(name = "genre_id")
-    )
-    private Set<Genre> genres;
+    @ElementCollection
+    @CollectionTable(name = "artist_genre", joinColumns = @JoinColumn(name = "artist_id"))
+    @Column(name = "genre")
+    private List<String> genres;
 
 }
