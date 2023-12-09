@@ -43,6 +43,8 @@ spotify:
   clientSecret: ${CLIENT_SECRET}
   redirectUri: ${REDIRECT_URI}
   scopes:
+    - user-read-private
+    - user-read-email
     - user-follow-read
     - playlist-read-collaborative
     - user-library-read

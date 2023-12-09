@@ -8,7 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "artist_detail")
@@ -40,5 +39,4 @@ public class ArtistDetail {
     @CollectionTable(name = "artist_genre", joinColumns = @JoinColumn(name = "artist_id"))
     @Column(name = "genre")
     private List<String> genres;
-
 }

@@ -42,5 +42,14 @@ public class AuthController {
         response.sendRedirect("http://localhost:3000/dashboard/me");
         return ResponseEntity.ok("User Registered and JWT set in cookie");
     }
+    @PostMapping("/logout")
+    public ResponseEntity<String> logoutUser(HttpServletResponse response) {
+        Cookie jwtCookie = new Cookie("JWT_TOKEN", null);
+        jwtCookie.setHttpOnly(true);
+        jwtCookie.setPath("/");
+        jwtCookie.setMaxAge(0);
+        response.addCookie(jwtCookie);
 
+        return ResponseEntity.ok("User logged out successfully");
+    }
 }

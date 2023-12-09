@@ -32,7 +32,7 @@ public class UserService {
     public JwtResponse handleUserRegistration(String userCode) {
         SpotifyApi spotifyApi = null;
         int expiresIn = 0;
-        Object[] result= spotifyOauthTokenService.getApiInstance(userCode).join();
+        Object[] result= spotifyOauthTokenService.getApiInstance(userCode);
         if (result != null && result.length == 2) {
             spotifyApi = (SpotifyApi) result[0];
             expiresIn = (int) result[1];
@@ -53,7 +53,7 @@ public class UserService {
         String accessToken = jwtService.createToken(userDetail);
         return new JwtResponse(accessToken);
     }
-    public UserDetail lodUserDetailBySpotifyId(String spotifyId){
+    public UserDetail loadUserDetailBySpotifyId(String spotifyId){
         Optional<UserDetail> optionalUserDetail = userDetailRepository.findBySpotifyId(spotifyId);
         if(optionalUserDetail.isPresent()){
             return optionalUserDetail.get();
@@ -61,7 +61,6 @@ public class UserService {
             throw new SpotifyIdNotFoundException(spotifyId);
         }
     }
-
 
     private UserDetail processSpotifyUser(User spotifyUser) {
         UserDetail userDetail = mapSpotifyUserToEntity(spotifyUser);

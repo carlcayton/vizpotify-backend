@@ -45,7 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String userSpotifyId = this.jwtService.extractSpotifyId(token);
         if(userSpotifyId!=null && SecurityContextHolder.getContext()
                 .getAuthentication()==null){
-            UserDetail userDetail = this.userService.lodUserDetailBySpotifyId(userSpotifyId);
+            UserDetail userDetail = this.userService.loadUserDetailBySpotifyId(userSpotifyId);
            if(jwtService.isTokenValid(token,  userDetail)){
                PreAuthenticatedAuthenticationToken auth = new PreAuthenticatedAuthenticationToken(
                        userDetail,

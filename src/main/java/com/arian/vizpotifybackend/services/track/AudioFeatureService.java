@@ -99,10 +99,9 @@ public class AudioFeatureService {
     }
 
     private List<String> getTracksForPreloading() {
-        // Fetch tracks with popularity >= 70
         return trackDetailRepository.findByPopularityGreaterThanEqual(70)
                 .stream()
-                .map(TrackDetail::getId) // Assuming Track has a getId method
+                .map(TrackDetail::getId)
                 .collect(Collectors.toList());
     }
 }

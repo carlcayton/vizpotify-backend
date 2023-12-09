@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import se.michaelthelin.spotify.SpotifyApi;
+import se.michaelthelin.spotify.model_objects.credentials.AuthorizationCodeCredentials;
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
 
@@ -52,18 +53,20 @@ public class SpotifyOauthTokenService {
     }
 
 
-    public CompletableFuture<Object[]> getApiInstance(String userCode) {
+
+    public Object[] getApiInstance(String userCode) {
         SpotifyApi spotifyApi = spotifyApiFactory.createSpotifyApiForAuth();
         AuthorizationCodeRequest authorizationCodeRequest = spotifyApi.authorizationCode(userCode).build();
 
-        return authorizationCodeRequest.executeAsync().thenApply(authorizationCodeCredentials -> {
+        try {
+            AuthorizationCodeCredentials authorizationCodeCredentials = authorizationCodeRequest.execute();
             spotifyApi.setAccessToken(authorizationCodeCredentials.getAccessToken());
             spotifyApi.setRefreshToken(authorizationCodeCredentials.getRefreshToken());
             return new Object[]{spotifyApi, authorizationCodeCredentials.getExpiresIn()};
-        }).exceptionally(ex -> {
-            System.out.println("Error: " + ex.getCause().getMessage());
+        } catch (Exception ex) {
+            System.out.println("Error: " + ex.getMessage());
             return null;
-        });
+        }
     }
 
     public SpotifyAuthToken createSpotifyAuthToken(String userSpotifyId, String accessToken,

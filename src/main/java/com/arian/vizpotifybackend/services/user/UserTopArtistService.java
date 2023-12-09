@@ -76,7 +76,7 @@ public class UserTopArtistService {
         for (Map.Entry<TimeRange, Paging<Artist>> entry : userTopArtistsForAllTimeRange.entrySet()) {
             String currentTimeRange = entry.getKey().getValue();
             List<ArtistDTO> artistDTOs = processArtistsForTimeRange(currentTimeRange, spotifyId, entry.getValue());
-            output.put(entry.getKey().getValue(), artistDTOs);
+            output.put(TopItemUtil.formatTimeRangeForDTO(currentTimeRange), artistDTOs);
         }
         return output;
     }
@@ -94,7 +94,7 @@ public class UserTopArtistService {
             UserTopArtist userTopArtist = createUserTopArtist(spotifyId, artist.getId(), timeRange, rank++);
             userTopArtists.add(userTopArtist);
         }
-        userTopArtistRepository.saveAll(userTopArtists);  // Save all in one go
+        userTopArtistRepository.saveAll(userTopArtists);
 
         return artistDTOs;
     }

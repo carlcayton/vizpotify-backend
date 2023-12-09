@@ -22,28 +22,38 @@ public class AnalyticsService {
     @Value("${fastapi.base-url}")
     private String fastApiBaseUrl;
 
-    public AnalyticsDTO getAnalyticsForUser(String userId)  {
-        boolean userTopArtistExists = userTopArtistRepository.existsByUserSpotifyId(userId);
-        boolean userTopTrackExists = userTopTrackRepository.existsByUserSpotifyId(userId);
+    public AnalyticsDTO getAnalyticsForUser(String userId) {
+        int attempts = 0;
+        final int maxAttempts = 5;
 
-        if (userTopArtistExists && userTopTrackExists) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+        while (true) {
+            boolean userTopArtistExists = userTopArtistRepository.existsByUserSpotifyId(userId);
+            boolean userTopTrackExists = userTopTrackRepository.existsByUserSpotifyId(userId);
+
+            if (userTopArtistExists && userTopTrackExists) {
+                try {
+                    String url = fastApiBaseUrl + "/analytics/consolidated-analytics/" + userId;
+                    ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+
+                    return new ObjectMapper().readValue(response.getBody(), AnalyticsDTO.class);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException("Error processing JSON", e);
+                }
+            } else {
+                attempts++;
+                if (attempts >= maxAttempts) {
+                    throw new IllegalStateException("UserTopArtist or UserTopTrack data not available for user: " + userId);
+                }
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException("Thread interrupted", e);
+                }
             }
-
-            String url = fastApiBaseUrl + "/analytics/consolidated-analytics/" + userId;
-            ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-
-            try {
-                return new ObjectMapper().readValue(response.getBody(), AnalyticsDTO.class);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException("Error processing JSON", e);
-            }
-        } else {
-            throw new IllegalStateException("UserTopArtist or UserTopTrack data not available for user: " + userId);
         }
     }
+
 
 }

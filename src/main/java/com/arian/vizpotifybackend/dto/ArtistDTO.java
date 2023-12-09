@@ -22,6 +22,6 @@ public class ArtistDTO {
     private Integer popularity;
     private String externalUrl;
     private String imageUrl;
-    private List<String> genres;  // Represented as strings instead of Genre entities.
+    private List<String> genres;
     private String rank;
 }

@@ -33,7 +33,6 @@ public class CurrentUserInfoController {
     @GetMapping("/profileHeader")
       public ResponseEntity<ProfileHeaderDTO> getProfileHeader(
             Authentication auth) throws IOException {
-        System.out.println("hist");
         UserDetail userDetail = (UserDetail) auth.getPrincipal();
        ProfileHeaderDTO profileHeaderDTO = profileHeaderService
                .getProfileHeaderDTO(userDetail.getSpotifyId());
@@ -45,6 +44,7 @@ public class CurrentUserInfoController {
             Authentication auth) throws IOException {
         UserDetail userDetail = (UserDetail) auth.getPrincipal();
         Map<String, List<ArtistDTO>> result = userTopArtistService.getUserTopArtists(userDetail.getSpotifyId());
+        System.out.println(result);
         return ResponseEntity.ok(result);
     }
 
