@@ -44,7 +44,6 @@ public class CurrentUserInfoController {
             Authentication auth) throws IOException {
         UserDetail userDetail = (UserDetail) auth.getPrincipal();
         Map<String, List<ArtistDTO>> result = userTopArtistService.getUserTopArtists(userDetail.getSpotifyId());
-        System.out.println(result);
         return ResponseEntity.ok(result);
     }
 
@@ -65,6 +64,4 @@ public class CurrentUserInfoController {
             AnalyticsDTO analytics = analyticsService.getAnalyticsForUser(userDetail.getSpotifyId());
         return ResponseEntity.ok(analytics);
     }
-
-
 }
