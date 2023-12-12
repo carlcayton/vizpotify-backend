@@ -2,9 +2,12 @@ package com.arian.vizpotifybackend.controller.auth;
 
 import com.arian.vizpotifybackend.dto.ProfileHeaderDTO;
 import com.arian.vizpotifybackend.model.JwtResponse;
+import com.arian.vizpotifybackend.model.UserDetail;
 import com.arian.vizpotifybackend.services.auth.jwt.JwtService;
 import com.arian.vizpotifybackend.services.auth.spotify.SpotifyOauthTokenService;
 import com.arian.vizpotifybackend.services.user.UserService;
+import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -15,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
@@ -26,6 +30,7 @@ public class AuthController {
     private String frontendUrl;
 
     private final SpotifyOauthTokenService spotifyOauthTokenService;
+    private final JwtService jwtService;
     private final UserService userService;
 
     @GetMapping("/login")
@@ -57,10 +62,16 @@ public class AuthController {
         response.addCookie(jwtCookie);
 
         return ResponseEntity.ok("User logged out successfully");
+
     }
     @GetMapping("/status")
-    public ResponseEntity<Boolean> isAuthenticated(Authentication auth) {
-        boolean isAuthenticated = auth != null && auth.isAuthenticated();
-        return ResponseEntity.ok(isAuthenticated);
+    public ResponseEntity<Object> isAuthenticated(Authentication auth) {
+        if (auth != null && auth.isAuthenticated()) {
+            UserDetail userDetail = (UserDetail) auth.getPrincipal();
+            String spotifyId = userDetail.getSpotifyId();
+            return ResponseEntity.ok(Map.of("isAuthenticated", true, "spotifyId", spotifyId));
+        }
+        return ResponseEntity.ok(Map.of("isAuthenticated", false));
     }
+
 }

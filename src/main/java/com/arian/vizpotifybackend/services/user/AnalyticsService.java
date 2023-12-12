@@ -35,7 +35,9 @@ public class AnalyticsService {
                     String url = fastApiBaseUrl + "/analytics/consolidated-analytics/" + userId;
                     ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
-                    return new ObjectMapper().readValue(response.getBody(), AnalyticsDTO.class);
+                    AnalyticsDTO analyticsDTO= new ObjectMapper().readValue(response.getBody(), AnalyticsDTO.class);
+                    System.out.println(analyticsDTO);
+                    return analyticsDTO;
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException("Error processing JSON", e);
                 }

@@ -20,6 +20,10 @@ public class AnalyticsDTO {
 
     @JsonProperty("music_era_summary")
     private Map<String, List<MusicEraSummaryDTO>> musicEraSummary;
+
+    @JsonProperty("artist_track_count")
+    private Map<String, List<ArtistTrackCountDTO>> userArtistTrackCount;
+
 }
 
 @Data
@@ -57,4 +61,13 @@ class MusicEraSummaryDTO {
     @JsonProperty("track_count")
     private Integer trackCount;
     private Double percentage;
+}
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+class ArtistTrackCountDTO {
+    @JsonProperty("artist_name")
+    private String artistName;
+    @JsonProperty("track_count")
+    private Integer trackCount;
 }
