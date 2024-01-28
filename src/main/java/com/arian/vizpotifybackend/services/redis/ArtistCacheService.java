@@ -30,12 +30,12 @@ public class ArtistCacheService {
 
     public void cacheArtistDetails(String artistId, ArtistDTO artistDetails) {
         String key = DETAILS_KEY_PREFIX + artistId;
-        jsonRedisTemplate.opsForValue().set(key, artistDetails, 1, TimeUnit.DAYS); // Adjust cache duration as needed
+        jsonRedisTemplate.opsForValue().set(key, artistDetails, 1, TimeUnit.DAYS);
     }
 
     public void cacheRelatedArtists(String artistId, List<ArtistDTO> relatedArtists) {
         String key = RELATED_KEY_PREFIX + artistId;
-        jsonRedisTemplate.opsForValue().set(key, relatedArtists, 1, TimeUnit.DAYS); // Adjust cache duration as needed
+        jsonRedisTemplate.opsForValue().set(key, relatedArtists, 1, TimeUnit.DAYS);
     }
 
     public Optional<List<ArtistDTO>> getRelatedArtistsFromCache(String artistId) {
@@ -50,7 +50,6 @@ public class ArtistCacheService {
 
     public Long getArtistAccessCount(String artistId) {
         String key = ACCESS_COUNT_KEY_PREFIX + artistId;
-        // Use stringRedisTemplate for counting since it's just a string value
         String value = myStringRedisTemplate.opsForValue().get(key);
         return value != null ? Long.parseLong(value) : 0;
     }

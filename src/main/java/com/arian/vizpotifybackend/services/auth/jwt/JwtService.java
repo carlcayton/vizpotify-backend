@@ -3,7 +3,6 @@ package com.arian.vizpotifybackend.services.auth.jwt;
 import com.arian.vizpotifybackend.model.UserDetail;
 import com.arian.vizpotifybackend.properties.JWTConfigProperties;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -19,9 +18,7 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class JwtService {
 
-
     private final JWTConfigProperties jwtConfig;
-
 
     public String createToken(UserDetail userDetail) {
         Claims claims = Jwts.claims().setSubject(userDetail.getSpotifyId());

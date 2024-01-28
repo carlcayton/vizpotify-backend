@@ -39,19 +39,15 @@ public class UserTopArtistService {
         Map<String, List<ArtistDTO>> artistDetailsForUser = new HashMap<>();
         List<UserTopArtist> allUserTopArtists = userTopArtistRepository.findByUserSpotifyId(userId);
 
-        // Extract all artist IDs associated with the user's top artists
         List<String> artistIds = allUserTopArtists.stream()
                 .map(UserTopArtist::getArtistId)
                 .collect(Collectors.toList());
 
-        // Retrieve artist details for all artist IDs collected from the user's top artists
         List<ArtistDetail> artistDetailsList = artistDetailService.getArtistsByIds(artistIds);
 
-        // Map each ArtistDetail to its ID for quick access during DTO conversion
         Map<String, ArtistDetail> artistIdToDetailMap = artistDetailsList.stream()
                 .collect(Collectors.toMap(ArtistDetail::getId, Function.identity()));
 
-        // Build a DTO list for each time range category
         for (UserTopArtist userTopArtist : allUserTopArtists) {
             ArtistDetail artistDetail = artistIdToDetailMap.get(userTopArtist.getArtistId());
             if (artistDetail != null) {

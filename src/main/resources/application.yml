@@ -18,7 +18,7 @@ spring:
        jdbc:
          batch_size: 20
          fetch_size: 20
-    show-sql: true
+    show-sql: false
   cache:
     type: none
 redis:
@@ -26,18 +26,18 @@ redis:
   port: ${REDIS_PORT}
 fastapi:
   base-url: http://localhost:8000
-#logging:
-#  level:
-#    org:
-#      hibernate:
-#        SQL:
-#        type:
-#          descriptor:
-#            sql:
-#
-#    jdbc:
-#      sqltiming: DEBUG
-#      resultsettable: DEBUG
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: WARN
+        type:
+          descriptor:
+            sql:
+              BasicBinder: WARN
+    jdbc:
+      sqltiming: DEBUG
+      resultsettable: DEBUG
 spotify:
   clientId: ${CLIENT_ID}
   clientSecret: ${CLIENT_SECRET}

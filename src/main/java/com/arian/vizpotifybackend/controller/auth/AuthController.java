@@ -64,14 +64,17 @@ public class AuthController {
         return ResponseEntity.ok("User logged out successfully");
 
     }
-    @GetMapping("/status")
-    public ResponseEntity<Object> isAuthenticated(Authentication auth) {
-        if (auth != null && auth.isAuthenticated()) {
-            UserDetail userDetail = (UserDetail) auth.getPrincipal();
-            String spotifyId = userDetail.getSpotifyId();
-            return ResponseEntity.ok(Map.of("isAuthenticated", true, "spotifyId", spotifyId));
-        }
-        return ResponseEntity.ok(Map.of("isAuthenticated", false));
+    //
+  @GetMapping("/status")
+public ResponseEntity<Object> isAuthenticated(Authentication auth) {
+    if (auth != null && auth.isAuthenticated()) {
+        UserDetail userDetail = (UserDetail) auth.getPrincipal();
+        String spotifyId = userDetail.getSpotifyId();
+        String userDisplayName = userDetail.getDisplayName();
+        String profilePictureUrl = userDetail.getProfilePictureUrl();
+        return ResponseEntity.ok(Map.of("isAuthenticated", true, "spotifyId", spotifyId, "userDisplayName", userDisplayName, "profilePictureUrl", profilePictureUrl));
     }
+    return ResponseEntity.ok(Map.of("isAuthenticated", false));
+}
 
 }

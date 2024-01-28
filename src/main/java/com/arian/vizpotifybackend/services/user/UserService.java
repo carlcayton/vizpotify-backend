@@ -22,11 +22,9 @@ import java.util.Optional;
 public class UserService {
 
     private final UserDetailRepository userDetailRepository;
-
     private final SpotifyOauthTokenService spotifyOauthTokenService;
     private final JwtService jwtService;
     private final SpotifyService spotifyService;
-
 
     @Transactional
     public JwtResponse handleUserRegistration(String userCode) {
