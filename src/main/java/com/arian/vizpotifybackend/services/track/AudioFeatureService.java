@@ -1,5 +1,7 @@
 package com.arian.vizpotifybackend.services.track;
 
+import com.arian.vizpotifybackend.mapper.ArtistMapper;
+import com.arian.vizpotifybackend.mapper.AudioFeatureMapper;
 import com.arian.vizpotifybackend.model.AudioFeature;
 import com.arian.vizpotifybackend.model.TrackDetail;
 import com.arian.vizpotifybackend.repository.AudioFeatureRepository;
@@ -25,6 +27,7 @@ public class AudioFeatureService {
     private final AudioFeatureRepository audioFeatureRepository;
     private final TrackCacheService trackCacheService;
     private final TrackDetailRepository trackDetailRepository;
+    private final AudioFeatureMapper audioFeatureMapper;
 
     public Optional<AudioFeature> getAudioFeature(String trackId) {
         Optional<AudioFeature> audioFeature = trackCacheService.getAudioFeaturesFromCache(trackId);
@@ -67,7 +70,7 @@ public class AudioFeatureService {
 
             if (audioFeaturesArray != null) {
                 List<AudioFeature> audioFeaturesList = Arrays.stream(audioFeaturesArray)
-                        .map(AudioFeatureService::toAudioFeature)
+                        .map(audioFeatureMapper::toAudioFeature)
                         .collect(Collectors.toList());
                 allAudioFeatures.addAll(audioFeaturesList);
             }
@@ -83,19 +86,6 @@ public class AudioFeatureService {
 
     private AudioFeatures[] getAudioFeaturesForSeveralTracksFromSpotify(List<String> ids){
         return spotifyService.getAudioFeaturesForSeveralTracks(ids);
-    }
-    public static AudioFeature toAudioFeature(AudioFeatures audioFeatures) {
-        return AudioFeature.builder()
-                .id(audioFeatures.getId())
-                .acousticness(audioFeatures.getAcousticness())
-                .danceability(audioFeatures.getDanceability())
-                .energy(audioFeatures.getEnergy())
-                .instrumentalness(audioFeatures.getInstrumentalness())
-                .liveness(audioFeatures.getLiveness())
-                .speechiness(audioFeatures.getSpeechiness())
-                .valence(audioFeatures.getValence())
-                .tempo(audioFeatures.getTempo())
-                .build();
     }
 
     private List<String> getTracksForPreloading() {

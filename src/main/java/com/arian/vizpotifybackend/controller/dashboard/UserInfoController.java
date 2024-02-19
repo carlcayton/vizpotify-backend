@@ -3,14 +3,12 @@ package com.arian.vizpotifybackend.controller.dashboard;
 import com.arian.vizpotifybackend.dto.*;
 import com.arian.vizpotifybackend.model.UserDetail;
 import com.arian.vizpotifybackend.services.user.*;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +19,7 @@ import java.util.Map;
 public class UserInfoController {
     private final ProfileHeaderService profileHeaderService;
     private final UserTopArtistService userTopArtistService;
-    private final UserTopTrackServiceImpl userTopTrackService;
+    private final UserTopTrackService userTopTrackService;
     private final AnalyticsService analyticsService;
     private final CommentService commentService;
 
@@ -47,24 +45,26 @@ public class UserInfoController {
 
     @GetMapping("/{userId}/analytics")
     public ResponseEntity<AnalyticsDTO> getUserAnalytics(@PathVariable String userId) {
-        AnalyticsDTO analytics = analyticsService.getAnalyticsForUser(userId);
+//        AnalyticsDTO analytics = analyticsService.getAnalyticsForUser(userId);
+        AnalyticsDTO analytics = null;
         return ResponseEntity.ok(analytics);
     }
 
     @PostMapping
-    public ResponseEntity<CommentDTO> postComment(@PathVariable Long userId,
+    public ResponseEntity<CommentDTO> postComment(@PathVariable String userId,
                                                   @RequestBody CommentDTO commentDTO,
                                                   Authentication authentication) {
         // Ensure the logged-in user is the one posting the comment
         UserDetail userDetail = (UserDetail) authentication.getPrincipal();
-        commentDTO.setAuthorSpotifyId(userDetail.getSpotifyId()); // Set author's Spotify ID
-        CommentDTO createdComment = commentService.createComment(userId, commentDTO);
+        commentDTO.setAuthorSpotifyId(userDetail.getSpotifyId());
+        CommentDTO createdComment = commentService.createComment(commentDTO);
         return new ResponseEntity<>(createdComment, HttpStatus.CREATED);
     }
 
-    @GetMapping
-    public ResponseEntity<List<CommentDTO>> getCommentsForUser(@PathVariable Long userId) {
-        List<CommentDTO> comments = commentService.getCommentsByUserId(userId);
+    @GetMapping("/{userId}/comments")
+    public ResponseEntity<List<CommentDTO>> getComments(@PathVariable String userId) {
+        List<CommentDTO> comments = commentService.getCommentsByDashboardUserId(userId);
         return ResponseEntity.ok(comments);
     }
+
 }

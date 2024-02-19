@@ -71,6 +71,18 @@ public class UserService {
         return userDetail;
     }
 
+    public void setAnalyticsAvailable(String userId, boolean available) {
+        userDetailRepository.findBySpotifyId(userId)
+                .ifPresent(userDetail -> {
+                    userDetail.setAnalyticsAvailable(available);
+                    userDetailRepository.save(userDetail);
+                });
+    }
+    public Optional<UserDetail> findBySpotifyId(String spotifyId) {
+        return userDetailRepository.findBySpotifyId(spotifyId);
+    }
+
+
     private UserDetail mapSpotifyUserToEntity(User spotifyUser) {
         return UserDetail.builder()
                 .spotifyId(spotifyUser.getId())

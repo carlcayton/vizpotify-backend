@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 @Table(name = "user_detail")
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class UserDetail {
 
     @Id
@@ -65,4 +64,7 @@ public class UserDetail {
 
     @Column
     private LocalDateTime updatedAt;
+
+    @Column
+    private boolean analyticsAvailable;
 }

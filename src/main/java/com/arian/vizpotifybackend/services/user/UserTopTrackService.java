@@ -2,6 +2,7 @@ package com.arian.vizpotifybackend.services.user;
 
 import com.arian.vizpotifybackend.dto.TrackDTO;
 import com.arian.vizpotifybackend.enums.TimeRange;
+import com.arian.vizpotifybackend.mapper.TrackMapper;
 import com.arian.vizpotifybackend.model.TrackDetail;
 import com.arian.vizpotifybackend.model.UserTopTrack;
 import com.arian.vizpotifybackend.repository.UserTopTrackRepository;
@@ -17,10 +18,11 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class UserTopTrackServiceImpl {
+public class UserTopTrackService implements UserTopItemService {
     private final UserTopTrackRepository userTopTrackRepository;
     private final SpotifyService spotifyService;
     private final TrackDetailService trackDetailService;
+    private final TrackMapper trackMapper;
 
     public Map<String, List<TrackDTO>> getUserTopItems(String userId) {
 
@@ -50,7 +52,7 @@ public class UserTopTrackServiceImpl {
         for (UserTopTrack userTopTrack : allUserTopTracks) {
             TrackDetail trackDetail = trackIdToDetailMap.get(userTopTrack.getTrackId());
             if (trackDetail != null) {
-                TrackDTO trackDTO = trackDetailService.convertTrackDetailToTrackDTO(trackDetail);
+                TrackDTO trackDTO = trackMapper.trackDetailToTrackDTO(trackDetail);
                 String timeRangeKey = userTopTrack.getTimeRange();
                 trackDetailsForUser.computeIfAbsent(TopItemUtil.formatTimeRangeForDTO(timeRangeKey), k -> new ArrayList<>()).add(trackDTO);
             }
@@ -77,6 +79,8 @@ public class UserTopTrackServiceImpl {
         return output;
 
     }
+
+
     private List<TrackDTO> processTracksForTimeRange(String timeRange, String spotifyId, Paging<Track> tracksPage) {
         List<TrackDTO> trackDTOs = new ArrayList<>();
         List<UserTopTrack> userTopTracks = new ArrayList<>();
@@ -85,7 +89,7 @@ public class UserTopTrackServiceImpl {
 
         int rank = 1;
         for (Track track : tracks) {
-            trackDTOs.add(trackDetailService.convertTrackToTrackDTO(track));
+            trackDTOs.add(trackMapper.trackToTrackDTO(track));
             UserTopTrack userTopTrack = createUserTopTrack(spotifyId, track.getId(), timeRange, rank++);
             userTopTracks.add(userTopTrack);
         }

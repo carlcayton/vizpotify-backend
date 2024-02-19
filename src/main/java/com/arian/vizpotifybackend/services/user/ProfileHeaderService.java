@@ -41,12 +41,10 @@ public class ProfileHeaderService {
     }
 
     private UserHeaderStat createUserHeaderStat(String spotifyId) {
-//        int playlistCount = spotifyService.getPlaylist(spotifyId).getTotal();
         int followedArtistCount = spotifyService.getFollowedArtists(spotifyId).getTotal();
         int followerCount = userDetailRepository.findFollowersCountBySpotifyId(spotifyId);
         UserHeaderStat userHeaderStat = UserHeaderStat.builder()
                 .userSpotifyId(spotifyId)
-//                .playlistCount(playlistCount)
                 .followerCount(followerCount)
                 .followedArtistCount(followedArtistCount)
                 .build();

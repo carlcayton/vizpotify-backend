@@ -2,6 +2,7 @@ package com.arian.vizpotifybackend.services.artist;
 
 
 import com.arian.vizpotifybackend.dto.TrackDTO;
+import com.arian.vizpotifybackend.mapper.TrackMapper;
 import com.arian.vizpotifybackend.services.redis.TrackCacheService;
 import com.arian.vizpotifybackend.services.spotify.SpotifyService;
 import com.arian.vizpotifybackend.services.track.TrackDetailService;
@@ -18,6 +19,7 @@ public class ArtistTopTracksService {
     private final TrackCacheService trackCacheService;
     private final SpotifyService spotifyService;
     private final TrackDetailService trackDetailService;
+    private final TrackMapper trackMapper;
 
     public List<TrackDTO> getArtistTopTracks(String artistId) {
         Optional<List<TrackDTO>> cachedTopTracks = trackCacheService.getArtistTopTracksFromCache(artistId);
@@ -35,7 +37,7 @@ public class ArtistTopTracksService {
             return Collections.emptyList();
         }
         List<TrackDTO> trackDTOs = Arrays.stream(tracks)
-                .map(trackDetailService::convertTrackToTrackDTO)
+                .map(trackMapper::trackToTrackDTO)
                 .limit(5)
                 .collect(Collectors.toList());
         trackCacheService.cacheArtistTopTracks(artistId, trackDTOs);

@@ -19,17 +19,17 @@ public class TrackDetail {
     private String name;
 
     @Column(name = "artists")
-    private String artists; // Assuming this is a CSV string of artist names
+    private String artists;
 
-    private int duration; // Track duration in milliseconds
+    private int duration;
 
     private String albumName;
 
     private String albumImageUrl;
 
-    private int popularity; // Track popularity score
+    private int popularity;
 
     @Column(name = "release_date")
-    private Date releaseDate; // The release date of the track
+    private Date releaseDate;
 }
 

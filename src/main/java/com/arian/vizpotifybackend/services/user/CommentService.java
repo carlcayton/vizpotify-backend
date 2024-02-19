@@ -1,8 +1,8 @@
 package com.arian.vizpotifybackend.services.user;
 
 import com.arian.vizpotifybackend.dto.CommentDTO;
+import com.arian.vizpotifybackend.mapper.CommentMapper;
 import com.arian.vizpotifybackend.model.Comment;
-import com.arian.vizpotifybackend.model.UserDetail;
 import com.arian.vizpotifybackend.repository.CommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public class CommentService {
 
     private final CommentRepository commentRepository;
-    private final UserService userService;
+    private final CommentMapper commentMapper;
 
     public CommentDTO createComment(CommentDTO commentDTO) {
         Comment comment = Comment.builder()
@@ -30,28 +30,14 @@ public class CommentService {
 
         Comment savedComment = commentRepository.save(comment);
 
-        return mapToDTO(savedComment);
+        return commentMapper.toDTO(savedComment);
     }
 
     public List<CommentDTO> getCommentsByDashboardUserId(String dashboardUserId) {
         return commentRepository.findByDashboardSpotifyId(dashboardUserId)
                 .stream()
-                .map(this::mapToDTO)
+                .map(commentMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
-    private CommentDTO mapToDTO(Comment comment) {
-        UserDetail userDetail = userService.loadUserDetailBySpotifyId(comment.getAuthorSpotifyId());
-        String authorImageUrl = userDetail.getProfilePictureUrl();
-        return CommentDTO.builder()
-                .commentId(comment.getCommentId())
-                .userName(comment.getUserName())
-                .authorImageUrl(authorImageUrl)
-                .authorSpotifyId(comment.getAuthorSpotifyId())
-                .dashboardSpotifyId(comment.getDashboardSpotifyId())
-                .content(comment.getContent())
-                .createdAt(comment.getCreatedAt())
-                .likeCount(comment.getLikeCount())
-                .build();
-    }
 }

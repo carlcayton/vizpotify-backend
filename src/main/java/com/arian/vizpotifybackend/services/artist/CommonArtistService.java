@@ -33,17 +33,7 @@ public class CommonArtistService {
                 .filter(artist -> artistsId.contains(artist.getId()))
                 .collect(Collectors.toSet());
     }
-    public ArtistDetail convertArtistToArtistDetail(Artist artist) {
-        return ArtistDetail.builder()
-                .id(artist.getId())
-                .followersTotal(artist.getFollowers().getTotal())
-                .externalUrl(artist.getExternalUrls().get("spotify"))
-                .name(artist.getName())
-                .popularity(artist.getPopularity())
-                .imageUrl(artist.getImages()[0].getUrl())
-                .genres(List.of((artist.getGenres())))
-                .build();
-    }
+
 
     public Set<String> extractIdsFromArtistDetails(List<ArtistDetail> artistDetailList) {
         return artistDetailList.stream()

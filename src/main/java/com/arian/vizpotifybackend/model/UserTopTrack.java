@@ -29,11 +29,8 @@ public class UserTopTrack {
     @Column(name = "rank", nullable = false)
     private int rank;
 
-    @Column(name = "last_updated", nullable = false,
-            columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "last_updated", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastUpdated;
 
-    // Additional fields specific to tracks can be added here
-    // For example, you might want to store track name, duration, or album
 }

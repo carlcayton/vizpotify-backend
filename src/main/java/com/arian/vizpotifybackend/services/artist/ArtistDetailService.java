@@ -1,8 +1,8 @@
 package com.arian.vizpotifybackend.services.artist;
 
-
 import com.arian.vizpotifybackend.dto.ArtistDTO;
 import com.arian.vizpotifybackend.enums.TimeRange;
+import com.arian.vizpotifybackend.mapper.ArtistMapper;
 import com.arian.vizpotifybackend.model.ArtistDetail;
 import com.arian.vizpotifybackend.repository.ArtistDetailRepository;
 import jakarta.transaction.Transactional;
@@ -20,20 +20,24 @@ public class ArtistDetailService {
 
     private final ArtistDetailRepository artistDetailRepository;
     private final CommonArtistService commonArtistService;
+    private final ArtistMapper artistMapper;
 
     @Transactional
     public void processAndStoreNewArtistDetails(Set<Artist> allArtistDetails) {
-        Set<Artist> artistsNotInTable = commonArtistService.extractArtistNotInArtistTable(allArtistDetails);
-        Set<ArtistDetail> newArtists= artistsNotInTable.stream()
-                .map(commonArtistService::convertArtistToArtistDetail)
+        Set<ArtistDetail> artistsNotInTable = commonArtistService.extractArtistNotInArtistTable(allArtistDetails)
+                .stream()
+                .map(artistMapper::artistToArtistDetail)
                 .collect(Collectors.toSet());
 
-        artistDetailRepository.saveAll(newArtists);
+        artistDetailRepository.saveAll(artistsNotInTable);
     }
 
-    public ArtistDetail getArtistById(String artistId){
-        return artistDetailRepository.findById(artistId).orElse(null);
+    public ArtistDTO getArtistDTOById(String artistId) {
+        return artistDetailRepository.findById(artistId)
+                .map(artistMapper::artistDetailToArtistDTO)
+                .orElse(null);
     }
+
 
     public Set<Artist> extractUniqueArtists(Map<TimeRange, Paging<Artist>> artistPagingMap) {
         Set<Artist> allUniqueArtists = new HashSet<>();
@@ -42,37 +46,6 @@ public class ArtistDetailService {
             allUniqueArtists.addAll(Arrays.asList(artists));
         }
         return allUniqueArtists;
-    }
-
-    public ArtistDTO convertArtistDetailToArtistDTO(ArtistDetail artistDetail) {
-
-        return ArtistDTO.builder()
-                .id(artistDetail.getId())
-                .followersTotal(artistDetail.getFollowersTotal())
-                .name(artistDetail.getName())
-                .popularity(artistDetail.getPopularity())
-                .externalUrl(artistDetail.getExternalUrl())
-                .imageUrl(artistDetail.getImageUrl())
-                .genres( artistDetail.getGenres())
-                .build();
-    }
-
-    public ArtistDTO convertArtistDetailToArtistDTOForRelatedArtists(ArtistDetail artistDetail) {
-        return ArtistDTO.builder()
-                .id(artistDetail.getId())
-                .name(artistDetail.getName())
-                .externalUrl(artistDetail.getExternalUrl())
-                .imageUrl(artistDetail.getImageUrl())
-                .build();
-    }
-
-
-    public ArtistDTO convertArtistToArtistDTO(Artist artist) {
-        return convertArtistDetailToArtistDTO(commonArtistService.convertArtistToArtistDetail(artist));
-    }
-
-    public ArtistDTO convertArtistToArtistDTOForRelatedArtists(Artist artist) {
-        return convertArtistDetailToArtistDTOForRelatedArtists(commonArtistService.convertArtistToArtistDetail(artist));
     }
 
     public List<ArtistDetail> getArtistsByIds(List<String> ids) {

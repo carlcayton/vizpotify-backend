@@ -2,6 +2,7 @@ package com.arian.vizpotifybackend.services.user;
 
 import com.arian.vizpotifybackend.dto.ArtistDTO;
 import com.arian.vizpotifybackend.enums.TimeRange;
+import com.arian.vizpotifybackend.mapper.ArtistMapper;
 import com.arian.vizpotifybackend.model.ArtistDetail;
 import com.arian.vizpotifybackend.model.UserTopArtist;
 import com.arian.vizpotifybackend.repository.UserTopArtistRepository;
@@ -26,6 +27,7 @@ public class UserTopArtistService {
     private final SpotifyService spotifyService;
     private final ArtistDetailService artistDetailService;
     private final ArtistCacheService artistCacheService;
+    private final ArtistMapper artistMapper;
 
     public Map<String, List<ArtistDTO>> getUserTopArtists(String userSpotifyId) {
         boolean userExists = userTopArtistRepository.existsByUserSpotifyId(userSpotifyId);
@@ -51,7 +53,7 @@ public class UserTopArtistService {
         for (UserTopArtist userTopArtist : allUserTopArtists) {
             ArtistDetail artistDetail = artistIdToDetailMap.get(userTopArtist.getArtistId());
             if (artistDetail != null) {
-                ArtistDTO artistDTO = artistDetailService.convertArtistDetailToArtistDTO(artistDetail);
+                ArtistDTO artistDTO = artistMapper.artistDetailToArtistDTO(artistDetail);
                 String userArtistTimeRange = TopItemUtil.formatTimeRangeForDTO(userTopArtist.getTimeRange());
                 artistDetailsForUser.computeIfAbsent(userArtistTimeRange, k -> new ArrayList<>()).add(artistDTO);
             }
@@ -85,7 +87,7 @@ public class UserTopArtistService {
 
         int rank = 1;
         for (Artist artist : artists) {
-            artistDTOs.add(artistDetailService.convertArtistToArtistDTO(artist));
+            artistDTOs.add(artistMapper.artistToArtistDTO(artist));
 
             UserTopArtist userTopArtist = createUserTopArtist(spotifyId, artist.getId(), timeRange, rank++);
             userTopArtists.add(userTopArtist);

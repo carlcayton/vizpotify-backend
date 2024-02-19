@@ -1,60 +1,75 @@
 package com.arian.vizpotifybackend.services.user;
+
+import java.util.concurrent.CompletableFuture;
+
 import com.arian.vizpotifybackend.dto.AnalyticsDTO;
-import com.arian.vizpotifybackend.repository.UserTopArtistRepository;
-import com.arian.vizpotifybackend.repository.UserTopTrackRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.http.ResponseEntity;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.arian.vizpotifybackend.model.UserDetail;
+import com.arian.vizpotifybackend.repository.UserDetailRepository;
+import com.arian.vizpotifybackend.services.redis.AnalyticsCacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.web.client.RestTemplate;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
 public class AnalyticsService {
 
     private final RestTemplate restTemplate;
-    private final UserTopArtistRepository userTopArtistRepository;
-    private final UserTopTrackRepository userTopTrackRepository;
+    private final UserService userService;
+    private final AnalyticsCacheService analyticsCacheService;
 
-    @Value("${fastapi.base-url}")
-    private String fastApiBaseUrl;
+    @Value("${lambda.base-url}")
+    private String lambdaBaseUrl;
 
-    public AnalyticsDTO getAnalyticsForUser(String userId) {
-        int attempts = 0;
-        final int maxAttempts = 5;
+    @Async
+    public CompletableFuture<AnalyticsDTO> getAnalyticsForUser(String userId) {
+        Optional<UserDetail> userDetailOpt = userService.findBySpotifyId(userId);
+        String processingKey = analyticsCacheService.getProcessingKey(userId);
+        return CompletableFuture.supplyAsync(() -> {
+            boolean isProcessing = analyticsCacheService.isProcessing(processingKey);
+            boolean analyticsAvailable = userDetailOpt.map(UserDetail::isAnalyticsAvailable).orElse(false);
 
-        while (true) {
-            boolean userTopArtistExists = userTopArtistRepository.existsByUserSpotifyId(userId);
-            boolean userTopTrackExists = userTopTrackRepository.existsByUserSpotifyId(userId);
-
-            if (userTopArtistExists && userTopTrackExists) {
-                try {
-                    String url = fastApiBaseUrl + "/analytics/consolidated-analytics/" + userId;
-                    ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-
-                    AnalyticsDTO analyticsDTO= new ObjectMapper().readValue(response.getBody(), AnalyticsDTO.class);
-                    return analyticsDTO;
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException("Error processing JSON", e);
-                }
-            } else {
-                attempts++;
-                if (attempts >= maxAttempts) {
-                    throw new IllegalStateException("UserTopArtist or UserTopTrack data not available for user: " + userId);
-                }
-
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw new RuntimeException("Thread interrupted", e);
-                }
+            if (analyticsAvailable || isProcessing) {
+                return null;
             }
+
+            analyticsCacheService.setProcessing(processingKey);
+            try {
+                AnalyticsDTO analyticsData = fetchAnalyticsData(userId, false);
+                userDetailOpt.ifPresent(userDetail -> userService.setAnalyticsAvailable(userId, true));
+                return analyticsData;
+            } finally {
+                analyticsCacheService.clearProcessing(processingKey);
+            }
+        });
+    }
+    private AnalyticsDTO fetchAnalyticsData(String userId, boolean analyticsAvailable) {
+        String url = lambdaBaseUrl+ "/consolidated-analytics";
+        HttpHeaders headers = new HttpHeaders();
+         headers.setContentType(MediaType.APPLICATION_JSON);
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("user_id", userId);
+        requestBody.put("analytics_available", analyticsAvailable);
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+
+        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+        try {
+            return new ObjectMapper().readValue(response.getBody(), AnalyticsDTO.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Error processing JSON", e);
         }
     }
-
-
 }
