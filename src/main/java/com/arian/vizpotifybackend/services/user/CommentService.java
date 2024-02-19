@@ -3,6 +3,7 @@ package com.arian.vizpotifybackend.services.user;
 import com.arian.vizpotifybackend.dto.CommentDTO;
 import com.arian.vizpotifybackend.mapper.CommentMapper;
 import com.arian.vizpotifybackend.model.Comment;
+import com.arian.vizpotifybackend.model.UserDetail;
 import com.arian.vizpotifybackend.repository.CommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final CommentMapper commentMapper;
+    private final UserService userService;
 
     public CommentDTO createComment(CommentDTO commentDTO) {
         Comment comment = Comment.builder()
@@ -36,8 +38,21 @@ public class CommentService {
     public List<CommentDTO> getCommentsByDashboardUserId(String dashboardUserId) {
         return commentRepository.findByDashboardSpotifyId(dashboardUserId)
                 .stream()
-                .map(commentMapper::toDTO)
+                .map(this::convertAndEnrichComment)
                 .collect(Collectors.toList());
+    }
+
+    protected CommentDTO convertAndEnrichComment(Comment comment) {
+        CommentDTO dto = commentMapper.toDTO(comment);
+        enrichDTOWithAuthorImage(comment, dto);
+        return dto;
+    }
+
+    private void enrichDTOWithAuthorImage(Comment comment, CommentDTO dto) {
+        UserDetail userDetail = userService.loadUserDetailBySpotifyId(comment.getAuthorSpotifyId());
+        if (userDetail != null) {
+            dto.setAuthorImageUrl(userDetail.getProfilePictureUrl());
+        }
     }
 
 }
