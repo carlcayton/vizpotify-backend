@@ -3,6 +3,7 @@ package com.arian.vizpotifybackend.filter;
 import com.arian.vizpotifybackend.model.UserDetail;
 import com.arian.vizpotifybackend.services.auth.jwt.JwtService;
 import com.arian.vizpotifybackend.services.user.UserService;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -35,28 +36,37 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String token = extractJwtFromCookie(request);
 
-        // Access-Control-Allow-Credentials
         response.setHeader("Access-Control-Allow-Credentials", "true");
 
         if (token == null) {
             filterChain.doFilter(request, response);
             return;
         }
-        String userSpotifyId = this.jwtService.extractSpotifyId(token);
-        if(userSpotifyId!=null && SecurityContextHolder.getContext()
-                .getAuthentication()==null){
-            UserDetail userDetail = this.userService.loadUserDetailBySpotifyId(userSpotifyId);
-           if(jwtService.isTokenValid(token,  userDetail)){
-               PreAuthenticatedAuthenticationToken auth = new PreAuthenticatedAuthenticationToken(
-                       userDetail,
-                       null,
-                       null
-               );
-               auth.setDetails(
-                       new WebAuthenticationDetailsSource()
-                               .buildDetails(request));
-               SecurityContextHolder.getContext().setAuthentication(auth);
-           }
+        try{
+            String userSpotifyId = this.jwtService.extractSpotifyId(token);
+            if(userSpotifyId!=null && SecurityContextHolder.getContext()
+                    .getAuthentication()==null){
+                UserDetail userDetail = this.userService.loadUserDetailBySpotifyId(userSpotifyId);
+                if(jwtService.isTokenValid(token,  userDetail)){
+                    PreAuthenticatedAuthenticationToken auth = new PreAuthenticatedAuthenticationToken(
+                            userDetail,
+                            null,
+                            null
+                    );
+                    auth.setDetails(
+                            new WebAuthenticationDetailsSource()
+                                    .buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                }
+            }
+        }catch (ExpiredJwtException e){
+            if ("/api/v1/auth/callback/".equals(request.getRequestURI())) {
+                // Log the expired JWT when trying to login again
+                System.out.println("Expired JWT on login callback, issuing a new JWT.");
+                filterChain.doFilter(request, response);
+            } else {
+                throw e;
+            }
         }
         filterChain.doFilter(request, response);
     }
