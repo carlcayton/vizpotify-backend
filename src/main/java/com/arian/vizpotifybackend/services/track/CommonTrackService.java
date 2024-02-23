@@ -1,15 +1,10 @@
 package com.arian.vizpotifybackend.services.track;
 
-import com.arian.vizpotifybackend.model.TrackDetail;
 import com.arian.vizpotifybackend.repository.TrackDetailRepository;
-import com.arian.vizpotifybackend.util.SpotifyUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import se.michaelthelin.spotify.model_objects.specification.ArtistSimplified;
 import se.michaelthelin.spotify.model_objects.specification.Track;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 

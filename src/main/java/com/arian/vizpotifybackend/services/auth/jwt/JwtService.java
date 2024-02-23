@@ -3,10 +3,12 @@ package com.arian.vizpotifybackend.services.auth.jwt;
 import com.arian.vizpotifybackend.model.UserDetail;
 import com.arian.vizpotifybackend.properties.JWTConfigProperties;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -66,5 +68,6 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody();
     }
+
 
 }

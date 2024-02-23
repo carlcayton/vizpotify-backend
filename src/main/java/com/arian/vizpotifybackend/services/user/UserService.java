@@ -28,8 +28,8 @@ public class UserService {
 
     @Transactional
     public JwtResponse handleUserRegistration(String userCode) {
-        SpotifyApi spotifyApi = null;
-        int expiresIn = 0;
+        SpotifyApi spotifyApi;
+        int expiresIn;
         Object[] result= spotifyOauthTokenService.getApiInstance(userCode);
         if (result != null && result.length == 2) {
             spotifyApi = (SpotifyApi) result[0];
@@ -49,7 +49,7 @@ public class UserService {
 
         spotifyOauthTokenService.save(spotifyAuthToken);
         String accessToken = jwtService.createToken(userDetail);
-        return new JwtResponse(accessToken);
+        return new JwtResponse(accessToken, userDetail.getSpotifyId());
     }
     public UserDetail loadUserDetailBySpotifyId(String spotifyId){
         Optional<UserDetail> optionalUserDetail = userDetailRepository.findBySpotifyId(spotifyId);
