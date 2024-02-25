@@ -1,7 +1,6 @@
 package com.arian.vizpotifybackend.config;
 
 import com.arian.vizpotifybackend.filter.JwtAuthenticationFilter;
-import com.arian.vizpotifybackend.services.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,14 +27,13 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
         http.cors().and().csrf(AbstractHttpConfigurer::disable);
         http.sessionManagement(sess->sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        http.authorizeHttpRequests((auth)->
-                auth.
-                requestMatchers(antMatcher("/api/v1/auth/**")).permitAll()
-                .requestMatchers(antMatcher("/**")).permitAll()
-                .requestMatchers(antMatcher(HttpMethod.OPTIONS,"/**")).permitAll()
-//                .anyRequest().authenticated()
+        http.authorizeHttpRequests(auth->
+                auth
+                .requestMatchers(antMatcher(HttpMethod.POST,"/api/v1/users/**")).authenticated()
+                .requestMatchers(antMatcher("/api/v1/auth/**")).permitAll()
+                .anyRequest().permitAll()
                 );
-    http.addFilterBefore(jwtAuthenticationFilter, BasicAuthenticationFilter.class);
+        http.addFilterBefore(jwtAuthenticationFilter, BasicAuthenticationFilter.class);
         return http.build();
     }
 

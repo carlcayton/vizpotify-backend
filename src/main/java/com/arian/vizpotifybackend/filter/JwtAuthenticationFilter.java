@@ -10,7 +10,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.stereotype.Component;
@@ -19,8 +18,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -29,14 +29,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserService userService;
+    private static final Set<String> permissiblePaths = new HashSet<>();
 
-    private final List<String> allowedOrigins = List.of("http://localhost:3000");
+    static {
+        permissiblePaths.add("/api/v1/users/");
+        permissiblePaths.add("/api/v1/auth/callback/");
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String token = extractJwtFromCookie(request);
 
         response.setHeader("Access-Control-Allow-Credentials", "true");
+
+        if(isPermissiblePath(request.getRequestURI())){
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         if (token == null) {
             filterChain.doFilter(request, response);
@@ -60,13 +69,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         }catch (ExpiredJwtException e){
-            if ("/api/v1/auth/callback/".equals(request.getRequestURI())) {
-                // Log the expired JWT when trying to login again
-                System.out.println("Expired JWT on login callback, issuing a new JWT.");
-                filterChain.doFilter(request, response);
-            } else {
-                throw e;
-            }
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 or another custom code
+                response.setHeader("X-Token-Expired", "true");
+                return;
         }
         filterChain.doFilter(request, response);
     }
@@ -80,6 +85,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
         return null;
+    }
+    // write a method that uses the permissiblePaths set to check if the request path is allowed
+    private boolean isPermissiblePath(String path) {
+        return permissiblePaths.stream().anyMatch(path::startsWith);
     }
 
 }
