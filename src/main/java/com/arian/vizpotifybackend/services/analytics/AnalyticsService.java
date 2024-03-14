@@ -1,16 +1,12 @@
-package com.arian.vizpotifybackend.services.user;
+package com.arian.vizpotifybackend.services.analytics;
 
-import java.util.concurrent.CompletableFuture;
-
-import com.arian.vizpotifybackend.dto.AnalyticsDTO;
+import com.arian.vizpotifybackend.dto.analytics.AnalyticsDTO;
 import com.arian.vizpotifybackend.model.UserDetail;
-import com.arian.vizpotifybackend.repository.UserDetailRepository;
+import com.arian.vizpotifybackend.properties.AWSLambdaProperties;
 import com.arian.vizpotifybackend.services.redis.AnalyticsCacheService;
+import com.arian.vizpotifybackend.services.user.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpHeaders;
@@ -21,47 +17,47 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.Optional;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
 public class AnalyticsService {
 
-    private final RestTemplate restTemplate;
     private final UserService userService;
     private final AnalyticsCacheService analyticsCacheService;
+    private final RestTemplate restTemplate;
+    private final AWSLambdaProperties awsLambdaProperties;
 
-    @Value("${lambda.base-url}")
-    private String lambdaBaseUrl;
-
-    @Async
-    public CompletableFuture<AnalyticsDTO> getAnalyticsForUser(String userId) {
+    public AnalyticsDTO getAnalyticsForUser(String userId) {
         Optional<UserDetail> userDetailOpt = userService.findBySpotifyId(userId);
         String processingKey = analyticsCacheService.getProcessingKey(userId);
-        return CompletableFuture.supplyAsync(() -> {
-            boolean isProcessing = analyticsCacheService.isProcessing(processingKey);
-            boolean analyticsAvailable = userDetailOpt.map(UserDetail::isAnalyticsAvailable).orElse(false);
+        boolean isProcessing = analyticsCacheService.isProcessing(processingKey);
+        boolean analyticsAvailable = userDetailOpt.map(UserDetail::isAnalyticsAvailable).orElse(false);
 
-            if (analyticsAvailable || isProcessing) {
-                return null;
-            }
+        if (analyticsAvailable || isProcessing) {
+            return null;
+        }
 
-            analyticsCacheService.setProcessing(processingKey);
-            try {
-                AnalyticsDTO analyticsData = fetchAnalyticsData(userId, false);
-                userDetailOpt.ifPresent(userDetail -> userService.setAnalyticsAvailable(userId, true));
-                return analyticsData;
-            } finally {
-                analyticsCacheService.clearProcessing(processingKey);
-            }
+        analyticsCacheService.setProcessing(processingKey);
+        try {
+            AnalyticsDTO analyticsData = fetchAnalyticsData(userId, false);
+            userDetailOpt.ifPresent(userDetail -> userService.setAnalyticsAvailable(userId, true));
+            return analyticsData;
+        } finally {
+            analyticsCacheService.clearProcessing(processingKey);
+        }
+    }
+    public void updateAnalyticsAvailable(String spotifyId, boolean analyticsAvailable) {
+        userService.findBySpotifyId(spotifyId).ifPresent(user -> {
+            user.setAnalyticsAvailable(analyticsAvailable);
+            userService.save(user);
         });
     }
+
     private AnalyticsDTO fetchAnalyticsData(String userId, boolean analyticsAvailable) {
-        String url = lambdaBaseUrl+ "/consolidated-analytics";
+        String url = awsLambdaProperties.endpoint() +userId;
         HttpHeaders headers = new HttpHeaders();
-         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setContentType(MediaType.APPLICATION_JSON);
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("user_id", userId);
         requestBody.put("analytics_available", analyticsAvailable);
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 
@@ -72,4 +68,5 @@ public class AnalyticsService {
             throw new RuntimeException("Error processing JSON", e);
         }
     }
+
 }
