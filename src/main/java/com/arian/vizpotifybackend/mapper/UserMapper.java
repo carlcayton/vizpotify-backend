@@ -31,7 +31,7 @@ public interface UserMapper {
 
     @Named("spotifyUrl")
     default String spotifyUrl(ExternalUrl externalUrl) {
-        return externalUrl != null ? externalUrl.get("spotify") : ""; // Assuming ExternalUrl has a get method. Correct this based on actual implementation.
+        return externalUrl != null ? externalUrl.get("spotify") : "";
     }
 
     @Named("productType")

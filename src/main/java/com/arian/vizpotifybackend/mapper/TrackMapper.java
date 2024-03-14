@@ -16,13 +16,11 @@ import se.michaelthelin.spotify.model_objects.specification.Track;
 
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring", imports = {Arrays.class, Collectors.class})
 public interface TrackMapper {
-
 
     @Mapping(target = "id", source = "id")
     @Mapping(target = "name", source = "name")
