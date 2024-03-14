@@ -3,9 +3,6 @@ package com.arian.vizpotifybackend.mapper;
 
 import com.arian.vizpotifybackend.dto.CommentDTO;
 import com.arian.vizpotifybackend.model.Comment;
-import com.arian.vizpotifybackend.model.UserDetail;
-import com.arian.vizpotifybackend.services.user.UserService;
-import lombok.RequiredArgsConstructor;
 import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
@@ -17,6 +14,4 @@ public abstract class CommentMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "likeCount", ignore = true)
     public abstract Comment toEntity(CommentDTO dto);
-
-
 }

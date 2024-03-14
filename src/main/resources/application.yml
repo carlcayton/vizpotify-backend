@@ -1,47 +1,56 @@
 spring:
-#  autoconfigure:
-#    exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
-#  devtools:
-#    remote:
-#      secret: mysecret
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
+    hibernate:
+      ddl-auto: none
     properties:
       hibernate:
-       ddl-auto: validate
-       dialect: org.hibernate.dialect.PostgreSQLDialect
-       default_schema: public
-       jdbc:
-         batch_size: 20
-         fetch_size: 20
+        default_schema: public
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 20
+          fetch_size: 20
     show-sql: false
   cache:
     type: none
+  jmx:
+    enabled: true
+
 redis:
   host: ${REDIS_HOST}
   port: ${REDIS_PORT}
-fastapi:
-  base-url: http://localhost:8000
+
+lambda:
+  base-url: ${LAMBDA_BASE_URL}
+
 logging:
   level:
     org:
       hibernate:
         SQL: WARN
-        type:
-          descriptor:
-            sql:
-              BasicBinder: WARN
+        type: WARN
+        orm:
+          sql:
+            exec: WARN
+            results: WARN
+            loading: WARN
+          results:
+            loading: WARN
+
+      springframework: WARN
+      springframework.boot.autoconfigure: WARN
     jdbc:
-      sqltiming: DEBUG
-      resultsettable: DEBUG
+      sqltiming: WARN
+      resultsettable: WARN
+
 spotify:
-  clientId: ${CLIENT_ID}
-  clientSecret: ${CLIENT_SECRET}
-  redirectUri: ${REDIRECT_URI}
+  clientId: ${SPOTIFY_CLIENT_ID}
+  clientSecret: ${SPOTIFY_CLIENT_SECRET}
+  redirectUri: ${SPOTIFY_REDIRECT_URI}
   scopes:
     - user-read-private
     - user-read-email
@@ -51,8 +60,18 @@ spotify:
     - user-top-read
     - user-read-playback-state
     - user-read-recently-played
+
 jwt:
-  secretKey: 3qRU5Tu7qho8Wj/GjKLzoc8laOPJHERxHu9NnL8dzYbcwOS2XWftAZ2jNjoNbSvR
+  secretKey: ${JWT_SECRET_KEY}
   validityInMs: 36000000
+
 misc:
-  frontendUrl: http://localhost:3000
+  frontendUrl: ${FRONTEND_URL}
+
+server:
+  port: 8081
+
+cloud:
+  function:
+    definition: VizpotifyAnalyticsFunction
+

@@ -22,8 +22,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthController {
 
-    @Value("${misc.frontendUrl")
-    private String frontendUrl;
 
     private final SpotifyOauthTokenService spotifyOauthTokenService;
     private final JwtService jwtService;
@@ -69,6 +67,4 @@ public class AuthController {
         }
         return ResponseEntity.ok(Map.of("isAuthenticated", false));
     }
-
-
 }

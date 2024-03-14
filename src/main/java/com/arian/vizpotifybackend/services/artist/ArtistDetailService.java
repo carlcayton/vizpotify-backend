@@ -38,7 +38,6 @@ public class ArtistDetailService {
                 .orElse(null);
     }
 
-
     public Set<Artist> extractUniqueArtists(Map<TimeRange, Paging<Artist>> artistPagingMap) {
         Set<Artist> allUniqueArtists = new HashSet<>();
         for (Map.Entry<TimeRange, Paging<Artist>> entry : artistPagingMap.entrySet()) {

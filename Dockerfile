@@ -22,7 +22,7 @@ FROM eclipse-temurin:17-jdk-alpine
 VOLUME /tmp
 
 # Make port 8080 available to the world outside this container
-EXPOSE 8080
+EXPOSE 8081
 
 # Set application's JAR file
 COPY --from=build /app/target/*.jar app.jar

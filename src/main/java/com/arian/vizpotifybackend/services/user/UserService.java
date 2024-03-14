@@ -1,6 +1,7 @@
 package com.arian.vizpotifybackend.services.user;
 
 import com.arian.vizpotifybackend.exception.SpotifyIdNotFoundException;
+import com.arian.vizpotifybackend.mapper.UserMapper;
 import com.arian.vizpotifybackend.model.JwtResponse;
 import com.arian.vizpotifybackend.repository.UserDetailRepository;
 import com.arian.vizpotifybackend.model.SpotifyAuthToken;
@@ -25,6 +26,7 @@ public class UserService {
     private final SpotifyOauthTokenService spotifyOauthTokenService;
     private final JwtService jwtService;
     private final SpotifyService spotifyService;
+    private final UserMapper userMapper;
 
     @Transactional
     public JwtResponse handleUserRegistration(String userCode) {
@@ -61,7 +63,7 @@ public class UserService {
     }
 
     private UserDetail processSpotifyUser(User spotifyUser) {
-        UserDetail userDetail = mapSpotifyUserToEntity(spotifyUser);
+        UserDetail userDetail = userMapper.userDetailToUser(spotifyUser);
         Optional<UserDetail> existingUserOpt = userDetailRepository.findBySpotifyId(userDetail.getSpotifyId());
         if (existingUserOpt.isEmpty()) {
             userDetail.setCreatedAt(LocalDateTime.now());
@@ -81,25 +83,11 @@ public class UserService {
     public Optional<UserDetail> findBySpotifyId(String spotifyId) {
         return userDetailRepository.findBySpotifyId(spotifyId);
     }
-
-
-    private UserDetail mapSpotifyUserToEntity(User spotifyUser) {
-        return UserDetail.builder()
-                .spotifyId(spotifyUser.getId())
-                .email(spotifyUser.getEmail())
-                .country(String.valueOf(spotifyUser.getCountry()))
-                .displayName(spotifyUser.getDisplayName())
-                .externalSpotifyUrl(spotifyUser.getExternalUrls().get("spotify"))
-                .followersHref(spotifyUser.getFollowers().getHref())
-                .followersTotal(spotifyUser.getFollowers().getTotal())
-                .profileHref(spotifyUser.getHref())
-                .product(spotifyUser.getProduct()==null? "": spotifyUser.getProduct().getType())
-                .profileType(spotifyUser.getType().getType())
-                .profilePictureUrl(spotifyUser.getImages().length>0? spotifyUser.getImages()[0].getUrl():"")
-                .profileUri(spotifyUser.getUri())
-                .isDisplayNamePublic(true)
-                .isProfilePublic(true)
-                .build();
+    public void save(UserDetail user) {
+        userDetailRepository.save(user);
     }
+
+
+
 }
 

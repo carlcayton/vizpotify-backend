@@ -1,6 +1,5 @@
 package com.arian.vizpotifybackend.services.track;
 
-import com.arian.vizpotifybackend.mapper.ArtistMapper;
 import com.arian.vizpotifybackend.mapper.AudioFeatureMapper;
 import com.arian.vizpotifybackend.model.AudioFeature;
 import com.arian.vizpotifybackend.model.TrackDetail;

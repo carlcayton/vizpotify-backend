@@ -17,7 +17,6 @@ public class RelatedArtistService {
 
     private final ArtistCacheService artistCacheService;
     private final SpotifyService spotifyService;
-    private final ArtistDetailService artistDetailService;
     private final ArtistMapper artistMapper;
 
     public List<ArtistDTO> getRelatedArtists(String artistId){
@@ -36,13 +35,11 @@ public class RelatedArtistService {
         return relatedArtists;
     }
 
-    // update this method such that it uses the mapstruct mapper to convert the Artist to ArtistDTO
 
 
     private List<ArtistDTO> fetchFromSpotify(String artistId){
         Artist[] artists = spotifyService.getRelatedArtists(artistId);
-        return Arrays.stream(artists)
-                .map(artistMapper::artistToArtistDTOForRelatedArtists)
+        return Arrays.stream(artists).map(artistMapper::artistToArtistDTO)
                 .collect(Collectors.toList());
     }
 }

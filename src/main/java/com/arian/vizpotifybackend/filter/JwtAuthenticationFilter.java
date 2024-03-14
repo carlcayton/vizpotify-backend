@@ -19,7 +19,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Component
@@ -51,6 +50,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+
         try{
             String userSpotifyId = this.jwtService.extractSpotifyId(token);
             if(userSpotifyId!=null && SecurityContextHolder.getContext()
@@ -86,7 +86,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         return null;
     }
-    // write a method that uses the permissiblePaths set to check if the request path is allowed
     private boolean isPermissiblePath(String path) {
         return permissiblePaths.stream().anyMatch(path::startsWith);
     }

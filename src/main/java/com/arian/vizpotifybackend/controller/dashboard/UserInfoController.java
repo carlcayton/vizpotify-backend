@@ -1,7 +1,9 @@
 package com.arian.vizpotifybackend.controller.dashboard;
 
 import com.arian.vizpotifybackend.dto.*;
+import com.arian.vizpotifybackend.dto.analytics.AnalyticsDTO;
 import com.arian.vizpotifybackend.model.UserDetail;
+import com.arian.vizpotifybackend.services.analytics.AnalyticsService;
 import com.arian.vizpotifybackend.services.user.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,8 +25,6 @@ public class UserInfoController {
     private final AnalyticsService analyticsService;
     private final CommentService commentService;
 
-    // 
-
     @GetMapping("/{userId}/profileHeader")
     public ResponseEntity<ProfileHeaderDTO> getUserProfileHeader(@PathVariable String userId) {
         ProfileHeaderDTO profileHeaderDTO = profileHeaderService.getProfileHeaderDTO(userId);
@@ -45,8 +45,7 @@ public class UserInfoController {
 
     @GetMapping("/{userId}/analytics")
     public ResponseEntity<AnalyticsDTO> getUserAnalytics(@PathVariable String userId) {
-//        AnalyticsDTO analytics = analyticsService.getAnalyticsForUser(userId);
-        AnalyticsDTO analytics = null;
+        AnalyticsDTO analytics = analyticsService.getAnalyticsForUser(userId);
         return ResponseEntity.ok(analytics);
     }
 
@@ -54,7 +53,6 @@ public class UserInfoController {
     public ResponseEntity<CommentDTO> postComment(@PathVariable String userId,
                                                   @RequestBody CommentDTO commentDTO,
                                                   Authentication authentication) {
-        // Ensure the logged-in user is the one posting the comment
         UserDetail userDetail = (UserDetail) authentication.getPrincipal();
         commentDTO.setAuthorSpotifyId(userDetail.getSpotifyId());
         CommentDTO createdComment = commentService.createComment(commentDTO);

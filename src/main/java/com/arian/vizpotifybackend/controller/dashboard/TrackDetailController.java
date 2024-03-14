@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/track")
-@CrossOrigin(origins = "http://localhost:3000") // Adjust the origins as per your frontend deployment
+@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class TrackDetailController {
 

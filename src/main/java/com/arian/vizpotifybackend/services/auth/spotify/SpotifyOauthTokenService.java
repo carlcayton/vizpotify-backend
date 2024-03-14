@@ -3,7 +3,6 @@ package com.arian.vizpotifybackend.services.auth.spotify;
 
 import com.arian.vizpotifybackend.factory.SpotifyApiFactory;
 import com.arian.vizpotifybackend.model.SpotifyAuthToken;
-import com.arian.vizpotifybackend.model.UserDetail;
 import com.arian.vizpotifybackend.properties.SpotifyProperties;
 import com.arian.vizpotifybackend.repository.SpotifyAuthTokenRepository;
 import com.arian.vizpotifybackend.util.SpotifyUtil;
@@ -18,8 +17,6 @@ import se.michaelthelin.spotify.requests.authorization.authorization_code.Author
 
 import java.net.URI;
 import java.time.LocalDateTime;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 @Service
@@ -52,8 +49,6 @@ public class SpotifyOauthTokenService {
         }
     }
 
-
-
     public Object[] getApiInstance(String userCode) {
         SpotifyApi spotifyApi = spotifyApiFactory.createSpotifyApiForAuth();
         AuthorizationCodeRequest authorizationCodeRequest = spotifyApi.authorizationCode(userCode).build();
@@ -65,7 +60,7 @@ public class SpotifyOauthTokenService {
             return new Object[]{spotifyApi, authorizationCodeCredentials.getExpiresIn()};
         } catch (Exception ex) {
             System.out.println("Error: " + ex.getMessage());
-            return null;
+            return new Object[]{null, null};
         }
     }
 
