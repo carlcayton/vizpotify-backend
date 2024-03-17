@@ -8,10 +8,10 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @SpringBootApplication
 @EnableAsync
 @ConfigurationPropertiesScan
-public class VizpotifybackendApplication {
+public class VizpotifyBackendApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(VizpotifybackendApplication.class, args);
+		SpringApplication.run(VizpotifyBackendApplication.class, args);
 	}
 
 

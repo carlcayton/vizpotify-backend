@@ -1,30 +1,49 @@
 package com.arian.vizpotifybackend.services.redis;
 
+import com.arian.vizpotifybackend.dto.analytics.AnalyticsDTO;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
 public class AnalyticsCacheService {
 
-        private final RedisTemplate<String, String> myStringRedisTemplate;
+    private final RedisTemplate<String, String> myStringRedisTemplate;
+    private final RedisTemplate<String, Object> jsonRedisTemplate;
 
-        public String getProcessingKey(String userId) {
-            return "analytics_processing_" + userId;
-        }
+    private static final String USER_ANALYTICS_PROCESSING_KEY_PREFIX = "user:analytics:processing:";
+    private static final String USER_ANALYTICS_KEY_PREFIX = "user:analytics:";
 
-        public boolean isProcessing(String processingKey) {
-            return Optional.ofNullable(myStringRedisTemplate.opsForValue().get(processingKey)).isPresent();
-        }
+    public void markAnalyticsProcessing(String userId) {
+        String key = USER_ANALYTICS_PROCESSING_KEY_PREFIX + userId;
+        jsonRedisTemplate.opsForValue().set(key, Boolean.TRUE, 10, TimeUnit.MINUTES); // Mark as processing, adjust time as needed
+    }
 
-        public void setProcessing(String processingKey) {
-            myStringRedisTemplate.opsForValue().set(processingKey, "true");
-        }
+    public boolean isAnalyticsProcessing(String userId) {
+        String key = USER_ANALYTICS_PROCESSING_KEY_PREFIX + userId;
+        Boolean processing = (Boolean) jsonRedisTemplate.opsForValue().get(key);
+        return Boolean.TRUE.equals(processing);
+    }
 
-        public void clearProcessing(String processingKey) {
-            myStringRedisTemplate.delete(processingKey);
-        }
+    public void clearAnalyticsProcessing(String userId) {
+        String key = USER_ANALYTICS_PROCESSING_KEY_PREFIX + userId;
+        jsonRedisTemplate.delete(key);
+    }
+
+    public void cacheUserAnalytics(String userId, AnalyticsDTO analyticsDTO) {
+        String key = USER_ANALYTICS_KEY_PREFIX + userId;
+        jsonRedisTemplate.opsForValue().set(key, analyticsDTO, 1, TimeUnit.DAYS); // Cache for 1 day, adjust as needed
+    }
+
+    public Optional<AnalyticsDTO> getUserAnalyticsFromCache(String userId) {
+        String key = USER_ANALYTICS_KEY_PREFIX + userId;
+        AnalyticsDTO analyticsDTO = (AnalyticsDTO) jsonRedisTemplate.opsForValue().get(key);
+        return Optional.ofNullable(analyticsDTO);
+    }
+
 }

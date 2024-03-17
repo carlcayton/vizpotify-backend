@@ -2,6 +2,7 @@ package com.arian.vizpotifybackend.controller.dashboard;
 
 import com.arian.vizpotifybackend.dto.*;
 import com.arian.vizpotifybackend.dto.analytics.AnalyticsDTO;
+import com.arian.vizpotifybackend.dto.analytics.AnalyticsResponseDTO;
 import com.arian.vizpotifybackend.model.UserDetail;
 import com.arian.vizpotifybackend.services.analytics.AnalyticsService;
 import com.arian.vizpotifybackend.services.user.*;
@@ -43,10 +44,17 @@ public class UserInfoController {
         return ResponseEntity.ok(result);
     }
 
+
     @GetMapping("/{userId}/analytics")
-    public ResponseEntity<AnalyticsDTO> getUserAnalytics(@PathVariable String userId) {
-        AnalyticsDTO analytics = analyticsService.getAnalyticsForUser(userId);
-        return ResponseEntity.ok(analytics);
+    public ResponseEntity<AnalyticsResponseDTO> getUserAnalytics(@PathVariable String userId) {
+        AnalyticsDTO analyticsDTO = analyticsService.getAnalyticsForUser(userId);
+        boolean isProcessing = analyticsDTO == null;
+
+        if (isProcessing){
+            return ResponseEntity.ok(new AnalyticsResponseDTO(null, isProcessing));
+        }else {
+            return ResponseEntity.ok(new AnalyticsResponseDTO(analyticsDTO, isProcessing));
+        }
     }
 
     @PostMapping

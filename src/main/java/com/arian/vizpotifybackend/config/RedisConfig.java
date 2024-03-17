@@ -14,6 +14,7 @@ import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -43,28 +44,41 @@ public class RedisConfig {
         return template;
     }
 
-    @Bean
-    public RedisTemplate<String, Object> jsonRedisTemplate() {
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(connectionFactory());
+//    @Bean
+//    public RedisTemplate<String, Object> jsonRedisTemplate() {
+//        RedisTemplate<String, Object> template = new RedisTemplate<>();
+//        template.setConnectionFactory(connectionFactory());
+//
+//        Jackson2JsonRedisSerializer<Object> jsonSerializer = new Jackson2JsonRedisSerializer<>(Object.class);
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+//
+//        PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
+//                .allowIfBaseType(Object.class)
+//                .build();
+//
+//        objectMapper.activateDefaultTyping(ptv, ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
+//
+//        jsonSerializer.setObjectMapper(objectMapper);
+//
+//        template.setKeySerializer(new StringRedisSerializer());
+//        template.setValueSerializer(jsonSerializer);
+//        template.afterPropertiesSet();
+//        return template;
+//    }
+@Bean
+public RedisTemplate<String, Object> jsonRedisTemplate() {
+    RedisTemplate<String, Object> template = new RedisTemplate<>();
+    template.setConnectionFactory(connectionFactory());
 
-        Jackson2JsonRedisSerializer<Object> jsonSerializer = new Jackson2JsonRedisSerializer<>(Object.class);
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+    GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer();
 
-        PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
-                .allowIfBaseType(Object.class)
-                .build();
+    template.setKeySerializer(new StringRedisSerializer());
+    template.setValueSerializer(jsonSerializer);
+    template.afterPropertiesSet();
+    return template;
+}
 
-        objectMapper.activateDefaultTyping(ptv, ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
-
-        jsonSerializer.setObjectMapper(objectMapper);
-
-        template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(jsonSerializer);
-        template.afterPropertiesSet();
-        return template;
-    }
 
 }
 

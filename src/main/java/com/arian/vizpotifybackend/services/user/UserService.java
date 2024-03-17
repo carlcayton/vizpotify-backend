@@ -86,8 +86,5 @@ public class UserService {
     public void save(UserDetail user) {
         userDetailRepository.save(user);
     }
-
-
-
 }
 
