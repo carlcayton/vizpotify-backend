@@ -3,13 +3,10 @@ package com.arian.vizpotifybackend.controller.dashboard;
 import com.arian.vizpotifybackend.dto.*;
 import com.arian.vizpotifybackend.dto.analytics.AnalyticsDTO;
 import com.arian.vizpotifybackend.dto.analytics.AnalyticsResponseDTO;
-import com.arian.vizpotifybackend.model.UserDetail;
 import com.arian.vizpotifybackend.services.analytics.AnalyticsService;
 import com.arian.vizpotifybackend.services.user.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -57,20 +54,5 @@ public class UserInfoController {
         }
     }
 
-    @PostMapping
-    public ResponseEntity<CommentDTO> postComment(@PathVariable String userId,
-                                                  @RequestBody CommentDTO commentDTO,
-                                                  Authentication authentication) {
-        UserDetail userDetail = (UserDetail) authentication.getPrincipal();
-        commentDTO.setAuthorSpotifyId(userDetail.getSpotifyId());
-        CommentDTO createdComment = commentService.createComment(commentDTO);
-        return new ResponseEntity<>(createdComment, HttpStatus.CREATED);
-    }
-
-    @GetMapping("/{userId}/comments")
-    public ResponseEntity<List<CommentDTO>> getComments(@PathVariable String userId) {
-        List<CommentDTO> comments = commentService.getCommentsByDashboardUserId(userId);
-        return ResponseEntity.ok(comments);
-    }
 
 }

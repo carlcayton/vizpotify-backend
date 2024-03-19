@@ -26,7 +26,6 @@ public class UserTopArtistService {
     private final UserTopArtistRepository userTopArtistRepository;
     private final SpotifyService spotifyService;
     private final ArtistDetailService artistDetailService;
-    private final ArtistCacheService artistCacheService;
     private final ArtistMapper artistMapper;
 
     public Map<String, List<ArtistDTO>> getUserTopArtists(String userSpotifyId) {

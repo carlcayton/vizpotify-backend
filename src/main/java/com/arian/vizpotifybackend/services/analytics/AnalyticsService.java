@@ -77,8 +77,6 @@ public class AnalyticsService {
         log.info("Retrieving fresh analytics for user: {}", userId);
         try {
             AnalyticsDTO analyticsData = requestAnalyticsFromExternalService(userId, false);
-            System.out.println(analyticsData);
-            //create a logger for analyticsData
 
             analyticsCacheService.cacheUserAnalytics(userId, analyticsData);
             userDetailOpt.ifPresent(userDetail -> userService.setAnalyticsAvailable(userId, true));
@@ -111,13 +109,11 @@ public class AnalyticsService {
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 
         try {
-//            ResponseEntity<AnalyticsDTO> response = restTemplate.postForEntity(url, request, AnalyticsDTO.class);
             ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
             AnalyticsDTO analyticsDTO = new ObjectMapper().readValue(response.getBody(), AnalyticsDTO.class);
             if (analyticsDTO.equals(null)){
                 throw new RuntimeException("Error calling external service");
             }
-            // write a logger for the response
             return analyticsDTO;
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             log.error("API call error: Status code {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
