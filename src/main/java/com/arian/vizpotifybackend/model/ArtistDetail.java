@@ -35,7 +35,7 @@ public class ArtistDetail {
     @Column(name = "image_url")
     private String imageUrl;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "artist_genre", joinColumns = @JoinColumn(name = "artist_id"))
     @Column(name = "genre")
     private List<String> genres;
