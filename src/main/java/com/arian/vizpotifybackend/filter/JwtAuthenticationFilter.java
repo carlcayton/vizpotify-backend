@@ -41,10 +41,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         response.setHeader("Access-Control-Allow-Credentials", "true");
 
-        if(isPermissiblePath(request.getRequestURI())){
-            filterChain.doFilter(request, response);
-            return;
-        }
+//        if(isPermissiblePath(request.getRequestURI())){
+//            filterChain.doFilter(request, response);
+//            return;
+//        }
 
         if (token == null) {
             filterChain.doFilter(request, response);
