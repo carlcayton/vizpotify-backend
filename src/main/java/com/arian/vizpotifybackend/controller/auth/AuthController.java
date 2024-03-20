@@ -2,10 +2,12 @@ package com.arian.vizpotifybackend.controller.auth;
 
 import com.arian.vizpotifybackend.model.JwtResponse;
 import com.arian.vizpotifybackend.model.UserDetail;
+import com.arian.vizpotifybackend.services.auth.AuthService;
 import com.arian.vizpotifybackend.services.auth.jwt.JwtService;
 import com.arian.vizpotifybackend.services.auth.spotify.SpotifyOauthTokenService;
 import com.arian.vizpotifybackend.services.user.UserService;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,8 +26,8 @@ public class AuthController {
 
 
     private final SpotifyOauthTokenService spotifyOauthTokenService;
-    private final JwtService jwtService;
     private final UserService userService;
+    private final AuthService authService;
 
     @GetMapping("/login")
     public ResponseEntity<String> getUriForLogin() {
@@ -57,14 +59,8 @@ public class AuthController {
     }
 
     @GetMapping("/status")
-    public ResponseEntity<Object> isAuthenticated(Authentication auth) {
-        if (auth != null && auth.isAuthenticated()) {
-            UserDetail userDetail = (UserDetail) auth.getPrincipal();
-            String spotifyId = userDetail.getSpotifyId();
-            String userDisplayName = userDetail.getDisplayName();
-            String profilePictureUrl = userDetail.getProfilePictureUrl();
-            return ResponseEntity.ok(Map.of("isAuthenticated", true, "spotifyId", spotifyId, "userDisplayName", userDisplayName, "profilePictureUrl", profilePictureUrl));
-        }
-        return ResponseEntity.ok(Map.of("isAuthenticated", false));
+    public ResponseEntity<Object> isAuthenticated(HttpServletRequest request) {
+        Map<String, Object> authStatus = authService.getUserAuthenticationStatus(request);
+        return ResponseEntity.ok(authStatus);
     }
 }

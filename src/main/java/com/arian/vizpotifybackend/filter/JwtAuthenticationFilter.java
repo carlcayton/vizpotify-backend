@@ -1,6 +1,7 @@
 package com.arian.vizpotifybackend.filter;
 
 import com.arian.vizpotifybackend.model.UserDetail;
+import com.arian.vizpotifybackend.services.auth.AuthService;
 import com.arian.vizpotifybackend.services.auth.jwt.JwtService;
 import com.arian.vizpotifybackend.services.user.UserService;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -28,6 +29,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserService userService;
+    private final AuthService authService;
     private static final Set<String> permissiblePaths = new HashSet<>();
 
     static {
@@ -37,14 +39,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String token = extractJwtFromCookie(request);
+        String token = authService.extractJwtFromCookie(request);
 
         response.setHeader("Access-Control-Allow-Credentials", "true");
 
-//        if(isPermissiblePath(request.getRequestURI())){
-//            filterChain.doFilter(request, response);
-//            return;
-//        }
+        if(isPermissiblePath(request.getRequestURI())  && !"POST".equals(request.getMethod())){
+        filterChain.doFilter(request, response);
+        return;
+    }
 
         if (token == null) {
             filterChain.doFilter(request, response);
@@ -75,17 +77,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         filterChain.doFilter(request, response);
     }
-    private String extractJwtFromCookie(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("JWT_TOKEN".equals(cookie.getName())) {
-                    return cookie.getValue();
-                }
-            }
-        }
-        return null;
-    }
+
     private boolean isPermissiblePath(String path) {
         return permissiblePaths.stream().anyMatch(path::startsWith);
     }
