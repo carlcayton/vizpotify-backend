@@ -101,7 +101,7 @@ public class AnalyticsService {
     }
 
     public AnalyticsDTO requestAnalyticsFromExternalService(String userId, boolean analyticsAvailable) {
-        String url = awsLambdaProperties.endpoint() + userId;
+        String url = awsLambdaProperties.analyticsEndpoint() + userId;
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         Map<String, Object> requestBody = new HashMap<>();

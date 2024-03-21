@@ -17,6 +17,7 @@ logging:
   level:
     root: INFO
     org.hibernate.bytecode.internal.bytebuddy: INFO
+    org.springframework.security: DEBUG
 
 
 
@@ -28,5 +29,6 @@ cloud:
       accessKey: test
       secretKey: test
       region: us-east-1
-      endpoint: http://localhost:5000/consolidated-analytics/
+      analyticsEndpoint: http://localhost:5000/consolidated-analytics/
+      comparisonEndpoint: http://localhost:5000/comparision/
 
