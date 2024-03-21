@@ -20,10 +20,10 @@ public class CommentService {
     private final CommentMapper commentMapper;
     private final UserService userService;
 
-    public CommentDTO createComment(CommentDTO commentDTO) {
+    public CommentDTO createComment(CommentDTO commentDTO, UserDetail userDetail) {
         Comment comment = Comment.builder()
-                .userName(commentDTO.getUserName())
-                .authorSpotifyId(commentDTO.getAuthorSpotifyId())
+                .userName(userDetail.getDisplayName())
+                .authorSpotifyId(userDetail.getSpotifyId())
                 .dashboardSpotifyId(commentDTO.getDashboardSpotifyId())
                 .content(commentDTO.getContent())
                 .createdAt(LocalDateTime.now())

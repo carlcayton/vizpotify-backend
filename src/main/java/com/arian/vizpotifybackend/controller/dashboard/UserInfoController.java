@@ -21,7 +21,6 @@ public class UserInfoController {
     private final UserTopArtistService userTopArtistService;
     private final UserTopTrackService userTopTrackService;
     private final AnalyticsService analyticsService;
-    private final CommentService commentService;
 
     @GetMapping("/{userId}/profileHeader")
     public ResponseEntity<ProfileHeaderDTO> getUserProfileHeader(@PathVariable String userId) {
