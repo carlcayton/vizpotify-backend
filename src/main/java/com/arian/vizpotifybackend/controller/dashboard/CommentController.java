@@ -4,6 +4,7 @@ import com.arian.vizpotifybackend.dto.CommentDTO;
 import com.arian.vizpotifybackend.model.UserDetail;
 import com.arian.vizpotifybackend.services.user.CommentService;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -12,11 +13,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/users")
-// inject a property value instead for the origin $frontendURl
-
-
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 @RequiredArgsConstructor
+//@CrossOrigin(origins = "http://localhost:3000")
 public class CommentController {
 
     private final CommentService commentService;

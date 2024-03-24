@@ -14,7 +14,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/users")
-@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class UserInfoController {
     private final ProfileHeaderService profileHeaderService;
@@ -40,7 +39,6 @@ public class UserInfoController {
         return ResponseEntity.ok(result);
     }
 
-
     @GetMapping("/{userId}/analytics")
     public ResponseEntity<AnalyticsResponseDTO> getUserAnalytics(@PathVariable String userId) {
         AnalyticsDTO analyticsDTO = analyticsService.getAnalyticsForUser(userId);
@@ -52,6 +50,4 @@ public class UserInfoController {
             return ResponseEntity.ok(new AnalyticsResponseDTO(analyticsDTO, isProcessing));
         }
     }
-
-
 }

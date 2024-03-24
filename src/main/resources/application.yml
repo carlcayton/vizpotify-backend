@@ -66,8 +66,7 @@ jwt:
   secretKey: ${JWT_SECRET_KEY}
   validityInMs: 36000000
 
-misc:
-  frontendUrl: ${FRONTEND_URL}
+frontendUrl: ${FRONTEND_URL}
 
 server:
   port: 8081

@@ -43,7 +43,6 @@ public class AnalyticsService {
     public AnalyticsDTO getAnalyticsForUser(String userId) {
         log.info("Getting analytics for user: {}", userId);
         Optional<UserDetail> userDetailOpt = userService.findBySpotifyId(userId);
-        boolean analyticsAvailable = userDetailOpt.map(UserDetail::isAnalyticsAvailable).orElse(false);
 
         Optional<AnalyticsDTO> cachedAnalytics = analyticsCacheService.getUserAnalyticsFromCache(userId);
 

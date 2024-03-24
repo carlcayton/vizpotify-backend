@@ -12,7 +12,6 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1/artist")
-@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class ArtistDetailController {
 

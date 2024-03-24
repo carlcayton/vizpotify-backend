@@ -41,6 +41,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String token = authService.extractJwtFromCookie(request);
 
+        // create a descript print for the token
+
         response.setHeader("Access-Control-Allow-Credentials", "true");
 
         if(isPermissiblePath(request.getRequestURI())  && !"POST".equals(request.getMethod())){

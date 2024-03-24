@@ -1,8 +1,18 @@
 package com.arian.vizpotifybackend.exception;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
-public class SpotifyIdNotFoundException extends UserDetailException {
+@ResponseStatus(HttpStatus.NOT_FOUND)
+public class SpotifyIdNotFoundException extends RuntimeException {
+    private String spotifyId;
+
     public SpotifyIdNotFoundException(String spotifyId) {
-        super("No UserDetail found with the given spotifyId: " + spotifyId);
+        super("User not found with Spotify ID: " + spotifyId);
+        this.spotifyId = spotifyId;
+    }
+
+    public String getSpotifyId() {
+        return spotifyId;
     }
 }
