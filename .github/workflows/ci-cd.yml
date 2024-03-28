@@ -26,12 +26,18 @@ jobs:
           distribution: 'adopt'
 
       - name: Build with Maven
+        env:
+          SPRING_PROFILES_ACTIVE: test
         run: mvn clean package
 
       - name: Run unit tests
+        env:
+          SPRING_PROFILES_ACTIVE: test
         run: mvn test
 
       - name: Run integration tests
+        env:
+          SPRING_PROFILES_ACTIVE: test
         run: mvn verify -P integration-tests
 
       - name: Configure AWS credentials

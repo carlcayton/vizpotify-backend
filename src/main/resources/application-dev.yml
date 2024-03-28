@@ -5,7 +5,7 @@ spring:
     password: ${DEV_SPRING_DATASOURCE_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: update  # auto-update schema in dev
+      ddl-auto: update
     show-sql: true
   devtools:
     restart:
@@ -19,8 +19,6 @@ logging:
     org.hibernate.bytecode.internal.bytebuddy: INFO
     org.springframework.security: DEBUG
 
-
-
 cloud:
   function:
     aws:
@@ -31,4 +29,3 @@ cloud:
       region: us-east-1
       analyticsEndpoint: http://localhost:5000/consolidated-analytics/
       comparisonEndpoint: http://localhost:5000/compare-analytics/
-

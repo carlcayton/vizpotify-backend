@@ -1,5 +1,15 @@
-redis:
-  port: 6379
 spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
   main:
     allow-bean-definition-overriding: true
+
+redis:
+  host: localhost
+  port: 6379
