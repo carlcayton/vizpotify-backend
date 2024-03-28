@@ -1,5 +1,6 @@
 package com.arian.vizpotifybackend.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,10 +27,14 @@ public class TrackDTO {
 
     private String albumName;
 
+    @JsonProperty("album_image_url")
+    private String albumImageUrlExternal;
     private String albumImageUrl;
 
     private int popularity;
 
+    @JsonProperty("release_date")
+    private String releaseDateExternal;
     private Date releaseDate;
 
     private Map<String, Double> audioFeatures;

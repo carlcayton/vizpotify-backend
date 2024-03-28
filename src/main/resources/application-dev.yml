@@ -30,5 +30,5 @@ cloud:
       secretKey: test
       region: us-east-1
       analyticsEndpoint: http://localhost:5000/consolidated-analytics/
-      comparisonEndpoint: http://localhost:5000/comparision/
+      comparisonEndpoint: http://localhost:5000/compare-analytics/
 

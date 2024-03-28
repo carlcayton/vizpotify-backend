@@ -42,7 +42,7 @@ public class CommentService {
                 .collect(Collectors.toList());
     }
 
-    protected CommentDTO convertAndEnrichComment(Comment comment) {
+    public CommentDTO convertAndEnrichComment(Comment comment) {
         CommentDTO dto = commentMapper.toDTO(comment);
         enrichDTOWithAuthorImage(comment, dto);
         return dto;
