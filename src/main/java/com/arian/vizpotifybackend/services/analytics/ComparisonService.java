@@ -1,9 +1,11 @@
 package com.arian.vizpotifybackend.services.analytics;
 
-import com.arian.vizpotifybackend.dto.analytics.ComparisonDTO;
+import com.arian.vizpotifybackend.dto.analytics.AnalyticsDTO;
+import com.arian.vizpotifybackend.dto.comparison.ComparisonDTO;
 import com.arian.vizpotifybackend.properties.AWSLambdaProperties;
 import com.arian.vizpotifybackend.repository.ArtistDetailRepository;
 import com.arian.vizpotifybackend.repository.TrackDetailRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
@@ -19,8 +21,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ComparisonService {
 
-    private final ArtistDetailRepository artistDetailRepository;
-    private final TrackDetailRepository trackDetailRepository;
     private final RestTemplate restTemplate;
     private final AWSLambdaProperties awsLambdaProperties;
 
@@ -34,13 +34,13 @@ public class ComparisonService {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("user1_spotify_id ", user1_spotify_id);
-        requestBody.put("user2_spotify_id ", user2_spotify_id);
+        requestBody.put("user1_spotify_id", user1_spotify_id);
+        requestBody.put("user2_spotify_id", user2_spotify_id);
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
         try {
             ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-            System.out.println(response);
-            return new ComparisonDTO();
+            ComparisonDTO comparisonDTO= new ObjectMapper().readValue(response.getBody(), ComparisonDTO.class);
+            return comparisonDTO;
         } catch (Exception e) {
             return null;
         }
