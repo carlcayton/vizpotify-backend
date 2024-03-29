@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+
+  vizpotify-db:
+    image: postgres:13
+    container_name: vizpotify-db-container
+    ports:
+      - "5432:5432"
+    env_file:
+      - vizpotify-db/.env
+    # volumes:
+    #   - ./vizpotify-db/backend-init.sql:/docker-entrypoint-initdb.d/backend-init.sql
+    networks:
+      - vizpotify-network
+    restart: always
+
+
+  vizpotify-redis:
+    image: redis:latest
+    container_name: vizpotify-redis-container
+    ports:
+      - "6379:6379"
+    networks:
+      - vizpotify-network
+    restart: always
+
+networks:
+  vizpotify-network:
+    driver: bridge

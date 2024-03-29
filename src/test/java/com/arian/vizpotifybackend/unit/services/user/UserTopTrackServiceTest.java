@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import se.michaelthelin.spotify.model_objects.specification.Paging;
 import se.michaelthelin.spotify.model_objects.specification.Track;
@@ -54,7 +55,6 @@ public class UserTopTrackServiceTest {
 
         Paging<Track> trackPaging = mock(Paging.class);
         Track[] tracks = new Track[]{mock(Track.class)};
-        when(trackPaging.getItems()).thenReturn(tracks);
         userTopTracksForAllTimeRange.put(TimeRange.SHORT_TERM, trackPaging);
 
         userTopTrackList = new ArrayList<>();
@@ -80,6 +80,12 @@ public class UserTopTrackServiceTest {
     @Test
     void getUserTopItems_shouldFetchFromSpotifyAndSave_whenUserDoesNotExist() {
         when(userTopTrackRepository.existsByUserSpotifyId(userId)).thenReturn(false);
+
+        Paging<Track> trackPaging = mock(Paging.class);
+        Track[] tracks = new Track[]{mock(Track.class)};
+        when(trackPaging.getItems()).thenReturn(tracks);
+        userTopTracksForAllTimeRange.put(TimeRange.SHORT_TERM, trackPaging);
+
         when(spotifyService.getUserTopTracksForAllTimeRange(userId)).thenReturn(userTopTracksForAllTimeRange);
         when(trackDetailService.extractUniqueTracks(userTopTracksForAllTimeRange)).thenReturn(new HashSet<>());
         when(trackMapper.trackToTrackDTO(any(Track.class))).thenReturn(new TrackDTO());
