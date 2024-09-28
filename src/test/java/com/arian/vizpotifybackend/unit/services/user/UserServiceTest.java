@@ -1,15 +1,14 @@
 package com.arian.vizpotifybackend.unit.services.user;
 
-import com.arian.vizpotifybackend.exception.SpotifyIdNotFoundException;
-import com.arian.vizpotifybackend.mapper.UserMapper;
-import com.arian.vizpotifybackend.model.JwtResponse;
-import com.arian.vizpotifybackend.model.SpotifyAuthToken;
-import com.arian.vizpotifybackend.model.UserDetail;
-import com.arian.vizpotifybackend.repository.UserDetailRepository;
-import com.arian.vizpotifybackend.services.auth.jwt.JwtService;
-import com.arian.vizpotifybackend.services.auth.spotify.SpotifyOauthTokenService;
-import com.arian.vizpotifybackend.services.spotify.SpotifyService;
-import com.arian.vizpotifybackend.services.user.UserService;
+import com.arian.vizpotifybackend.auth.JwtService;
+import com.arian.vizpotifybackend.auth.SpotifyOauthTokenService;
+import com.arian.vizpotifybackend.common.SpotifyService;
+import com.arian.vizpotifybackend.common.exception.SpotifyIdNotFoundException;
+import com.arian.vizpotifybackend.common.mapper.UserMapper;
+import com.arian.vizpotifybackend.auth.SpotifyAuthToken;
+import com.arian.vizpotifybackend.user.core.UserDetail;
+import com.arian.vizpotifybackend.user.core.UserDetailRepository;
+import com.arian.vizpotifybackend.user.core.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import se.michaelthelin.spotify.SpotifyApi;
 import se.michaelthelin.spotify.model_objects.specification.User;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;

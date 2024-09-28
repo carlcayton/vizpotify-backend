@@ -1,21 +1,20 @@
 package com.arian.vizpotifybackend.unit.services.user;
 
-import com.arian.vizpotifybackend.dto.TrackDTO;
-import com.arian.vizpotifybackend.enums.TimeRange;
-import com.arian.vizpotifybackend.mapper.TrackMapper;
-import com.arian.vizpotifybackend.model.TrackDetail;
-import com.arian.vizpotifybackend.model.UserTopTrack;
-import com.arian.vizpotifybackend.repository.UserTopTrackRepository;
-import com.arian.vizpotifybackend.services.spotify.SpotifyService;
-import com.arian.vizpotifybackend.services.track.TrackDetailService;
-import com.arian.vizpotifybackend.services.user.UserTopTrackService;
+import com.arian.vizpotifybackend.common.SpotifyService;
+import com.arian.vizpotifybackend.common.TimeRange;
+import com.arian.vizpotifybackend.common.mapper.TrackMapper;
+import com.arian.vizpotifybackend.track.TrackDto;
+import com.arian.vizpotifybackend.track.TrackDetail;
+import com.arian.vizpotifybackend.track.TrackDetailService;
+import com.arian.vizpotifybackend.user.topitems.track.UserTopTrack;
+import com.arian.vizpotifybackend.user.topitems.track.UserTopTrackRepository;
+import com.arian.vizpotifybackend.user.topitems.track.UserTopTrackService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import se.michaelthelin.spotify.model_objects.specification.Paging;
 import se.michaelthelin.spotify.model_objects.specification.Track;
@@ -67,12 +66,12 @@ public class UserTopTrackServiceTest {
         when(userTopTrackRepository.findByUserSpotifyId(userId)).thenReturn(userTopTrackList);
         when(trackDetailService.getTracksByIds(anyList())).thenReturn(trackDetailList);
 
-        Map<String, List<TrackDTO>> result = userTopTrackService.getUserTopItems(userId);
+        Map<String, List<TrackDto>> result = userTopTrackService.getUserTopItems(userId);
 
         verify(userTopTrackRepository, times(1)).existsByUserSpotifyId(userId);
         verify(userTopTrackRepository, times(1)).findByUserSpotifyId(userId);
         verify(trackDetailService, times(1)).getTracksByIds(anyList());
-        verify(trackMapper, times(userTopTrackList.size())).trackDetailToTrackDTO(any(TrackDetail.class));
+        verify(trackMapper, times(userTopTrackList.size())).trackDetailToTrackDto(any(TrackDetail.class));
 
         assertEquals(userTopTrackList.size(), result.values().stream().mapToInt(List::size).sum());
     }
@@ -88,9 +87,9 @@ public class UserTopTrackServiceTest {
 
         when(spotifyService.getUserTopTracksForAllTimeRange(userId)).thenReturn(userTopTracksForAllTimeRange);
         when(trackDetailService.extractUniqueTracks(userTopTracksForAllTimeRange)).thenReturn(new HashSet<>());
-        when(trackMapper.trackToTrackDTO(any(Track.class))).thenReturn(new TrackDTO());
+        when(trackMapper.trackToTrackDto(any(Track.class))).thenReturn(new TrackDto());
 
-        Map<String, List<TrackDTO>> result = userTopTrackService.getUserTopItems(userId);
+        Map<String, List<TrackDto>> result = userTopTrackService.getUserTopItems(userId);
 
         verify(userTopTrackRepository, times(1)).existsByUserSpotifyId(userId);
         verify(spotifyService, times(1)).getUserTopTracksForAllTimeRange(userId);

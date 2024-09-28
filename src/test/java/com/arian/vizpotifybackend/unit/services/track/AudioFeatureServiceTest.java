@@ -1,12 +1,12 @@
 package com.arian.vizpotifybackend.unit.services.track;
 
-import com.arian.vizpotifybackend.mapper.AudioFeatureMapper;
-import com.arian.vizpotifybackend.model.AudioFeature;
-import com.arian.vizpotifybackend.repository.AudioFeatureRepository;
-import com.arian.vizpotifybackend.repository.TrackDetailRepository;
-import com.arian.vizpotifybackend.services.redis.TrackCacheService;
-import com.arian.vizpotifybackend.services.spotify.SpotifyService;
-import com.arian.vizpotifybackend.services.track.AudioFeatureService;
+import com.arian.vizpotifybackend.cache.TrackCacheService;
+import com.arian.vizpotifybackend.common.SpotifyService;
+import com.arian.vizpotifybackend.common.mapper.AudioFeatureMapper;
+import com.arian.vizpotifybackend.track.AudioFeature;
+import com.arian.vizpotifybackend.track.AudioFeatureRepository;
+import com.arian.vizpotifybackend.track.AudioFeatureService;
+import com.arian.vizpotifybackend.track.TrackDetailRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

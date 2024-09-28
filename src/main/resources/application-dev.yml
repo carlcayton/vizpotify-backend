@@ -3,10 +3,21 @@ spring:
     url: ${DEV_SPRING_DATASOURCE_URL}
     username: ${DEV_SPRING_DATASOURCE_USERNAME}
     password: ${DEV_SPRING_DATASOURCE_PASSWORD}
+  output:
+    ansi:
+      enabled: always
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
+    properties:
+      javax:
+        persistence:
+          schema-generation:
+            create-source: metadata
+            scripts:
+              action: create
+              create-target: create.sql
   devtools:
     restart:
       enabled: true
@@ -15,17 +26,9 @@ spring:
 
 logging:
   level:
-    root: INFO
-    org.hibernate.bytecode.internal.bytebuddy: INFO
-    org.springframework.security: DEBUG
+    root: ERROR
+    org.hibernate: ERROR
+    org.springframework: ERROR
+  config: classpath:logback-spring.xml
 
-cloud:
-  function:
-    aws:
-      stack:
-        url: http://localhost:5000
-      accessKey: test
-      secretKey: test
-      region: us-east-1
-      analyticsEndpoint: http://localhost:5000/consolidated-analytics/
-      comparisonEndpoint: http://localhost:5000/compare-analytics/
+

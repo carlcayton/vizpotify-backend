@@ -1,10 +1,10 @@
 package com.arian.vizpotifybackend.unit.services.artist;
 
-import com.arian.vizpotifybackend.dto.ArtistDTO;
-import com.arian.vizpotifybackend.mapper.ArtistMapper;
-import com.arian.vizpotifybackend.services.artist.RelatedArtistService;
-import com.arian.vizpotifybackend.services.redis.ArtistCacheService;
-import com.arian.vizpotifybackend.services.spotify.SpotifyService;
+import com.arian.vizpotifybackend.artist.ArtistDto;
+import com.arian.vizpotifybackend.artist.RelatedArtistService;
+import com.arian.vizpotifybackend.cache.ArtistCacheService;
+import com.arian.vizpotifybackend.common.SpotifyService;
+import com.arian.vizpotifybackend.common.mapper.ArtistMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,21 +36,21 @@ public class RelatedArtistServiceTest {
     private RelatedArtistService relatedArtistService;
 
     private String artistId;
-    private List<ArtistDTO> relatedArtists;
+    private List<ArtistDto> relatedArtists;
 
     @BeforeEach
     void setUp() {
         artistId = "artist123";
         relatedArtists = new ArrayList<>();
-        relatedArtists.add(new ArtistDTO());
-        relatedArtists.add(new ArtistDTO());
+        relatedArtists.add(new ArtistDto());
+        relatedArtists.add(new ArtistDto());
     }
 
     @Test
     void getRelatedArtists_shouldReturnCachedRelatedArtists_whenAvailable() {
         when(artistCacheService.getRelatedArtistsFromCache(artistId)).thenReturn(Optional.of(relatedArtists));
 
-        List<ArtistDTO> result = relatedArtistService.getRelatedArtists(artistId);
+        List<ArtistDto> result = relatedArtistService.getRelatedArtists(artistId);
 
         assertEquals(relatedArtists, result);
         verify(artistCacheService).getRelatedArtistsFromCache(artistId);
@@ -65,13 +65,13 @@ public class RelatedArtistServiceTest {
         artists[1] = new Artist.Builder().build();
 
         when(spotifyService.getRelatedArtists(artistId)).thenReturn(artists);
-        when(artistMapper.artistToArtistDTO(any(Artist.class))).thenReturn(new ArtistDTO());
+        when(artistMapper.artistToArtistDto(any(Artist.class))).thenReturn(new ArtistDto());
 
-        List<ArtistDTO> result = relatedArtistService.fetchFromSpotifyAndStoreRelatedArtists(artistId);
+        List<ArtistDto> result = relatedArtistService.fetchFromSpotifyAndStoreRelatedArtists(artistId);
 
         assertEquals(2, result.size());
         verify(spotifyService).getRelatedArtists(artistId);
-        verify(artistMapper, times(2)).artistToArtistDTO(any(Artist.class));
+        verify(artistMapper, times(2)).artistToArtistDto(any(Artist.class));
         verify(artistCacheService).cacheRelatedArtists(eq(artistId), eq(result));
     }
 }

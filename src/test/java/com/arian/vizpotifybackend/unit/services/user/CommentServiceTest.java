@@ -1,12 +1,12 @@
 package com.arian.vizpotifybackend.unit.services.user;
 
-import com.arian.vizpotifybackend.dto.CommentDTO;
-import com.arian.vizpotifybackend.mapper.CommentMapper;
-import com.arian.vizpotifybackend.model.Comment;
-import com.arian.vizpotifybackend.model.UserDetail;
-import com.arian.vizpotifybackend.repository.CommentRepository;
-import com.arian.vizpotifybackend.services.user.CommentService;
-import com.arian.vizpotifybackend.services.user.UserService;
+import com.arian.vizpotifybackend.comment.Comment;
+import com.arian.vizpotifybackend.comment.CommentDto;
+import com.arian.vizpotifybackend.comment.CommentRepository;
+import com.arian.vizpotifybackend.comment.CommentService;
+import com.arian.vizpotifybackend.common.mapper.CommentMapper;
+import com.arian.vizpotifybackend.user.core.UserDetail;
+import com.arian.vizpotifybackend.user.core.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +42,7 @@ public class CommentServiceTest {
     private ArgumentCaptor<Comment> commentCaptor;
 
     private UserDetail userDetail;
-    private CommentDTO commentDTO;
+    private CommentDto commentDto;
     private Comment comment;
 
     @BeforeEach
@@ -53,7 +53,7 @@ public class CommentServiceTest {
                 .profilePictureUrl("profile_url")
                 .build();
 
-        commentDTO = CommentDTO.builder()
+        commentDto = CommentDto.builder()
                 .dashboardSpotifyId("dashboard123")
                 .content("Test comment")
                 .build();
@@ -70,53 +70,53 @@ public class CommentServiceTest {
     }
 
     @Test
-    void createComment_shouldSaveAndReturnCommentDTO() {
-        when(commentMapper.toDTO(any(Comment.class))).thenReturn(commentDTO);
+    void createComment_shouldSaveAndReturnCommentDto() {
+        when(commentMapper.toDto(any(Comment.class))).thenReturn(commentDto);
         when(commentRepository.save(any(Comment.class))).thenReturn(comment);
 
-        CommentDTO result = commentService.createComment(commentDTO, userDetail);
+        CommentDto result = commentService.createComment(commentDto, userDetail);
 
         verify(commentRepository).save(commentCaptor.capture());
         Comment capturedComment = commentCaptor.getValue();
         assertEquals(userDetail.getDisplayName(), capturedComment.getUserName());
         assertEquals(userDetail.getSpotifyId(), capturedComment.getAuthorSpotifyId());
-        assertEquals(commentDTO.getDashboardSpotifyId(), capturedComment.getDashboardSpotifyId());
-        assertEquals(commentDTO.getContent(), capturedComment.getContent());
+        assertEquals(commentDto.getDashboardSpotifyId(), capturedComment.getDashboardSpotifyId());
+        assertEquals(commentDto.getContent(), capturedComment.getContent());
         assertEquals(0, capturedComment.getLikeCount());
 
-        assertEquals(commentDTO, result);
+        assertEquals(commentDto, result);
     }
 
     @Test
-    void getCommentsByDashboardUserId_shouldReturnListOfCommentDTOs() {
+    void getCommentsByDashboardUserId_shouldReturnListOfCommentDtos() {
         List<Comment> comments = new ArrayList<>();
         comments.add(comment);
         when(commentRepository.findByDashboardSpotifyId("dashboard123")).thenReturn(comments);
-        when(commentMapper.toDTO(comment)).thenReturn(commentDTO);
+        when(commentMapper.toDto(comment)).thenReturn(commentDto);
         when(userService.loadUserDetailBySpotifyId("user123")).thenReturn(userDetail);
 
-        List<CommentDTO> result = commentService.getCommentsByDashboardUserId("dashboard123");
+        List<CommentDto> result = commentService.getCommentsByDashboardUserId("dashboard123");
 
         verify(commentRepository).findByDashboardSpotifyId("dashboard123");
-        verify(commentMapper).toDTO(comment);
+        verify(commentMapper).toDto(comment);
         verify(userService).loadUserDetailBySpotifyId("user123");
 
         assertEquals(1, result.size());
-        assertEquals(commentDTO, result.get(0));
+        assertEquals(commentDto, result.get(0));
         assertEquals(userDetail.getProfilePictureUrl(), result.get(0).getAuthorImageUrl());
     }
 
     @Test
-    void convertAndEnrichComment_shouldConvertAndEnrichCommentDTO() {
-        when(commentMapper.toDTO(comment)).thenReturn(commentDTO);
+    void convertAndEnrichComment_shouldConvertAndEnrichCommentDto() {
+        when(commentMapper.toDto(comment)).thenReturn(commentDto);
         when(userService.loadUserDetailBySpotifyId("user123")).thenReturn(userDetail);
 
-        CommentDTO result = commentService.convertAndEnrichComment(comment);
+        CommentDto result = commentService.convertAndEnrichComment(comment);
 
-        verify(commentMapper).toDTO(comment);
+        verify(commentMapper).toDto(comment);
         verify(userService).loadUserDetailBySpotifyId("user123");
 
-        assertEquals(commentDTO, result);
+        assertEquals(commentDto, result);
         assertEquals(userDetail.getProfilePictureUrl(), result.getAuthorImageUrl());
     }
 }
