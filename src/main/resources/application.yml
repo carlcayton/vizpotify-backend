@@ -26,24 +26,24 @@ spring:
   lambda:
     base-url: ${LAMBDA_BASE_URL}
 
-logging:
-  level:
-    org:
-      hibernate:
-        SQL: WARN
-        type: WARN
-        orm:
-          sql:
-            exec: WARN
-            results: WARN
-            loading: WARN
-          results:
-            loading: WARN
-    springframework: WARN
-    springframework.boot.autoconfigure: WARN
-    jdbc:
-      sqltiming: WARN
-      resultsettable: WARN
+#logging:
+#  level:
+#    org:
+#      hibernate:
+#        SQL: WARN
+#        type: WARN
+#        orm:
+#          sql:
+#            exec: WARN
+#            results: WARN
+#            loading: WARN
+#          results:
+#            loading: WARN
+#    springframework: WARN
+#    springframework.boot.autoconfigure: WARN
+#    jdbc:
+#      sqltiming: WARN
+#      resultsettable: WARN
 
 spotify:
   clientId: ${SPOTIFY_CLIENT_ID}
