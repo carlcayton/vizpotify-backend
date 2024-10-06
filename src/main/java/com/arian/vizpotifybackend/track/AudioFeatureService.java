@@ -68,7 +68,7 @@ public class AudioFeatureService {
             if (audioFeaturesArray != null) {
                 List<AudioFeature> audioFeaturesList = Arrays.stream(audioFeaturesArray)
                         .map(audioFeatureMapper::toAudioFeature)
-                        .collect(Collectors.toList());
+                        .toList();
                 allAudioFeatures.addAll(audioFeaturesList);
             }
         }

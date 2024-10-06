@@ -38,7 +38,6 @@ public class AnalyticsService {
     private AnalyticsDto retrieveFreshAnalyticsAndCache(String userId) {
         log.info("Retrieving fresh analytics for user: {}", userId);
         boolean isUserAnalyticsAvailable = userService.isAnalyticsAvailable(userId);
-        System.out.println(isUserAnalyticsAvailable);
         AnalyticsDto analyticsDto = analyticsAggregator.getAllAnalyticsForUser(userId, isUserAnalyticsAvailable);
 
         analyticsCacheService.cacheUserAnalytics(userId, analyticsDto);

@@ -1,79 +1,50 @@
 
 package com.arian.vizpotifybackend.analytics.core;
 
-import com.arian.vizpotifybackend.analytics.artist.UserArtistTrackCountRepository;
-import com.arian.vizpotifybackend.analytics.artist.UserTrackFeatureStatsMapper;
-import com.arian.vizpotifybackend.analytics.era.UserMusicEraSummaryRepository;
-import com.arian.vizpotifybackend.analytics.features.UserTrackFeatureStats;
-import com.arian.vizpotifybackend.analytics.features.UserTrackFeatureStatsDto;
-import com.arian.vizpotifybackend.analytics.features.UserTrackFeatureStatsRepository;
-import com.arian.vizpotifybackend.analytics.genre.UserGenreDistribution;
-import com.arian.vizpotifybackend.analytics.genre.UserGenreDistributionRepository;
+import com.arian.vizpotifybackend.analytics.era.UserMusicEraSummaryService;
+import com.arian.vizpotifybackend.analytics.features.UserTrackFeatureStatsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.*;
-import java.util.function.Function;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class AnalyticsAggregator {
 
-    private final UserTrackFeatureStatsRepository userTrackFeatureStatsRepository;
-    private final UserGenreDistributionRepository userGenreDistributionRepository;
-    private final UserMusicEraSummaryRepository userMusicEraSummaryRepository;
-    private final UserArtistTrackCountRepository userArtistTrackCountRepository;
-
-    private final UserTrackFeatureStatsMapper userTrackFeatureStatsMapper;
-
-    @Transactional
-    public void aggregateAndInsertUserTrackFeatureStats(String spotifyId) {
-        userTrackFeatureStatsRepository.aggregateAndInsertUserTrackFeatureStats(spotifyId);
-    }
-
-    public Map<String, UserTrackFeatureStatsDto> fetchUserTrackFeatureStats(String spotifyId) {
-        List<UserTrackFeatureStats> userTrackFeatureStats = userTrackFeatureStatsRepository.findAllByUserSpotifyId(spotifyId);
-        return groupByTimeRange(userTrackFeatureStats, UserTrackFeatureStats::getTimeRange, userTrackFeatureStatsMapper::toDto);
-    }
-
-    private static <T, R> Map<String, R> groupByTimeRange(
-            List<T> input,
-            Function<T, String> timeRangeExtractor,
-            Function<T, R> mapper
-    ) {
-        return input.stream()
-                .collect(Collectors.toMap(
-                        timeRangeExtractor,
-                        mapper,
-                        (existing, replacement) -> existing
-                ));
-    }
-
-    public List<UserGenreDistribution> fetchTopNUserGenreDistribution(String spotifyUserId, int maxSize) {
-        List<UserGenreDistribution> allGenres =
-                userGenreDistributionRepository.findByUserSpotifyIdOrderByPercentageDesc(spotifyUserId);
-        Map<String, List<UserGenreDistribution>> genresByTimeRange = allGenres.stream()
-                .collect(Collectors.groupingBy(UserGenreDistribution::getTimeRange));
-
-        return genresByTimeRange.entrySet().stream()
-                .flatMap(entry -> entry.getValue().stream()
-                        .limit(maxSize))
-                .collect(Collectors.toList());
-    }
+    private final UserTrackFeatureStatsService userTrackFeatureStatsService;
+    private final UserMusicEraSummaryService userMusicEraSummaryService;
 
 
-    public void aggregateAndStoreGenreDistributionForUser(String spotifyId) {
-        userGenreDistributionRepository.aggregateAndInsertUserGenreDistribution(spotifyId);
-    }
 
 
-    public void aggregateAndStoreMusicEraSummary(String spotifyId) {
-        userMusicEraSummaryRepository.aggregateAndInsertUserMusicEraSummary(spotifyId);
-    }
-
+//    public List<UserGenreDistribution> fetchTopNUserGenreDistribution(String spotifyUserId, int maxSize) {
+//        List<UserGenreDistribution> allGenres =
+//                userGenreDistributionRepository.findByUserSpotifyIdOrderByPercentageDesc(spotifyUserId);
+//        Map<String, List<UserGenreDistribution>> genresByTimeRange = allGenres.stream()
+//                .collect(Collectors.groupingBy(UserGenreDistribution::getTimeRange));
+//
+//        return genresByTimeRange.entrySet().stream()
+//                .flatMap(entry -> entry.getValue().stream()
+//                        .limit(maxSize))
+//                .collect(Collectors.toList());
+//    }
+//
+//
+//    public void aggregateAndStoreGenreDistributionForUser(String spotifyId) {
+//        userGenreDistributionRepository.aggregateAndInsertUserGenreDistribution(spotifyId);
+//    }
+//
+//
+//    public void aggregateAndStoreMusicEraSummary(String spotifyId) {
+//        userMusicEraSummaryRepository.aggregateAndInsertUserMusicEraSummary(spotifyId);
+//    }
 
 
     private String toCamelCase(String snakeStr) {
@@ -106,18 +77,17 @@ public class AnalyticsAggregator {
         defaultResult.put("percentage", BigDecimal.ZERO);
         return defaultResult;
     }
+
     @Transactional
     public AnalyticsDto getAllAnalyticsForUser(String userId, boolean analyticsAvailable) {
         if (!analyticsAvailable) {
-            aggregateAndInsertUserTrackFeatureStats(userId);
-            aggregateAndStoreGenreDistributionForUser(userId);
-            aggregateAndStoreMusicEraSummary(userId);
+           userTrackFeatureStatsService.aggregateAndUpsertUserTrackFeatureStats(userId);
+           userMusicEraSummaryService.aggregateAndUpsertMusicEraSummary(userId);
+
         }
 
-        AnalyticsDto analyticsDto = new AnalyticsDto(
-                fetchUserTrackFeatureStats(userId)
-        );
-
-        return analyticsDto;
-    }
+        return new AnalyticsDto(
+                userTrackFeatureStatsService.fetchUserTrackFeatureStats(userId),
+                null);
+            }
 }

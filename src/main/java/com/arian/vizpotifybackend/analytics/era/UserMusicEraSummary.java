@@ -3,6 +3,7 @@ package com.arian.vizpotifybackend.analytics.era;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -35,7 +36,12 @@ public class UserMusicEraSummary {
     @Column(name = "percentage", nullable = false, precision = 5)
     private Double percentage;
 
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
 
 }

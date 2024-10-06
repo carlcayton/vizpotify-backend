@@ -2,7 +2,6 @@
 package com.arian.vizpotifybackend.comparison;
 
 import com.arian.vizpotifybackend.track.AudioFeatureDto;
-import com.arian.vizpotifybackend.analytics.era.MusicEraSummaryDto;
 import com.arian.vizpotifybackend.track.TrackDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -19,8 +18,8 @@ public record ComparisonDto(
         @JsonProperty("tracks")
         Map<String, Map<String, List<TrackDto>>> tracks,
 
-        @JsonProperty("musicEraSummary")
-        Map<String, Map<String, List<MusicEraSummaryDto>>> musicEraSummary,
+//        @JsonProperty("musicEraSummary")
+//        Map<String, Map<String, List<MusicEraSummaryDto>>> musicEraSummary,
 
         @JsonProperty("audioFeature")
         Map<String, Map<String, List<AudioFeatureDto>>> audioFeature
