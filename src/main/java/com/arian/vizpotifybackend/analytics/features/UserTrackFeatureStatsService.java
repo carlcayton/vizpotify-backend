@@ -1,6 +1,5 @@
 package com.arian.vizpotifybackend.analytics.features;
 
-import com.arian.vizpotifybackend.analytics.artist.UserTrackFeatureStatsMapper;
 import com.arian.vizpotifybackend.analytics.util.AnalyticsUtility;
 import com.arian.vizpotifybackend.track.AudioFeature;
 import com.arian.vizpotifybackend.track.AudioFeatureRepository;

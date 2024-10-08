@@ -21,32 +21,6 @@ public class AnalyticsAggregator {
     private final UserTrackFeatureStatsService userTrackFeatureStatsService;
     private final UserMusicEraSummaryService userMusicEraSummaryService;
 
-
-
-
-//    public List<UserGenreDistribution> fetchTopNUserGenreDistribution(String spotifyUserId, int maxSize) {
-//        List<UserGenreDistribution> allGenres =
-//                userGenreDistributionRepository.findByUserSpotifyIdOrderByPercentageDesc(spotifyUserId);
-//        Map<String, List<UserGenreDistribution>> genresByTimeRange = allGenres.stream()
-//                .collect(Collectors.groupingBy(UserGenreDistribution::getTimeRange));
-//
-//        return genresByTimeRange.entrySet().stream()
-//                .flatMap(entry -> entry.getValue().stream()
-//                        .limit(maxSize))
-//                .collect(Collectors.toList());
-//    }
-//
-//
-//    public void aggregateAndStoreGenreDistributionForUser(String spotifyId) {
-//        userGenreDistributionRepository.aggregateAndInsertUserGenreDistribution(spotifyId);
-//    }
-//
-//
-//    public void aggregateAndStoreMusicEraSummary(String spotifyId) {
-//        userMusicEraSummaryRepository.aggregateAndInsertUserMusicEraSummary(spotifyId);
-//    }
-
-
     private String toCamelCase(String snakeStr) {
         String[] parts = snakeStr.split("_");
         StringBuilder camelCaseString = new StringBuilder(parts[0]);
@@ -78,16 +52,4 @@ public class AnalyticsAggregator {
         return defaultResult;
     }
 
-    @Transactional
-    public AnalyticsDto getAllAnalyticsForUser(String userId, boolean analyticsAvailable) {
-        if (!analyticsAvailable) {
-           userTrackFeatureStatsService.aggregateAndUpsertUserTrackFeatureStats(userId);
-           userMusicEraSummaryService.aggregateAndUpsertMusicEraSummary(userId);
-
-        }
-
-        return new AnalyticsDto(
-                userTrackFeatureStatsService.fetchUserTrackFeatureStats(userId),
-                null);
-            }
 }

@@ -29,4 +29,6 @@ logging:
     org.springframework: ERROR
   config: classpath:logback-spring.xml
 
+server:
+  port: 8081
 

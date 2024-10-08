@@ -1,7 +1,6 @@
 package com.arian.vizpotifybackend.comparison;
 
 import com.arian.vizpotifybackend.analytics.core.AnalyticsDto;
-import com.arian.vizpotifybackend.analytics.core.AnalyticsService;
 import com.arian.vizpotifybackend.artist.ArtistDto;
 import com.arian.vizpotifybackend.track.TrackDto;
 import com.arian.vizpotifybackend.user.topitems.artist.UserTopArtistService;
