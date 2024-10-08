@@ -1,10 +1,12 @@
 package com.arian.vizpotifybackend.analytics.era;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 @Table(name = "user_music_era_summary")
@@ -19,6 +21,7 @@ public class UserMusicEraSummary {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_music_era_summary_id_seq")
     @SequenceGenerator(name = "user_music_era_summary_id_seq", sequenceName = "user_music_era_summary_id_seq", allocationSize = 1)
     @Column(name = "id", nullable = false)
+    @JsonIgnore
     private Long id;
 
     @Column(name = "user_spotify_id", nullable = false, length = 255)
@@ -36,10 +39,11 @@ public class UserMusicEraSummary {
     @Column(name = "percentage", nullable = false, precision = 5)
     private Double percentage;
 
-    @Column(name = "created_at", nullable = false)
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-
+    @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
