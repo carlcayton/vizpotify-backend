@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -77,5 +78,26 @@ public class UserMusicEraSummaryService {
         if (year >= 1960) return "1960s";
         if (year >= 1950) return "1950s";
         return "<1950s";
+    }
+
+    private List<Map<String, Object>> ensureAllErasPresent(List<Map<String, Object>> results) {
+        List<String> allEras = Arrays.asList("1950s", "1960s", "1970s", "1980s", "1990s", "2000s", "2010s", "2020s", "< 1950");
+        Map<String, Map<String, Object>> resultsByEra = results.stream()
+                .collect(Collectors.toMap(
+                        result -> (String) result.get("releaseDateRange"),
+                        result -> result
+                ));
+
+        return allEras.stream()
+                .map(era -> resultsByEra.computeIfAbsent(era, k -> createDefaultEraResult(k)))
+                .collect(Collectors.toList());
+    }
+
+    private Map<String, Object> createDefaultEraResult(String era) {
+        Map<String, Object> defaultResult = new HashMap<>();
+        defaultResult.put("releaseDateRange", era);
+        defaultResult.put("trackCount", 0);
+        defaultResult.put("percentage", BigDecimal.ZERO);
+        return defaultResult;
     }
 }
