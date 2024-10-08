@@ -64,6 +64,7 @@ public class UserService {
         Optional<UserDetail> existingUserOpt = userDetailRepository.findBySpotifyId(userDetail.getSpotifyId());
         if (existingUserOpt.isEmpty()) {
             userDetail.setCreatedAt(LocalDateTime.now());
+            userDetail.setUpdatedAt(LocalDateTime.now());
             userDetailRepository.save(userDetail);
         }
 

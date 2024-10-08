@@ -4,7 +4,7 @@ package com.arian.vizpotifybackend.analytics.features;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "user_track_feature_stats",
@@ -36,6 +36,11 @@ public class UserTrackFeatureStats {
     private Double speechiness;
     private Double valence;
     private Double tempo;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
 
 }

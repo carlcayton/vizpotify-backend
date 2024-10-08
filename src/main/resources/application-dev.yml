@@ -9,15 +9,13 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: false
+    show-sql: true
     properties:
-      javax:
-        persistence:
-          schema-generation:
-            create-source: metadata
-            scripts:
-              action: create
-              create-target: create.sql
+      hibernate:
+        default_schema: public
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    generate-ddl: true
+
   devtools:
     restart:
       enabled: true
@@ -31,4 +29,6 @@ logging:
     org.springframework: ERROR
   config: classpath:logback-spring.xml
 
+server:
+  port: 8081
 

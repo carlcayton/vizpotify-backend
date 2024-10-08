@@ -45,7 +45,6 @@ public interface TrackMapper {
     @Mapping(target = "albumImageUrl", source = "albumImageUrl")
     @Mapping(target = "popularity", source = "popularity")
     @Mapping(target = "releaseDate", source = "releaseDate")
-    @Mapping(target = "audioFeatures", ignore = true)
     TrackDto trackDetailToTrackDto(TrackDetail trackDetail);
 
     @Named("convertArtistsToCSV")

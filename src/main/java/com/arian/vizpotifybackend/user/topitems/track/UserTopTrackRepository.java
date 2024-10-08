@@ -1,5 +1,6 @@
 package com.arian.vizpotifybackend.user.topitems.track;
 
+import com.arian.vizpotifybackend.analytics.era.UserTrackEraDataProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,4 +23,14 @@ public interface UserTopTrackRepository extends JpaRepository<UserTopTrack, Long
             """, nativeQuery = true)
     List<String> fetchCommonTopTracks(@Param("userIdA") String userIdA, @Param("userIdB") String userIdB);
 
+    @Query(value = "SELECT track_id FROM user_top_track WHERE user_spotify_id = :userSpotifyId AND time_range = :timeRange", nativeQuery = true)
+    List<String> findTrackIdsByUserSpotifyIdAndTimeRange(@Param("userSpotifyId") String userSpotifyId, @Param("timeRange") String timeRange);
+
+    @Query("SELECT utt.timeRange as timeRange, td.releaseDate as releaseDate " +
+            "FROM UserTopTrack utt JOIN TrackDetail td ON utt.trackId = td.id " +
+            "WHERE utt.userSpotifyId = :spotifyUserId")
+    List<UserTrackEraDataProjection> findUserTrackEraData(@Param("spotifyUserId") String spotifyUserId);
+
+
 }
+

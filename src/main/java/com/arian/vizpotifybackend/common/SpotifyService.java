@@ -97,7 +97,7 @@ public class SpotifyService {
         } catch (Exception e) {
             // Log the exception
         }
-        return null;
+        return new Artist[0];
     }
 
     public Track[] getArtistTopTracks(String artistId) {
@@ -109,7 +109,7 @@ public class SpotifyService {
         } catch (Exception e) {
             // Log the exception
         }
-        return null;
+        return new Track[0];
     }
 
 
