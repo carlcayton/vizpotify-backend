@@ -48,8 +48,8 @@ public class UserArtistTrackCountService {
         List<UserTopTrack> userTopTracks = userTopTrackRepository.findByUserSpotifyIdAndTimeRangeWithTrackDetails(spotifyUserId, timeRange);
         
         Map<String, Integer> artistTrackCounts = new HashMap<>();
-        for (UserTopTrack track : userTopTracks) {
-            String[] artists = track.getTrackDetail().getArtists().split(",");
+        for (UserTopTrack userTopTrack : userTopTracks) {
+            String[] artists = userTopTrack.getTrack().getArtists().split(",");
             for (String artist : artists) {
                 artistTrackCounts.merge(artist.trim(), 1, Integer::sum);
             }
