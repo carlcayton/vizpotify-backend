@@ -47,7 +47,7 @@ public class UserGenreDistributionService {
     }
 
     private List<GenreDistributionDto> calculateGenreDistribution(String spotifyUserId, String timeRange) {
-        List<Object[]> genreData = userTopArtistRepository.findGenresAndCountByUserSpotifyIdAndTimeRange(spotifyUserId, timeRange);
+        List<Object[]> genreData = userTopArtistRepository.findGenresAndCountByUserSpotifyId(spotifyUserId);
         
         long totalCount = genreData.stream()
                 .mapToLong(data -> (Long) data[1])
