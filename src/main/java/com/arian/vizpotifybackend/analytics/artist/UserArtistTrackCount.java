@@ -1,15 +1,20 @@
 package com.arian.vizpotifybackend.analytics.artist;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "user_artist_track_count")
+@Table(name = "user_artist_track_count",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"user_spotify_id", "time_range", "artist_name"}))
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 public class UserArtistTrackCount {
 
     @Id
@@ -21,7 +26,7 @@ public class UserArtistTrackCount {
     @Column(name = "user_spotify_id", nullable = false, length = 255)
     private String userSpotifyId;
 
-    @Column(name = "time_range", nullable = false, length = 255)
+    @Column(name = "time_range", nullable = false, length = 50)
     private String timeRange;
 
     @Column(name = "artist_name", nullable = false, length = 255)
@@ -30,10 +35,14 @@ public class UserArtistTrackCount {
     @Column(name = "track_count", nullable = false)
     private Integer trackCount;
 
-    @Column(name = "created_at", nullable = false)
-    private String createdAt;
+    @Column(name = "percentage", nullable = false, precision = 5, scale = 2)
+    private Double percentage;
 
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
-    private String updatedAt;
-
+    private LocalDateTime updatedAt;
 }

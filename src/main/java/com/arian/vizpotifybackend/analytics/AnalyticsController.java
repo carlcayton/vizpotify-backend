@@ -1,5 +1,7 @@
 package com.arian.vizpotifybackend.analytics;
 
+import com.arian.vizpotifybackend.analytics.artist.UserArtistTrackCountMapDto;
+import com.arian.vizpotifybackend.analytics.artist.UserArtistTrackCountService;
 import com.arian.vizpotifybackend.analytics.era.UserMusicEraSummaryMapDto;
 import com.arian.vizpotifybackend.analytics.era.UserMusicEraSummaryService;
 import com.arian.vizpotifybackend.analytics.features.UserTrackFeatureStatsMapDto;
@@ -18,6 +20,7 @@ public class AnalyticsController {
     private final UserMusicEraSummaryService userMusicEraSummaryService;
     private final UserTrackFeatureStatsService userTrackFeatureStatsService;
     private final UserGenreDistributionService userGenreDistributionService;
+    private final UserArtistTrackCountService userArtistTrackCountService;
 
     @GetMapping("/users/{userId}/musicEraSummary")
     public ResponseEntity<UserMusicEraSummaryMapDto> getUserMusicEraSummary(@PathVariable String userId) {
@@ -35,5 +38,11 @@ public class AnalyticsController {
     public ResponseEntity<UserGenreDistributionMapDto> getUserGenreDistribution(@PathVariable String userId) {
         UserGenreDistributionMapDto genreDistribution = userGenreDistributionService.fetchUserGenreDistribution(userId);
         return ResponseEntity.ok(genreDistribution);
+    }
+
+    @GetMapping("/users/{userId}/artistTrackCount")
+    public ResponseEntity<UserArtistTrackCountMapDto> getUserArtistTrackCount(@PathVariable String userId) {
+        UserArtistTrackCountMapDto artistTrackCount = userArtistTrackCountService.fetchUserArtistTrackCount(userId);
+        return ResponseEntity.ok(artistTrackCount);
     }
 }

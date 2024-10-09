@@ -8,13 +8,13 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UserArtistTrackCountRepository extends JpaRepository<UserArtistTrackCount, Long> {
-    UserArtistTrackCount findByUserSpotifyIdAndTimeRange(String userSpotifyId, String timeRange);
-
-    UserArtistTrackCount findByUserSpotifyId(String userSpotifyId);
-
+    List<UserArtistTrackCount> findAllByUserSpotifyId(String userSpotifyId);
+    Optional<UserArtistTrackCount> findFirstByUserSpotifyIdAndTimeRangeOrderByUpdatedAtDesc(String userSpotifyId, String timeRange);
+    void deleteByUserSpotifyIdAndTimeRange(String userSpotifyId, String timeRange);
     boolean existsByUserSpotifyId(String userSpotifyId);
 
     @Modifying
@@ -38,31 +38,21 @@ public interface UserArtistTrackCountRepository extends JpaRepository<UserArtist
                 user_spotify_id,
                 time_range,
                 artist_name,
-                track_count
+                track_count,
+                percentage,
+                created_at,
+                updated_at
             )
             SELECT 
                 :spotifyUserId AS user_spotify_id,
                 time_range,
                 artist_name,
-                SUM(track_count) AS track_count
+                track_count,
+                (track_count * 100.0 / SUM(track_count) OVER (PARTITION BY time_range)) AS percentage,
+                CURRENT_TIMESTAMP AS created_at,
+                CURRENT_TIMESTAMP AS updated_at
             FROM 
                 ArtistTrackCount
-            GROUP BY 
-                time_range, artist_name
             """, nativeQuery = true)
     void aggregateAndInsertUserArtistTrackCount(@Param("spotifyUserId") String spotifyUserId);
-
-    @Query(value = """
-            SELECT 
-                artist_name, 
-                track_count, 
-                time_range 
-            FROM 
-                user_artist_track_count 
-            WHERE 
-                user_spotify_id = :spotifyUserId
-            ORDER BY 
-                time_range, track_count DESC
-            """, nativeQuery = true)
-    List<Object[]> fetchUserArtistTrackCount(@Param("spotifyUserId") String spotifyUserId);
 }
