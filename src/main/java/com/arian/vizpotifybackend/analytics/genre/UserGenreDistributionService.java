@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -18,12 +19,11 @@ public class UserGenreDistributionService {
     private final UserGenreDistributionRepository userGenreDistributionRepository;
     private final UserGenreDistributionMapper userGenreDistributionMapper;
 
+    private static final int DAYS_BEFORE_REFRESH = 9;
+
     @Transactional
     public UserGenreDistributionMapDto fetchUserGenreDistribution(String spotifyId) {
-        if (!userGenreDistributionRepository.existsByUserSpotifyId(spotifyId)) {
-            aggregateAndUpsertUserGenreDistribution(spotifyId);
-        }
-
+        aggregateAndUpsertUserGenreDistribution(spotifyId);
         List<UserGenreDistribution> userGenreDistributions = userGenreDistributionRepository.findByUserSpotifyIdOrderByPercentageDesc(spotifyId);
         return userGenreDistributionMapper.toMapDto(spotifyId, userGenreDistributions);
     }
@@ -32,9 +32,18 @@ public class UserGenreDistributionService {
     public void aggregateAndUpsertUserGenreDistribution(String spotifyUserId) {
         Stream.of("short_term", "medium_term", "long_term")
                 .forEach(timeRange -> {
-                    List<GenreDistributionDto> genreDistributions = calculateGenreDistribution(spotifyUserId, timeRange);
-                    saveGenreDistributions(spotifyUserId, timeRange, genreDistributions);
+                    Optional<UserGenreDistribution> existingDistribution = userGenreDistributionRepository
+                            .findFirstByUserSpotifyIdAndTimeRangeOrderByUpdatedAtDesc(spotifyUserId, timeRange);
+
+                    if (existingDistribution.isEmpty() || isDistributionOutdated(existingDistribution.get())) {
+                        List<GenreDistributionDto> genreDistributions = calculateGenreDistribution(spotifyUserId, timeRange);
+                        saveGenreDistributions(spotifyUserId, timeRange, genreDistributions);
+                    }
                 });
+    }
+
+    private boolean isDistributionOutdated(UserGenreDistribution distribution) {
+        return distribution.getUpdatedAt().plusDays(DAYS_BEFORE_REFRESH).isBefore(LocalDateTime.now());
     }
 
     private List<GenreDistributionDto> calculateGenreDistribution(String spotifyUserId, String timeRange) {
@@ -55,6 +64,8 @@ public class UserGenreDistributionService {
     }
 
     private void saveGenreDistributions(String spotifyUserId, String timeRange, List<GenreDistributionDto> genreDistributions) {
+        userGenreDistributionRepository.deleteByUserSpotifyIdAndTimeRange(spotifyUserId, timeRange);
+        
         genreDistributions.forEach(dto -> {
             UserGenreDistribution distribution = UserGenreDistribution.builder()
                     .userSpotifyId(spotifyUserId)
