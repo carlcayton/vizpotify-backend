@@ -3,9 +3,11 @@ package com.arian.vizpotifybackend.analytics.genre;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "user_genre_distribution",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"user_spotify_id", "time_range"}))
+        uniqueConstraints = @UniqueConstraint(columnNames = {"user_spotify_id", "time_range", "genre"}))
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -33,4 +35,21 @@ public class UserGenreDistribution {
 
     @Column(name = "percentage", nullable = false, precision = 5)
     private Double percentage;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

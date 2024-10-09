@@ -1,6 +1,5 @@
 package com.arian.vizpotifybackend.analytics.features;
 
-import com.arian.vizpotifybackend.analytics.util.AnalyticsUtility;
 import com.arian.vizpotifybackend.track.AudioFeature;
 import com.arian.vizpotifybackend.track.AudioFeatureRepository;
 import com.arian.vizpotifybackend.user.topitems.track.UserTopTrackRepository;
@@ -14,7 +13,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-
 @Service
 @RequiredArgsConstructor
 public class UserTrackFeatureStatsService {
@@ -23,34 +21,29 @@ public class UserTrackFeatureStatsService {
     private final UserTrackFeatureStatsRepository userTrackFeatureStatsRepository;
     private final UserTrackFeatureStatsMapper userTrackFeatureStatsMapper;
 
-
-
-    public Map<String, UserTrackFeatureStatsDto> fetchUserTrackFeatureStats(String spotifyId) {
+    @Transactional
+    public UserTrackFeatureStatsMapDto fetchUserTrackFeatureStats(String spotifyId) {
+        if (!userTrackFeatureStatsRepository.existsByUserSpotifyId(spotifyId)) {
+            aggregateAndUpsertUserTrackFeatureStats(spotifyId);
+        }
+    
         List<UserTrackFeatureStats> userTrackFeatureStats = userTrackFeatureStatsRepository.findAllByUserSpotifyId(spotifyId);
-        return AnalyticsUtility.groupByTimeRange(userTrackFeatureStats, UserTrackFeatureStats::getTimeRange, userTrackFeatureStatsMapper::toDto);
+        return userTrackFeatureStatsMapper.toMapDto(spotifyId, userTrackFeatureStats);
     }
+
     @Transactional
     public void aggregateAndUpsertUserTrackFeatureStats(String spotifyUserId) {
-        Optional<UserTrackFeatureStats> statsOptional = userTrackFeatureStatsRepository.findByUserSpotifyId(spotifyUserId);
+        Stream.of("short_term", "medium_term", "long_term")
+                .forEach(timeRange -> {
+                    UserTrackFeatureStats stats = calculateStats(spotifyUserId, timeRange);
+                    Optional<UserTrackFeatureStats> existingStats = userTrackFeatureStatsRepository.findByUserSpotifyIdAndTimeRange(spotifyUserId, timeRange);
 
-        if (statsOptional.isEmpty() ||
-                statsOptional.get().getUpdatedAt().isBefore(LocalDateTime.now().minusDays(9))) {
+                    stats.setCreatedAt(existingStats.map(UserTrackFeatureStats::getCreatedAt).orElse(LocalDateTime.now()));
+                    stats.setUpdatedAt(LocalDateTime.now());
 
-            if (statsOptional.isPresent()) {
-                userTrackFeatureStatsRepository.deleteByUserSpotifyId(spotifyUserId);
-            }
-
-            Stream.of("short_term", "medium_term", "long_term")
-                    .forEach(timeRange -> {
-                        UserTrackFeatureStats stats = calculateStats(spotifyUserId, timeRange);
-                        stats.setCreatedAt(LocalDateTime.now());
-                        stats.setUpdatedAt(LocalDateTime.now());
-
-                        userTrackFeatureStatsRepository.save(stats);
-                    });
-        }
+                    userTrackFeatureStatsRepository.save(stats);
+                });
     }
-
     private UserTrackFeatureStats calculateStats(String spotifyUserId, String timeRange) {
         List<String> trackIds = topTrackRepository.findTrackIdsByUserSpotifyIdAndTimeRange(spotifyUserId, timeRange);
         List<AudioFeature> features = audioFeatureRepository.findAllById(trackIds);
@@ -81,4 +74,5 @@ public class UserTrackFeatureStatsService {
                 .average()
                 .orElse(0.0);
     }
+
 }
