@@ -21,29 +21,27 @@ public class UserTrackFeatureStatsService {
     private final UserTrackFeatureStatsRepository userTrackFeatureStatsRepository;
     private final UserTrackFeatureStatsMapper userTrackFeatureStatsMapper;
 
+    @Transactional
     public UserTrackFeatureStatsMapDto fetchUserTrackFeatureStats(String spotifyId) {
+        if (!userTrackFeatureStatsRepository.existsByUserSpotifyId(spotifyId)) {
+            aggregateAndUpsertUserTrackFeatureStats(spotifyId);
+        }
+    
         List<UserTrackFeatureStats> userTrackFeatureStats = userTrackFeatureStatsRepository.findAllByUserSpotifyId(spotifyId);
-        Map<String, UserTrackFeatureStatsDto> featureStatsByTimeRange = userTrackFeatureStats.stream()
-                .collect(java.util.stream.Collectors.toMap(
-                        UserTrackFeatureStats::getTimeRange,
-                        userTrackFeatureStatsMapper::toDto
-                ));
-        return new UserTrackFeatureStatsMapDto(spotifyId, featureStatsByTimeRange);
+        return userTrackFeatureStatsMapper.toMapDto(spotifyId, userTrackFeatureStats);
     }
 
     @Transactional
     public void aggregateAndUpsertUserTrackFeatureStats(String spotifyUserId) {
         Stream.of("short_term", "medium_term", "long_term")
                 .forEach(timeRange -> {
+                    UserTrackFeatureStats stats = calculateStats(spotifyUserId, timeRange);
                     Optional<UserTrackFeatureStats> existingStats = userTrackFeatureStatsRepository.findByUserSpotifyIdAndTimeRange(spotifyUserId, timeRange);
 
-                    if (existingStats.isEmpty() || existingStats.get().getUpdatedAt().isBefore(LocalDateTime.now().minusDays(9))) {
-                        UserTrackFeatureStats stats = calculateStats(spotifyUserId, timeRange);
-                        stats.setCreatedAt(existingStats.map(UserTrackFeatureStats::getCreatedAt).orElse(LocalDateTime.now()));
-                        stats.setUpdatedAt(LocalDateTime.now());
+                    stats.setCreatedAt(existingStats.map(UserTrackFeatureStats::getCreatedAt).orElse(LocalDateTime.now()));
+                    stats.setUpdatedAt(LocalDateTime.now());
 
-                        userTrackFeatureStatsRepository.save(stats);
-                    }
+                    userTrackFeatureStatsRepository.save(stats);
                 });
     }
     private UserTrackFeatureStats calculateStats(String spotifyUserId, String timeRange) {
