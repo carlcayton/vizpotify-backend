@@ -49,7 +49,7 @@ public class UserArtistTrackCountService {
         
         Map<String, Integer> artistTrackCounts = new HashMap<>();
         for (UserTopTrack userTopTrack : userTopTracks) {
-            String[] artists = userTopTrack.getTrack().getArtists().split(",");
+            String[] artists = userTopTrack.getTrackId().split(",");
             for (String artist : artists) {
                 artistTrackCounts.merge(artist.trim(), 1, Integer::sum);
             }
