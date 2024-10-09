@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -46,22 +47,19 @@ public class UserArtistTrackCountService {
 
     private List<UserArtistTrackCount> calculateArtistTrackCounts(String spotifyUserId, String timeRange) {
         List<UserTopTrack> userTopTracks = userTopTrackRepository.findByUserSpotifyIdAndTimeRangeWithTrackDetails(spotifyUserId, timeRange);
-        
-        Map<String, Integer> artistTrackCounts = new HashMap<>();
-        for (UserTopTrack userTopTrack : userTopTracks) {
-            String[] artists = userTopTrack.getTrackId().split(",");
-            for (String artist : artists) {
-                artistTrackCounts.merge(artist.trim(), 1, Integer::sum);
-            }
-        }
 
-        int totalTracks = userTopTracks.size();
+        Map<String, Long> artistTrackCounts = userTopTracks.stream()
+                .flatMap(userTopTrack -> Arrays.stream(userTopTrack.getTrackDetail().getArtists().split(",")))
+                .map(String::trim)
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+        long totalTracks = userTopTracks.size();
         return artistTrackCounts.entrySet().stream()
                 .map(entry -> UserArtistTrackCount.builder()
                         .userSpotifyId(spotifyUserId)
                         .timeRange(timeRange)
                         .artistName(entry.getKey())
-                        .trackCount(entry.getValue())
+                        .trackCount(entry.getValue().intValue())
                         .percentage((entry.getValue() * 100.0) / totalTracks)
                         .build())
                 .collect(Collectors.toList());

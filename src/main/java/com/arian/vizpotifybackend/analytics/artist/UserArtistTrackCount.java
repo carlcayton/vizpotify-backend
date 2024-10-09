@@ -35,7 +35,7 @@ public class UserArtistTrackCount {
     @Column(name = "track_count", nullable = false)
     private Integer trackCount;
 
-    @Column(name = "percentage", nullable = false, precision = 5, scale = 2)
+    @Column(name = "percentage", nullable = false)
     private Double percentage;
 
     @CreationTimestamp
