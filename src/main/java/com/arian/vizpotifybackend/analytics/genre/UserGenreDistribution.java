@@ -33,7 +33,7 @@ public class UserGenreDistribution {
     @Column(name = "genre_count", nullable = false)
     private Integer genreCount;
 
-    @Column(name = "percentage", nullable = false, precision = 5, scale = 2)
+    @Column(name = "percentage", nullable = false, precision = 5)
     private Double percentage;
 
     @Column(name = "created_at", nullable = false)

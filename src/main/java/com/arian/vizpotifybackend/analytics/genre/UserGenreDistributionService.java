@@ -6,9 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -37,18 +35,66 @@ public class UserGenreDistributionService {
 
                     if (existingDistribution.isEmpty() || isDistributionOutdated(existingDistribution.get())) {
                         List<GenreDistributionDto> genreDistributions = calculateGenreDistribution(spotifyUserId, timeRange);
+                        userGenreDistributionRepository.deleteByUserSpotifyIdAndTimeRange(spotifyUserId, timeRange);
                         saveGenreDistributions(spotifyUserId, timeRange, genreDistributions);
                     }
                 });
     }
 
     private boolean isDistributionOutdated(UserGenreDistribution distribution) {
-        return distribution.getUpdatedAt().plusDays(DAYS_BEFORE_REFRESH).isBefore(LocalDateTime.now());
+        return distribution.getUpdatedAt().plusDays(7).isBefore(LocalDateTime.now());
     }
+
+
+    public void saveGenreDistributions(String spotifyUserId, String timeRange, List<GenreDistributionDto> genreDistributions) {
+        // Fetch all existing distributions for this user and time range
+        List<UserGenreDistribution> existingDistributions =
+                userGenreDistributionRepository.findByUserSpotifyIdAndTimeRange(spotifyUserId, timeRange);
+
+        Map<String, UserGenreDistribution> existingDistributionMap = existingDistributions.stream()
+                .collect(Collectors.toMap(
+                        distribution -> distribution.getGenre(),
+                        distribution -> distribution
+                ));
+
+        List<UserGenreDistribution> distributionsToSave = new ArrayList<>();
+
+        for (GenreDistributionDto dto : genreDistributions) {
+            UserGenreDistribution distribution = existingDistributionMap.getOrDefault(dto.genre(),
+                    UserGenreDistribution.builder()
+                            .userSpotifyId(spotifyUserId)
+                            .timeRange(timeRange)
+                            .genre(dto.genre())
+                            .createdAt(LocalDateTime.now())
+                            .build());
+
+            distribution.setGenreCount(dto.genreCount());
+            distribution.setPercentage(dto.percentage());
+            distribution.setUpdatedAt(LocalDateTime.now());
+
+            distributionsToSave.add(distribution);
+        }
+
+        userGenreDistributionRepository.saveAll(distributionsToSave);
+
+        // Remove old distributions that are no longer present
+        Set<String> currentGenres = genreDistributions.stream()
+                .map(GenreDistributionDto::genre)
+                .collect(Collectors.toSet());
+
+        List<UserGenreDistribution> distributionsToDelete = existingDistributions.stream()
+                .filter(distribution -> !currentGenres.contains(distribution.getGenre()))
+                .collect(Collectors.toList());
+
+        if (!distributionsToDelete.isEmpty()) {
+            userGenreDistributionRepository.deleteAll(distributionsToDelete);
+        }
+    }
+
 
     private List<GenreDistributionDto> calculateGenreDistribution(String spotifyUserId, String timeRange) {
         List<Object[]> genreData = userTopArtistRepository.findGenresAndCountByUserSpotifyId(spotifyUserId);
-        
+
         long totalCount = genreData.stream()
                 .mapToLong(data -> (Long) data[1])
                 .sum();
@@ -63,19 +109,4 @@ public class UserGenreDistributionService {
                 .collect(Collectors.toList());
     }
 
-    private void saveGenreDistributions(String spotifyUserId, String timeRange, List<GenreDistributionDto> genreDistributions) {
-        userGenreDistributionRepository.deleteByUserSpotifyIdAndTimeRange(spotifyUserId, timeRange);
-        
-        genreDistributions.forEach(dto -> {
-            UserGenreDistribution distribution = UserGenreDistribution.builder()
-                    .userSpotifyId(spotifyUserId)
-                    .timeRange(timeRange)
-                    .genre(dto.genre())
-                    .genreCount(dto.genreCount())
-                    .percentage(dto.percentage())
-                    .build();
-
-            userGenreDistributionRepository.save(distribution);
-        });
-    }
 }

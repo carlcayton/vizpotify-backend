@@ -21,11 +21,11 @@ public interface UserTopArtistRepository extends JpaRepository<UserTopArtist, Lo
             """, nativeQuery = true)
     List<String> fetchCommonTopArtists(@Param("userIdA") String userIdA, @Param("userIdB") String userIdB);
 
-    @Query("SELECT ag.genre, COUNT(ag.genre) FROM UserTopArtist uta " +
-           "JOIN ArtistDetail ad ON uta.artistId = ad.id " +
-           "JOIN ad.genres ag " +
-           "WHERE uta.userSpotifyId = :userSpotifyId " +
-           "GROUP BY ag.genre")
-    List<Object[]> findGenresAndCountByUserSpotifyId(@Param("userSpotifyId") String userSpotifyId);
 
+    @Query("SELECT ag, COUNT(ag) FROM UserTopArtist uta " +
+            "JOIN ArtistDetail ad ON uta.artistId = ad.id " +
+            "JOIN ad.genres ag " +
+            "WHERE uta.userSpotifyId = :userSpotifyId " +
+            "GROUP BY ag")
+    List<Object[]> findGenresAndCountByUserSpotifyId(@Param("userSpotifyId") String userSpotifyId);
 }

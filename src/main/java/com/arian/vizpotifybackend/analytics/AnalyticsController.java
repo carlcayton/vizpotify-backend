@@ -4,6 +4,8 @@ import com.arian.vizpotifybackend.analytics.era.UserMusicEraSummaryDto;
 import com.arian.vizpotifybackend.analytics.era.UserMusicEraSummaryService;
 import com.arian.vizpotifybackend.analytics.features.UserTrackFeatureStatsMapDto;
 import com.arian.vizpotifybackend.analytics.features.UserTrackFeatureStatsService;
+import com.arian.vizpotifybackend.analytics.genre.UserGenreDistributionService;
+import com.arian.vizpotifybackend.analytics.genre.UserGenreDistributionMapDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,12 +19,13 @@ public class AnalyticsController {
 
     private final UserMusicEraSummaryService userMusicEraSummaryService;
     private final UserTrackFeatureStatsService userTrackFeatureStatsService;
+    private final UserGenreDistributionService userGenreDistributionService;
 
-    @GetMapping("/users/{userId}/musicEraSummary")
-    public ResponseEntity<Map<String, Map<String, UserMusicEraSummaryDto>>> getUserMusicEraSummary(@PathVariable String userId) {
-        Map<String, Map<String, UserMusicEraSummaryDto>> summary = userMusicEraSummaryService.fetchUserMusicEraSummary(userId);
-        return ResponseEntity.ok(summary);
-    }
+//    @GetMapping("/users/{userId}/musicEraSummary")
+//    public ResponseEntity<Map<String, Map<String, UserMusicEraSummaryDto>>> getUserMusicEraSummary(@PathVariable String userId) {
+//        Map<String, Map<String, UserMusicEraSummaryDto>> summary = userMusicEraSummaryService.fetchUserMusicEraSummary(userId);
+//        return ResponseEntity.ok(summary);
+//    }
 
     @GetMapping("/users/{userId}/trackFeatureStats")
     public ResponseEntity<UserTrackFeatureStatsMapDto> getUserTrackFeatureStats(@PathVariable String userId) {
@@ -30,10 +33,9 @@ public class AnalyticsController {
         return ResponseEntity.ok(featureStats);
     }
 
-    @PostMapping("/users/{userId}/aggregate")
-    public ResponseEntity<Void> aggregateUserAnalytics(@PathVariable String userId) {
-        userMusicEraSummaryService.aggregateAndUpsertMusicEraSummary(userId);
-        userTrackFeatureStatsService.aggregateAndUpsertUserTrackFeatureStats(userId);
-        return ResponseEntity.ok().build();
+    @GetMapping("/users/{userId}/genreDistribution")
+    public ResponseEntity<UserGenreDistributionMapDto> getUserGenreDistribution(@PathVariable String userId) {
+        UserGenreDistributionMapDto genreDistribution = userGenreDistributionService.fetchUserGenreDistribution(userId);
+        return ResponseEntity.ok(genreDistribution);
     }
 }
