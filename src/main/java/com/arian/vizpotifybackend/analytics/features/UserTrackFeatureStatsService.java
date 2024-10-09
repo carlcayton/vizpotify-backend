@@ -50,6 +50,35 @@ public class UserTrackFeatureStatsService {
                     });
         }
     }
+    private UserTrackFeatureStats calculateStats(String spotifyUserId, String timeRange) {
+        List<String> trackIds = topTrackRepository.findTrackIdsByUserSpotifyIdAndTimeRange(spotifyUserId, timeRange);
+        List<AudioFeature> features = audioFeatureRepository.findAllById(trackIds);
 
-    // ... (rest of the methods remain the same)
+        return createUserTrackFeatureStats(spotifyUserId, timeRange, features);
+    }
+
+    private UserTrackFeatureStats createUserTrackFeatureStats(String spotifyUserId, String timeRange, List<AudioFeature> features) {
+        return UserTrackFeatureStats.builder()
+                .userSpotifyId(spotifyUserId)
+                .timeRange(timeRange)
+                .acousticness(calculateAverage(features, AudioFeature::getAcousticness))
+                .danceability(calculateAverage(features, AudioFeature::getDanceability))
+                .energy(calculateAverage(features, AudioFeature::getEnergy))
+                .instrumentalness(calculateAverage(features, AudioFeature::getInstrumentalness))
+                .liveness(calculateAverage(features, AudioFeature::getLiveness))
+                .speechiness(calculateAverage(features, AudioFeature::getSpeechiness))
+                .valence(calculateAverage(features, AudioFeature::getValence))
+                .tempo(calculateAverage(features, AudioFeature::getTempo))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+    }
+
+    private double calculateAverage(List<AudioFeature> features, java.util.function.ToDoubleFunction<AudioFeature> featureExtractor) {
+        return features.stream()
+                .mapToDouble(featureExtractor)
+                .average()
+                .orElse(0.0);
+    }
+
 }
