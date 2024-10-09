@@ -12,14 +12,9 @@ import java.util.Optional;
 @Repository
 public interface UserTrackFeatureStatsRepository extends JpaRepository<UserTrackFeatureStats, Long> {
 
-    Optional<UserTrackFeatureStats> findByUserSpotifyId(String userSpotifyId);
     Optional<UserTrackFeatureStats> findByUserSpotifyIdAndTimeRange(String userSpotifyId, String timeRange);
 
     List<UserTrackFeatureStats> findAllByUserSpotifyId(String userSpotifyId);
 
-
     boolean existsByUserSpotifyId(String userSpotifyId);
-
-
-    void deleteByUserSpotifyId(String spotifyId);
 }

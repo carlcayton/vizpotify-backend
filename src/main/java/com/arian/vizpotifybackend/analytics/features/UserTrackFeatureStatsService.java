@@ -33,22 +33,18 @@ public class UserTrackFeatureStatsService {
 
     @Transactional
     public void aggregateAndUpsertUserTrackFeatureStats(String spotifyUserId) {
-        Optional<UserTrackFeatureStats> statsOptional = userTrackFeatureStatsRepository.findByUserSpotifyId(spotifyUserId);
+        Stream.of("short_term", "medium_term", "long_term")
+                .forEach(timeRange -> {
+                    Optional<UserTrackFeatureStats> existingStats = userTrackFeatureStatsRepository.findByUserSpotifyIdAndTimeRange(spotifyUserId, timeRange);
 
-        if (statsOptional.isEmpty() ||
-                statsOptional.get().getUpdatedAt().isBefore(LocalDateTime.now().minusDays(9))) {
-
-            userTrackFeatureStatsRepository.deleteByUserSpotifyId(spotifyUserId);
-
-            Stream.of("short_term", "medium_term", "long_term")
-                    .forEach(timeRange -> {
+                    if (existingStats.isEmpty() || existingStats.get().getUpdatedAt().isBefore(LocalDateTime.now().minusDays(9))) {
                         UserTrackFeatureStats stats = calculateStats(spotifyUserId, timeRange);
-                        stats.setCreatedAt(LocalDateTime.now());
+                        stats.setCreatedAt(existingStats.map(UserTrackFeatureStats::getCreatedAt).orElse(LocalDateTime.now()));
                         stats.setUpdatedAt(LocalDateTime.now());
 
                         userTrackFeatureStatsRepository.save(stats);
-                    });
-        }
+                    }
+                });
     }
     private UserTrackFeatureStats calculateStats(String spotifyUserId, String timeRange) {
         List<String> trackIds = topTrackRepository.findTrackIdsByUserSpotifyIdAndTimeRange(spotifyUserId, timeRange);
