@@ -21,11 +21,11 @@ public class AnalyticsController {
     private final UserTrackFeatureStatsService userTrackFeatureStatsService;
     private final UserGenreDistributionService userGenreDistributionService;
 
-//    @GetMapping("/users/{userId}/musicEraSummary")
-//    public ResponseEntity<Map<String, Map<String, UserMusicEraSummaryDto>>> getUserMusicEraSummary(@PathVariable String userId) {
-//        Map<String, Map<String, UserMusicEraSummaryDto>> summary = userMusicEraSummaryService.fetchUserMusicEraSummary(userId);
-//        return ResponseEntity.ok(summary);
-//    }
+    @GetMapping("/users/{userId}/musicEraSummary")
+    public ResponseEntity<Map<String, Map<String, UserMusicEraSummaryDto>>> getUserMusicEraSummary(@PathVariable String userId) {
+        Map<String, Map<String, UserMusicEraSummaryDto>> summary = userMusicEraSummaryService.fetchUserMusicEraSummary(userId);
+        return ResponseEntity.ok(summary);
+    }
 
     @GetMapping("/users/{userId}/trackFeatureStats")
     public ResponseEntity<UserTrackFeatureStatsMapDto> getUserTrackFeatureStats(@PathVariable String userId) {
