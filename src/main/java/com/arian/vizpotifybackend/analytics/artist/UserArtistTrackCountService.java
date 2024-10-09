@@ -1,12 +1,14 @@
 package com.arian.vizpotifybackend.analytics.artist;
 
+import com.arian.vizpotifybackend.user.topitems.track.UserTopTrack;
+import com.arian.vizpotifybackend.user.topitems.track.UserTopTrackRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -14,6 +16,7 @@ import java.util.stream.Stream;
 public class UserArtistTrackCountService {
     private final UserArtistTrackCountRepository userArtistTrackCountRepository;
     private final UserArtistTrackCountMapper userArtistTrackCountMapper;
+    private final UserTopTrackRepository userTopTrackRepository;
 
     @Transactional
     public UserArtistTrackCountMapDto fetchUserArtistTrackCount(String spotifyId) {
@@ -31,12 +34,36 @@ public class UserArtistTrackCountService {
 
                     if (existingCount.isEmpty() || isCountOutdated(existingCount.get())) {
                         userArtistTrackCountRepository.deleteByUserSpotifyIdAndTimeRange(spotifyUserId, timeRange);
-                        userArtistTrackCountRepository.aggregateAndInsertUserArtistTrackCount(spotifyUserId);
+                        List<UserArtistTrackCount> newCounts = calculateArtistTrackCounts(spotifyUserId, timeRange);
+                        userArtistTrackCountRepository.saveAll(newCounts);
                     }
                 });
     }
 
     private boolean isCountOutdated(UserArtistTrackCount count) {
         return count.getUpdatedAt().plusDays(7).isBefore(LocalDateTime.now());
+    }
+
+    private List<UserArtistTrackCount> calculateArtistTrackCounts(String spotifyUserId, String timeRange) {
+        List<UserTopTrack> userTopTracks = userTopTrackRepository.findByUserSpotifyIdAndTimeRangeWithTrackDetails(spotifyUserId, timeRange);
+        
+        Map<String, Integer> artistTrackCounts = new HashMap<>();
+        for (UserTopTrack track : userTopTracks) {
+            String[] artists = track.getTrackDetail().getArtists().split(",");
+            for (String artist : artists) {
+                artistTrackCounts.merge(artist.trim(), 1, Integer::sum);
+            }
+        }
+
+        int totalTracks = userTopTracks.size();
+        return artistTrackCounts.entrySet().stream()
+                .map(entry -> UserArtistTrackCount.builder()
+                        .userSpotifyId(spotifyUserId)
+                        .timeRange(timeRange)
+                        .artistName(entry.getKey())
+                        .trackCount(entry.getValue())
+                        .percentage((entry.getValue() * 100.0) / totalTracks)
+                        .build())
+                .collect(Collectors.toList());
     }
 }
