@@ -47,17 +47,17 @@ public class UserGenreDistributionService {
     }
 
     private List<GenreDistributionDto> calculateGenreDistribution(String spotifyUserId, String timeRange) {
-        Map<String, Long> genreCounts = userTopArtistRepository.findByUserSpotifyIdAndTimeRange(spotifyUserId, timeRange).stream()
-                .flatMap(artist -> artist.getGenres().stream())
-                .collect(Collectors.groupingBy(genre -> genre, Collectors.counting()));
+        List<Object[]> genreData = userTopArtistRepository.findGenresAndCountByUserSpotifyIdAndTimeRange(spotifyUserId, timeRange);
+        
+        long totalCount = genreData.stream()
+                .mapToLong(data -> (Long) data[1])
+                .sum();
 
-        long totalCount = genreCounts.values().stream().mapToLong(Long::longValue).sum();
-
-        return genreCounts.entrySet().stream()
-                .map(entry -> new GenreDistributionDto(
-                        entry.getKey(),
-                        entry.getValue().intValue(),
-                        (entry.getValue().doubleValue() / totalCount) * 100
+        return genreData.stream()
+                .map(data -> new GenreDistributionDto(
+                        (String) data[0],
+                        ((Long) data[1]).intValue(),
+                        ((Long) data[1]).doubleValue() / totalCount * 100
                 ))
                 .sorted((a, b) -> Double.compare(b.percentage(), a.percentage()))
                 .collect(Collectors.toList());
