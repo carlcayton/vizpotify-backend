@@ -1,6 +1,6 @@
 package com.arian.vizpotifybackend.analytics;
 
-import com.arian.vizpotifybackend.analytics.era.UserMusicEraSummaryDto;
+import com.arian.vizpotifybackend.analytics.era.UserMusicEraSummaryMapDto;
 import com.arian.vizpotifybackend.analytics.era.UserMusicEraSummaryService;
 import com.arian.vizpotifybackend.analytics.features.UserTrackFeatureStatsMapDto;
 import com.arian.vizpotifybackend.analytics.features.UserTrackFeatureStatsService;
@@ -9,8 +9,6 @@ import com.arian.vizpotifybackend.analytics.genre.UserGenreDistributionMapDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/analytics")
@@ -22,8 +20,8 @@ public class AnalyticsController {
     private final UserGenreDistributionService userGenreDistributionService;
 
     @GetMapping("/users/{userId}/musicEraSummary")
-    public ResponseEntity<Map<String, Map<String, UserMusicEraSummaryDto>>> getUserMusicEraSummary(@PathVariable String userId) {
-        Map<String, Map<String, UserMusicEraSummaryDto>> summary = userMusicEraSummaryService.fetchUserMusicEraSummary(userId);
+    public ResponseEntity<UserMusicEraSummaryMapDto> getUserMusicEraSummary(@PathVariable String userId) {
+        UserMusicEraSummaryMapDto summary = userMusicEraSummaryService.fetchUserMusicEraSummary(userId);
         return ResponseEntity.ok(summary);
     }
 
