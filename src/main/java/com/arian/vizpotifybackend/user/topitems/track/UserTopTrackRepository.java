@@ -31,9 +31,8 @@ public interface UserTopTrackRepository extends JpaRepository<UserTopTrack, Long
 
     @Query("SELECT utt.timeRange as timeRange, td.releaseDate as releaseDate " +
             "FROM UserTopTrack utt JOIN utt.trackDetail td " +
-            "WHERE utt.userSpotifyId = :spotifyUserId")
-    List<UserTrackEraDataProjection> findUserTrackEraData(@Param("spotifyUserId") String spotifyUserId);
-
+            "WHERE utt.userSpotifyId = :spotifyUserId AND utt.timeRange = :timeRange")
+    List<UserTrackEraDataProjection> findUserTrackEraData(@Param("spotifyUserId") String spotifyUserId, @Param("timeRange") String timeRange);
 
 }
 

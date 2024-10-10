@@ -24,6 +24,7 @@ public class UserMusicEraSummaryService {
         return userMusicEraSummaryMapper.toMapDto(spotifyId, userMusicEraSummaries);
     }
 
+
     @Transactional
     public void aggregateAndUpsertMusicEraSummary(String spotifyUserId) {
         Stream.of("short_term", "medium_term", "long_term")
@@ -32,7 +33,7 @@ public class UserMusicEraSummaryService {
                             .findFirstByUserSpotifyIdAndTimeRangeOrderByUpdatedAtDesc(spotifyUserId, timeRange);
 
                     if (existingSummary.isEmpty() || isSummaryOutdated(existingSummary.get())) {
-                        List<UserTrackEraDataProjection> userTrackEraData = userTopTrackRepository.findUserTrackEraData(spotifyUserId);
+                        List<UserTrackEraDataProjection> userTrackEraData = userTopTrackRepository.findUserTrackEraData(spotifyUserId, timeRange);
                         Map<String, Integer> eraCounts = calculateEraCounts(userTrackEraData);
                         long totalCount = calculateTotalCount(eraCounts);
                         List<UserMusicEraSummary> summaries = createSummaries(spotifyUserId, timeRange, eraCounts, totalCount);

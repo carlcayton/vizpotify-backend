@@ -26,8 +26,9 @@ public class ArtistDetailController {
         Map<String,Object> result = new HashMap<>();
         List<ArtistDto> artistDtoS= relatedArtistService.getRelatedArtists(artistId);
         List<TrackDto> trackDtoS =  artistTopTracksService.getArtistTopTracks(artistId);
-        result.put("artistDtoS",artistDtoS);
-        result.put("trackDtoS",trackDtoS);
+        result.put("relatedArtists",artistDtoS);
+        result.put("artistTopTracks",trackDtoS);
+
         return ResponseEntity.ok(result);
     }
 }
