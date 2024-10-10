@@ -21,15 +21,6 @@ public class AnalyticsAggregator {
     private final UserTrackFeatureStatsService userTrackFeatureStatsService;
     private final UserMusicEraSummaryService userMusicEraSummaryService;
 
-    private String toCamelCase(String snakeStr) {
-        String[] parts = snakeStr.split("_");
-        StringBuilder camelCaseString = new StringBuilder(parts[0]);
-        for (int i = 1; i < parts.length; i++) {
-            camelCaseString.append(Character.toUpperCase(parts[i].charAt(0)))
-                    .append(parts[i].substring(1));
-        }
-        return camelCaseString.toString();
-    }
 
     private List<Map<String, Object>> ensureAllErasPresent(List<Map<String, Object>> results) {
         List<String> allEras = Arrays.asList("1950s", "1960s", "1970s", "1980s", "1990s", "2000s", "2010s", "2020s", "< 1950");

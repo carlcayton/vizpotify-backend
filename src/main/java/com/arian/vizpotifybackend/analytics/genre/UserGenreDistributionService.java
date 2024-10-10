@@ -47,7 +47,6 @@ public class UserGenreDistributionService {
 
 
     public void saveGenreDistributions(String spotifyUserId, String timeRange, List<GenreDistributionDto> genreDistributions) {
-        // Fetch all existing distributions for this user and time range
         List<UserGenreDistribution> existingDistributions =
                 userGenreDistributionRepository.findByUserSpotifyIdAndTimeRange(spotifyUserId, timeRange);
 

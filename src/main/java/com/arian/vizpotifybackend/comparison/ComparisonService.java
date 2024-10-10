@@ -15,21 +15,20 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ComparisonService {
 
-    private final AnalyticsService analyticsService;
     private final UserTopArtistService userTopArtistService;
     private final UserTopTrackService userTopTrackService;
 
     public ComparisonDto compareUsers(String userId1, String userId2) {
-        AnalyticsDto analytics1 = analyticsService.getAnalyticsForUser(userId1);
-        AnalyticsDto analytics2 = analyticsService.getAnalyticsForUser(userId2);
-        Map<String, List<ArtistDto>> topArtists1 = userTopArtistService.getUserTopArtists(userId1);
-        Map<String, List<ArtistDto>> topArtists2 = userTopArtistService.getUserTopArtists(userId2);
-        Map<String, List<TrackDto>> topTracks1 = userTopTrackService.getUserTopItems(userId1);
-        Map<String, List<TrackDto>> topTracks2 = userTopTrackService.getUserTopItems(userId2);
-
-        Map<String, Double> jaccardSimilarity = calculateJaccardSimilarity(topArtists1, topArtists2, topTracks1, topTracks2);
-        CommonItemsDto commonItems = findCommonItems(topArtists1, topArtists2, topTracks1, topTracks2);
-
+//        AnalyticsDto analytics1 = analyticsService.getAnalyticsForUser(userId1);
+//        AnalyticsDto analytics2 = analyticsService.getAnalyticsForUser(userId2);
+//        Map<String, List<ArtistDto>> topArtists1 = userTopArtistService.getUserTopArtists(userId1);
+//        Map<String, List<ArtistDto>> topArtists2 = userTopArtistService.getUserTopArtists(userId2);
+//        Map<String, List<TrackDto>> topTracks1 = userTopTrackService.getUserTopItems(userId1);
+//        Map<String, List<TrackDto>> topTracks2 = userTopTrackService.getUserTopItems(userId2);
+//
+//        Map<String, Double> jaccardSimilarity = calculateJaccardSimilarity(topArtists1, topArtists2, topTracks1, topTracks2);
+//        CommonItemsDto commonItems = findCommonItems(topArtists1, topArtists2, topTracks1, topTracks2);
+//
 //        return new ComparisonDto(
 //                commonItems,
 //                jaccardSimilarity,

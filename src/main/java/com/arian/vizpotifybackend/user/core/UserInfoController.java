@@ -23,7 +23,6 @@ public class UserInfoController {
     private final ProfileHeaderService profileHeaderService;
     private final UserTopArtistService userTopArtistService;
     private final UserTopTrackService userTopTrackService;
-    private final AnalyticsService analyticsService;
 
     @GetMapping("/{userId}/profileHeader")
     public ResponseEntity<ProfileHeaderDto> getUserProfileHeader(@PathVariable String userId) {
