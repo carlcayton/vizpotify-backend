@@ -53,7 +53,12 @@ public class UserArtistTrackCountService {
                 .map(String::trim)
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
-        long totalTracks = userTopTracks.size();
+         artistTrackCounts = artistTrackCounts.entrySet().stream()
+                .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue()))
+                .limit(10)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+
+        long totalTracks = artistTrackCounts.size();
         return artistTrackCounts.entrySet().stream()
                 .map(entry -> UserArtistTrackCount.builder()
                         .userSpotifyId(spotifyUserId)
