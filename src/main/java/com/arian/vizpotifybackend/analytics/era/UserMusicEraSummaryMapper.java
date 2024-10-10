@@ -1,5 +1,6 @@
 package com.arian.vizpotifybackend.analytics.era;
 
+import com.arian.vizpotifybackend.analytics.util.AnalyticsUtility;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -18,7 +19,7 @@ public interface UserMusicEraSummaryMapper {
     default Map<String, List<UserMusicEraSummaryDto>> mapEraSummariesByTimeRange(List<UserMusicEraSummary> userMusicEraSummaries) {
         return userMusicEraSummaries.stream()
                 .collect(Collectors.groupingBy(
-                        UserMusicEraSummary::getTimeRange,
+                        summary -> AnalyticsUtility.toCamelCase(summary.getTimeRange()),
                         Collectors.mapping(this::toDto, Collectors.toList())
                 ));
     }

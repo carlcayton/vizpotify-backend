@@ -1,5 +1,6 @@
 package com.arian.vizpotifybackend.analytics.features;
 
+import com.arian.vizpotifybackend.analytics.util.AnalyticsUtility;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -19,7 +20,7 @@ public interface UserTrackFeatureStatsMapper {
     default Map<String, UserTrackFeatureStatsDto> mapFeatureStatsByTimeRange(List<UserTrackFeatureStats> userTrackFeatureStatsList) {
         return userTrackFeatureStatsList.stream()
                 .collect(Collectors.toMap(
-                        UserTrackFeatureStats::getTimeRange,
+                        stats -> AnalyticsUtility.toCamelCase(stats.getTimeRange()),
                         this::toDto
                 ));
     }

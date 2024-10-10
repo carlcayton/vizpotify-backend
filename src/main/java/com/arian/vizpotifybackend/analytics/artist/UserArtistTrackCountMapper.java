@@ -1,5 +1,6 @@
 package com.arian.vizpotifybackend.analytics.artist;
 
+import com.arian.vizpotifybackend.analytics.util.AnalyticsUtility;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -18,7 +19,7 @@ public interface UserArtistTrackCountMapper {
     default Map<String, List<UserArtistTrackCountDto>> mapArtistTrackCountsByTimeRange(List<UserArtistTrackCount> userArtistTrackCounts) {
         return userArtistTrackCounts.stream()
                 .collect(Collectors.groupingBy(
-                        UserArtistTrackCount::getTimeRange,
+                        count -> AnalyticsUtility.toCamelCase(count.getTimeRange()),
                         Collectors.mapping(this::toDto, Collectors.toList())
                 ));
     }
