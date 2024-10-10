@@ -62,7 +62,6 @@ public class UserTrackFeatureStatsService {
                 .liveness(calculateAverage(features, AudioFeature::getLiveness))
                 .speechiness(calculateAverage(features, AudioFeature::getSpeechiness))
                 .valence(calculateAverage(features, AudioFeature::getValence))
-                .tempo(calculateAverage(features, AudioFeature::getTempo))
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();

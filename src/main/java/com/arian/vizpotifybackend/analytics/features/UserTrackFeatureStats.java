@@ -35,7 +35,6 @@ public class UserTrackFeatureStats {
     private Double liveness;
     private Double speechiness;
     private Double valence;
-    private Double tempo;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

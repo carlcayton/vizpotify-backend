@@ -1,6 +1,8 @@
 package com.arian.vizpotifybackend.analytics;
 
-import com.arian.vizpotifybackend.analytics.era.UserMusicEraSummaryDto;
+import com.arian.vizpotifybackend.analytics.artist.UserArtistTrackCountMapDto;
+import com.arian.vizpotifybackend.analytics.artist.UserArtistTrackCountService;
+import com.arian.vizpotifybackend.analytics.era.UserMusicEraSummaryMapDto;
 import com.arian.vizpotifybackend.analytics.era.UserMusicEraSummaryService;
 import com.arian.vizpotifybackend.analytics.features.UserTrackFeatureStatsMapDto;
 import com.arian.vizpotifybackend.analytics.features.UserTrackFeatureStatsService;
@@ -10,8 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api/v1/analytics")
 @RequiredArgsConstructor
@@ -20,12 +20,13 @@ public class AnalyticsController {
     private final UserMusicEraSummaryService userMusicEraSummaryService;
     private final UserTrackFeatureStatsService userTrackFeatureStatsService;
     private final UserGenreDistributionService userGenreDistributionService;
+    private final UserArtistTrackCountService userArtistTrackCountService;
 
-//    @GetMapping("/users/{userId}/musicEraSummary")
-//    public ResponseEntity<Map<String, Map<String, UserMusicEraSummaryDto>>> getUserMusicEraSummary(@PathVariable String userId) {
-//        Map<String, Map<String, UserMusicEraSummaryDto>> summary = userMusicEraSummaryService.fetchUserMusicEraSummary(userId);
-//        return ResponseEntity.ok(summary);
-//    }
+    @GetMapping("/users/{userId}/musicEraSummary")
+    public ResponseEntity<UserMusicEraSummaryMapDto> getUserMusicEraSummary(@PathVariable String userId) {
+        UserMusicEraSummaryMapDto summary = userMusicEraSummaryService.fetchUserMusicEraSummary(userId);
+        return ResponseEntity.ok(summary);
+    }
 
     @GetMapping("/users/{userId}/trackFeatureStats")
     public ResponseEntity<UserTrackFeatureStatsMapDto> getUserTrackFeatureStats(@PathVariable String userId) {
@@ -37,5 +38,11 @@ public class AnalyticsController {
     public ResponseEntity<UserGenreDistributionMapDto> getUserGenreDistribution(@PathVariable String userId) {
         UserGenreDistributionMapDto genreDistribution = userGenreDistributionService.fetchUserGenreDistribution(userId);
         return ResponseEntity.ok(genreDistribution);
+    }
+
+    @GetMapping("/users/{userId}/artistTrackCount")
+    public ResponseEntity<UserArtistTrackCountMapDto> getUserArtistTrackCount(@PathVariable String userId) {
+        UserArtistTrackCountMapDto artistTrackCount = userArtistTrackCountService.fetchUserArtistTrackCount(userId);
+        return ResponseEntity.ok(artistTrackCount);
     }
 }

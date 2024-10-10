@@ -7,7 +7,6 @@ public record UserTrackFeatureStatsDto(
         String instrumentalness,
         String liveness,
         String speechiness,
-        String valence,
-        String tempo
+        String valence
 ) {
 }

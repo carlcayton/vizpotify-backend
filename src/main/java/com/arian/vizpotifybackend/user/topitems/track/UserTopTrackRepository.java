@@ -15,6 +15,9 @@ public interface UserTopTrackRepository extends JpaRepository<UserTopTrack, Long
     boolean existsByUserSpotifyId(String spotifyId);
 
     List<UserTopTrack> findByUserSpotifyIdAndTimeRange(String userSpotifyId, String timeRange);
+
+    @Query("SELECT utt FROM UserTopTrack utt JOIN FETCH utt.trackDetail WHERE utt.userSpotifyId = :userSpotifyId AND utt.timeRange = :timeRange")
+    List<UserTopTrack> findByUserSpotifyIdAndTimeRangeWithTrackDetails(@Param("userSpotifyId") String userSpotifyId, @Param("timeRange") String timeRange);
     @Query(value = """
             SELECT DISTINCT a.track_id 
             FROM user_top_track a 
@@ -27,10 +30,9 @@ public interface UserTopTrackRepository extends JpaRepository<UserTopTrack, Long
     List<String> findTrackIdsByUserSpotifyIdAndTimeRange(@Param("userSpotifyId") String userSpotifyId, @Param("timeRange") String timeRange);
 
     @Query("SELECT utt.timeRange as timeRange, td.releaseDate as releaseDate " +
-            "FROM UserTopTrack utt JOIN TrackDetail td ON utt.trackId = td.id " +
-            "WHERE utt.userSpotifyId = :spotifyUserId")
-    List<UserTrackEraDataProjection> findUserTrackEraData(@Param("spotifyUserId") String spotifyUserId);
-
+            "FROM UserTopTrack utt JOIN utt.trackDetail td " +
+            "WHERE utt.userSpotifyId = :spotifyUserId AND utt.timeRange = :timeRange")
+    List<UserTrackEraDataProjection> findUserTrackEraData(@Param("spotifyUserId") String spotifyUserId, @Param("timeRange") String timeRange);
 
 }
 

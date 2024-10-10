@@ -1,3 +1,4 @@
+
 package com.arian.vizpotifybackend.user.topitems.track;
 
 import com.arian.vizpotifybackend.common.SpotifyService;
@@ -7,7 +8,6 @@ import com.arian.vizpotifybackend.track.TrackDto;
 import com.arian.vizpotifybackend.track.TrackDetail;
 import com.arian.vizpotifybackend.track.TrackDetailService;
 import com.arian.vizpotifybackend.user.topitems.common.UserTopItemService;
-
 import com.arian.vizpotifybackend.user.topitems.common.TopItemUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,83 +26,61 @@ public class UserTopTrackService implements UserTopItemService {
     private final TrackMapper trackMapper;
 
     public Map<String, List<TrackDto>> getUserTopItems(String userId) {
-
-        boolean userExists =userTopTrackRepository.existsByUserSpotifyId(userId);
-        if (userExists) {
-            return fetchUserTopItemsFromDB(userId);
-        } else {
-            return fetchUserTopItemsFromSpotifyAndSave(userId);
-        }
+        return userTopTrackRepository.existsByUserSpotifyId(userId)
+                ? fetchUserTopItemsFromDB(userId)
+                : fetchUserTopItemsFromSpotifyAndSave(userId);
     }
 
     public Map<String, List<TrackDto>> fetchUserTopItemsFromDB(String userId) {
-        Map<String, List<TrackDto>> trackDetailsForUser = new HashMap<>();
         List<UserTopTrack> allUserTopTracks = userTopTrackRepository.findByUserSpotifyId(userId);
-
         List<String> trackIds = allUserTopTracks.stream()
-                .map(UserTopTrack::getTrackId)
+                .map(userTopTrack -> userTopTrack.getTrackDetail().getId())
                 .collect(Collectors.toList());
 
-        List<TrackDetail> trackDetailsList = trackDetailService.getTracksByIds(trackIds);
+        Map<String, TrackDetail> trackIdToDetailMap = trackDetailService.getTracksByIds(trackIds).stream()
+                .collect(Collectors.toMap(TrackDetail::getId, track -> track));
 
-        Map<String, TrackDetail> trackIdToDetailMap = new HashMap<>();
-        for (TrackDetail detail : trackDetailsList) {
-            trackIdToDetailMap.put(detail.getId(), detail);
-        }
-
-        for (UserTopTrack userTopTrack : allUserTopTracks) {
-            TrackDetail trackDetail = trackIdToDetailMap.get(userTopTrack.getTrackId());
-            if (trackDetail != null) {
-                TrackDto trackDto = trackMapper.trackDetailToTrackDto(trackDetail);
-                String timeRangeKey = userTopTrack.getTimeRange();
-                trackDetailsForUser.computeIfAbsent(TopItemUtil.formatTimeRangeForDto(timeRangeKey), k -> new ArrayList<>()).add(trackDto);
-            }
-        }
-
-        return trackDetailsForUser;
+        return allUserTopTracks.stream()
+                .collect(Collectors.groupingBy(
+                        userTopTrack -> TopItemUtil.formatTimeRangeForDto(userTopTrack.getTimeRange()),
+                        Collectors.mapping(userTopTrack -> {
+                            TrackDetail trackDetail = trackIdToDetailMap.get(userTopTrack.getTrackDetail().getId());
+                            return trackMapper.trackDetailToTrackDto(trackDetail);
+                        }, Collectors.toList())
+                ));
     }
-
 
     public Map<String, List<TrackDto>> fetchUserTopItemsFromSpotifyAndSave(String userId) {
         Map<TimeRange, Paging<Track>> userTopTracksForAllTimeRange = spotifyService.getUserTopTracksForAllTimeRange(userId);
 
-        Set<Track> allTracksAsSet =
-                trackDetailService
-                        .extractUniqueTracks(userTopTracksForAllTimeRange);
+        Set<Track> allTracksAsSet = trackDetailService.extractUniqueTracks(userTopTracksForAllTimeRange);
         trackDetailService.processAndStoreNewTrackDetails(allTracksAsSet);
-        Map<String, List<TrackDto>> output = new HashMap<>();
-        for (Map.Entry<TimeRange, Paging<Track>> entry : userTopTracksForAllTimeRange.entrySet()) {
-            String currentTimeRange = entry.getKey().getValue();
-            List<TrackDto> trackDtos = processTracksForTimeRange(currentTimeRange, userId, entry.getValue());
-            output.put(TopItemUtil.formatTimeRangeForDto(currentTimeRange), trackDtos);
-        }
 
-        return output;
-
+        return userTopTracksForAllTimeRange.entrySet().stream()
+                .collect(Collectors.toMap(
+                        entry -> TopItemUtil.formatTimeRangeForDto(entry.getKey().getValue()),
+                        entry -> processTracksForTimeRange(entry.getKey().getValue(), userId, entry.getValue())
+                ));
     }
 
-
     private List<TrackDto> processTracksForTimeRange(String timeRange, String spotifyId, Paging<Track> tracksPage) {
-        List<TrackDto> trackDtos = new ArrayList<>();
         List<UserTopTrack> userTopTracks = new ArrayList<>();
+        List<TrackDto> trackDtos = Arrays.stream(tracksPage.getItems())
+                .map(track -> {
+                    TrackDto trackDto = trackMapper.trackToTrackDto(track);
+                    userTopTracks.add(createUserTopTrack(spotifyId, track.getId(), timeRange, userTopTracks.size() + 1));
+                    return trackDto;
+                })
+                .collect(Collectors.toList());
 
-        Track[] tracks = tracksPage.getItems();
-
-        int rank = 1;
-        for (Track track : tracks) {
-            trackDtos.add(trackMapper.trackToTrackDto(track));
-            UserTopTrack userTopTrack = createUserTopTrack(spotifyId, track.getId(), timeRange, rank++);
-            userTopTracks.add(userTopTrack);
-        }
         userTopTrackRepository.saveAll(userTopTracks);
-
         return trackDtos;
     }
 
     private UserTopTrack createUserTopTrack(String spotifyId, String trackId, String timeRange, int rank) {
         return UserTopTrack.builder()
                 .userSpotifyId(spotifyId)
-                .trackId(trackId)
+                .trackDetail(TrackDetail.builder().id(trackId).build())
                 .timeRange(timeRange)
                 .rank(rank)
                 .lastUpdated(new Date())

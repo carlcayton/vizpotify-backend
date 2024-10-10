@@ -1,5 +1,6 @@
 package com.arian.vizpotifybackend.user.topitems.track;
 
+import com.arian.vizpotifybackend.track.TrackDetail;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,8 +24,9 @@ public class UserTopTrack {
     @Column(name = "user_spotify_id")
     private String userSpotifyId;
 
-    @Column(name = "track_id")
-    private String trackId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "track_id")
+    private TrackDetail trackDetail;
 
     @Column(name = "time_range", nullable = false)
     private String timeRange;
