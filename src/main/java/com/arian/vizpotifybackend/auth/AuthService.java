@@ -15,8 +15,6 @@ public class AuthService {
     private final JwtService jwtService;
     private final UserService userService;
 
-
-
     public String extractJwtFromCookie(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
