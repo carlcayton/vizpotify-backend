@@ -6,6 +6,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Map;
 
 public record CommonItemsDto(
-        @JsonProperty("commonArtists") Map<String, String> commonArtists,
-        @JsonProperty("commonTracks") Map<String, Map<String, String>> commonTracks
+        Map<String, String> commonArtists,
+        Map<String, String> commonTracks
 ) {}
