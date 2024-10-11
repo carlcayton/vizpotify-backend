@@ -17,7 +17,6 @@ public class UserGenreDistributionService {
     private final UserGenreDistributionRepository userGenreDistributionRepository;
     private final UserGenreDistributionMapper userGenreDistributionMapper;
 
-    private static final int DAYS_BEFORE_REFRESH = 9;
 
     @Transactional
     public UserGenreDistributionMapDto fetchUserGenreDistribution(String spotifyId) {

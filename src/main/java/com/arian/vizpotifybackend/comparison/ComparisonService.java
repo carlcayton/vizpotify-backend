@@ -54,7 +54,7 @@ public class ComparisonService {
         return new ComparisonDto(
                 commonItems,
                 jaccardSimilarity,
-                Map.of(userId1, topTracks1, userId2, topTracks2),
+                Map.of(userId1, consolidateTracks(topTracks1).stream().toList(), userId2, consolidateTracks(topTracks2).stream().toList()),
                 Map.of(userId1, eraSummary1, userId2, eraSummary2),
                 Map.of(userId1, featureStats1, userId2, featureStats2),
                 Map.of(userId1, genreDistribution1, userId2, genreDistribution2),
@@ -67,17 +67,18 @@ public class ComparisonService {
             Map<String, List<ArtistDto>> topArtists2,
             Map<String, List<TrackDto>> topTracks1,
             Map<String, List<TrackDto>> topTracks2) {
+
+        Set<String> artists1 = consolidateArtists(topArtists1).stream().map(ArtistDto::getId).collect(Collectors.toSet());
+        Set<String> artists2 = consolidateArtists(topArtists2).stream().map(ArtistDto::getId).collect(Collectors.toSet());
+        double artistSimilarity = calculateJaccard(artists1, artists2);
+
+        Set<String> tracks1 = consolidateTracks(topTracks1).stream().map(TrackDto::getId).collect(Collectors.toSet());
+        Set<String> tracks2 = consolidateTracks(topTracks2).stream().map(TrackDto::getId).collect(Collectors.toSet());
+        double trackSimilarity = calculateJaccard(tracks1, tracks2);
+
         Map<String, Double> similarity = new HashMap<>();
-
-        for (String timeRange : topArtists1.keySet()) {
-            Set<String> artists1 = topArtists1.get(timeRange).stream().map(ArtistDto::getId).collect(Collectors.toSet());
-            Set<String> artists2 = topArtists2.get(timeRange).stream().map(ArtistDto::getId).collect(Collectors.toSet());
-            similarity.put("artists_" + timeRange, calculateJaccard(artists1, artists2));
-
-            Set<String> tracks1 = topTracks1.get(timeRange).stream().map(TrackDto::getId).collect(Collectors.toSet());
-            Set<String> tracks2 = topTracks2.get(timeRange).stream().map(TrackDto::getId).collect(Collectors.toSet());
-            similarity.put("tracks_" + timeRange, calculateJaccard(tracks1, tracks2));
-        }
+        similarity.put("artists", artistSimilarity);
+        similarity.put("tracks", trackSimilarity);
 
         return similarity;
     }

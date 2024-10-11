@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 public class ComparisonController {
 
     private final ComparisonService comparisonService;
-    private final UserComparisonService userComparisonService;
 
     @GetMapping("/{userId1}/{userId2}")
     public ResponseEntity<ComparisonDto> compareUsers(
@@ -20,11 +19,4 @@ public class ComparisonController {
         return ResponseEntity.ok(comparisonDto);
     }
 
-    @GetMapping("/users")
-    public ResponseEntity<UserComparisonDto> compareUserAnalytics(
-            @RequestParam String userId1,
-            @RequestParam String userId2) {
-        UserComparisonDto userComparisonDto = userComparisonService.compareUsers(userId1, userId2);
-        return ResponseEntity.ok(userComparisonDto);
-    }
 }
