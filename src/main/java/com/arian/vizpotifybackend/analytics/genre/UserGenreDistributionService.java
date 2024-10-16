@@ -1,7 +1,10 @@
 package com.arian.vizpotifybackend.analytics.genre;
 
+import com.arian.vizpotifybackend.analytics.AnalyticsResponse;
 import com.arian.vizpotifybackend.user.topitems.artist.UserTopArtistRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,11 +22,18 @@ public class UserGenreDistributionService {
 
 
     @Transactional
-    public UserGenreDistributionMapDto fetchUserGenreDistribution(String spotifyId) {
+    @Retryable(maxAttempts = 12, backoff = @Backoff(delay = 5000))
+    public AnalyticsResponse<UserGenreDistributionMapDto> fetchUserGenreDistribution(String spotifyId) {
+        List<Object[]> genreData = userTopArtistRepository.findGenresAndCountByUserSpotifyId(spotifyId);
+        if (genreData.isEmpty()) {
+            return new AnalyticsResponse<>("processing", "Data is being processed. Please try again later.", null);
+        }
         aggregateAndUpsertUserGenreDistribution(spotifyId);
         List<UserGenreDistribution> userGenreDistributions = userGenreDistributionRepository.findByUserSpotifyIdOrderByPercentageDesc(spotifyId);
-        return userGenreDistributionMapper.toMapDto(spotifyId, userGenreDistributions);
+        UserGenreDistributionMapDto dto = userGenreDistributionMapper.toMapDto(spotifyId, userGenreDistributions);
+        return new AnalyticsResponse<>("complete", "Data processing complete", dto);
     }
+
 
     @Transactional
     public void aggregateAndUpsertUserGenreDistribution(String spotifyUserId) {

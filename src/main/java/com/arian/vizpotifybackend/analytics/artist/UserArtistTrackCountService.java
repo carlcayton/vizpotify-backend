@@ -1,8 +1,11 @@
 package com.arian.vizpotifybackend.analytics.artist;
 
+import com.arian.vizpotifybackend.analytics.AnalyticsResponse;
 import com.arian.vizpotifybackend.user.topitems.track.UserTopTrack;
 import com.arian.vizpotifybackend.user.topitems.track.UserTopTrackRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,10 +23,16 @@ public class UserArtistTrackCountService {
     private final UserTopTrackRepository userTopTrackRepository;
 
     @Transactional
-    public UserArtistTrackCountMapDto fetchUserArtistTrackCount(String spotifyId) {
+    @Retryable(maxAttempts = 12, backoff = @Backoff(delay = 5000))
+    public AnalyticsResponse<UserArtistTrackCountMapDto> fetchUserArtistTrackCount(String spotifyId) {
+        List<String> trackIds = userTopTrackRepository.findTrackIdsByUserSpotifyIdAndTimeRange(spotifyId, "long_term");
+        if (trackIds.isEmpty()) {
+            return new AnalyticsResponse<>("processing", "Data is being processed. Please try again later.", null);
+        }
         aggregateAndUpsertUserArtistTrackCount(spotifyId);
         List<UserArtistTrackCount> userArtistTrackCounts = userArtistTrackCountRepository.findAllByUserSpotifyId(spotifyId);
-        return userArtistTrackCountMapper.toMapDto(spotifyId, userArtistTrackCounts);
+        UserArtistTrackCountMapDto dto = userArtistTrackCountMapper.toMapDto(spotifyId, userArtistTrackCounts);
+        return new AnalyticsResponse<>("complete", "Data processing complete", dto);
     }
 
     @Transactional

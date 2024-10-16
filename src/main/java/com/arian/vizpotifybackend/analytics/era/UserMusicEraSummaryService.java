@@ -1,7 +1,10 @@
 package com.arian.vizpotifybackend.analytics.era;
 
+import com.arian.vizpotifybackend.analytics.AnalyticsResponse;
 import com.arian.vizpotifybackend.user.topitems.track.UserTopTrackRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,11 +20,18 @@ public class UserMusicEraSummaryService {
     private final UserMusicEraSummaryRepository userMusicEraSummaryRepository;
     private final UserMusicEraSummaryMapper userMusicEraSummaryMapper;
 
+
     @Transactional
-    public UserMusicEraSummaryMapDto fetchUserMusicEraSummary(String spotifyId) {
+    @Retryable(maxAttempts = 12, backoff = @Backoff(delay = 5000))
+    public AnalyticsResponse<UserMusicEraSummaryMapDto> fetchUserMusicEraSummary(String spotifyId) {
+        List<String> trackIds = userTopTrackRepository.findTrackIdsByUserSpotifyIdAndTimeRange(spotifyId, "long_term");
+        if (trackIds.isEmpty()) {
+            return new AnalyticsResponse<>("processing", "Data is being processed. Please try again later.", null);
+        }
         aggregateAndUpsertMusicEraSummary(spotifyId);
         List<UserMusicEraSummary> userMusicEraSummaries = userMusicEraSummaryRepository.findAllByUserSpotifyId(spotifyId);
-        return userMusicEraSummaryMapper.toMapDto(spotifyId, userMusicEraSummaries);
+        UserMusicEraSummaryMapDto dto = userMusicEraSummaryMapper.toMapDto(spotifyId, userMusicEraSummaries);
+        return new AnalyticsResponse<>("complete", "Data processing complete", dto);
     }
 
 

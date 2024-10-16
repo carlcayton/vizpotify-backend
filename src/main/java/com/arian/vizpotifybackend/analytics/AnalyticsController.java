@@ -9,6 +9,7 @@ import com.arian.vizpotifybackend.analytics.features.UserTrackFeatureStatsServic
 import com.arian.vizpotifybackend.analytics.genre.UserGenreDistributionService;
 import com.arian.vizpotifybackend.analytics.genre.UserGenreDistributionMapDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,26 +24,39 @@ public class AnalyticsController {
     private final UserArtistTrackCountService userArtistTrackCountService;
 
     @GetMapping("/users/{userId}/musicEraSummary")
-    public ResponseEntity<UserMusicEraSummaryMapDto> getUserMusicEraSummary(@PathVariable String userId) {
-        UserMusicEraSummaryMapDto summary = userMusicEraSummaryService.fetchUserMusicEraSummary(userId);
-        return ResponseEntity.ok(summary);
+    public ResponseEntity<?> getUserMusicEraSummary(@PathVariable String userId) {
+        AnalyticsResponse<UserMusicEraSummaryMapDto> response = userMusicEraSummaryService.fetchUserMusicEraSummary(userId);
+        if ("processing".equals(response.getStatus())) {
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+        }
+        return ResponseEntity.ok(response.getData());
     }
 
     @GetMapping("/users/{userId}/trackFeatureStats")
-    public ResponseEntity<UserTrackFeatureStatsMapDto> getUserTrackFeatureStats(@PathVariable String userId) {
-        UserTrackFeatureStatsMapDto featureStats = userTrackFeatureStatsService.fetchUserTrackFeatureStats(userId);
-        return ResponseEntity.ok(featureStats);
+    public ResponseEntity<?> getUserTrackFeatureStats(@PathVariable String userId) {
+        AnalyticsResponse<UserTrackFeatureStatsMapDto> response = userTrackFeatureStatsService.fetchUserTrackFeatureStats(userId);
+        if ("processing".equals(response.getStatus())) {
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+        }
+        return ResponseEntity.ok(response.getData());
     }
 
     @GetMapping("/users/{userId}/genreDistribution")
-    public ResponseEntity<UserGenreDistributionMapDto> getUserGenreDistribution(@PathVariable String userId) {
-        UserGenreDistributionMapDto genreDistribution = userGenreDistributionService.fetchUserGenreDistribution(userId);
-        return ResponseEntity.ok(genreDistribution);
+    public ResponseEntity<?> getUserGenreDistribution(@PathVariable String userId) {
+        AnalyticsResponse<UserGenreDistributionMapDto> response = userGenreDistributionService.fetchUserGenreDistribution(userId);
+        if ("processing".equals(response.getStatus())) {
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+        }
+        return ResponseEntity.ok(response.getData());
     }
 
     @GetMapping("/users/{userId}/artistTrackCount")
-    public ResponseEntity<UserArtistTrackCountMapDto> getUserArtistTrackCount(@PathVariable String userId) {
-        UserArtistTrackCountMapDto artistTrackCount = userArtistTrackCountService.fetchUserArtistTrackCount(userId);
-        return ResponseEntity.ok(artistTrackCount);
+    public ResponseEntity<?> getUserArtistTrackCount(@PathVariable String userId) {
+        AnalyticsResponse<UserArtistTrackCountMapDto> response = userArtistTrackCountService.fetchUserArtistTrackCount(userId);
+        if ("processing".equals(response.getStatus())) {
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+        }
+        return ResponseEntity.ok(response.getData());
     }
 }
+

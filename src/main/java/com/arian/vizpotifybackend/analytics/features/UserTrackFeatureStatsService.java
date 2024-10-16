@@ -1,13 +1,17 @@
 package com.arian.vizpotifybackend.analytics.features;
 
+import com.arian.vizpotifybackend.analytics.AnalyticsResponse;
 import com.arian.vizpotifybackend.track.AudioFeature;
 import com.arian.vizpotifybackend.track.AudioFeatureRepository;
 import com.arian.vizpotifybackend.user.topitems.track.UserTopTrackRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -16,19 +20,22 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class UserTrackFeatureStatsService {
-    private final UserTopTrackRepository topTrackRepository;
+    private final UserTopTrackRepository userTopTrackRepository;
     private final AudioFeatureRepository audioFeatureRepository;
     private final UserTrackFeatureStatsRepository userTrackFeatureStatsRepository;
     private final UserTrackFeatureStatsMapper userTrackFeatureStatsMapper;
 
     @Transactional
-    public UserTrackFeatureStatsMapDto fetchUserTrackFeatureStats(String spotifyId) {
-        if (!userTrackFeatureStatsRepository.existsByUserSpotifyId(spotifyId)) {
-            aggregateAndUpsertUserTrackFeatureStats(spotifyId);
+    @Retryable(maxAttempts = 12, backoff = @Backoff(delay = 5000))
+    public AnalyticsResponse<UserTrackFeatureStatsMapDto> fetchUserTrackFeatureStats(String spotifyId) {
+        List<String> trackIds = userTopTrackRepository.findTrackIdsByUserSpotifyIdAndTimeRange(spotifyId, "long_term");
+        if (trackIds.isEmpty()) {
+            return new AnalyticsResponse<>("processing", "Data is being processed. Please try again later.", null);
         }
-    
+        aggregateAndUpsertUserTrackFeatureStats(spotifyId);
         List<UserTrackFeatureStats> userTrackFeatureStats = userTrackFeatureStatsRepository.findAllByUserSpotifyId(spotifyId);
-        return userTrackFeatureStatsMapper.toMapDto(spotifyId, userTrackFeatureStats);
+        UserTrackFeatureStatsMapDto dto = userTrackFeatureStatsMapper.toMapDto(spotifyId, userTrackFeatureStats);
+        return new AnalyticsResponse<>("complete", "Data processing complete", dto);
     }
 
     @Transactional
@@ -45,7 +52,7 @@ public class UserTrackFeatureStatsService {
                 });
     }
     private UserTrackFeatureStats calculateStats(String spotifyUserId, String timeRange) {
-        List<String> trackIds = topTrackRepository.findTrackIdsByUserSpotifyIdAndTimeRange(spotifyUserId, timeRange);
+        List<String> trackIds = userTopTrackRepository.findTrackIdsByUserSpotifyIdAndTimeRange(spotifyUserId, timeRange);
         List<AudioFeature> features = audioFeatureRepository.findAllById(trackIds);
 
         return createUserTrackFeatureStats(spotifyUserId, timeRange, features);
