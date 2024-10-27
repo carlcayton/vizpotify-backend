@@ -11,10 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 @Service
@@ -26,17 +23,30 @@ public class UserTrackFeatureStatsService {
     private final UserTrackFeatureStatsMapper userTrackFeatureStatsMapper;
 
     @Transactional
-    @Retryable(maxAttempts = 12, backoff = @Backoff(delay = 5000))
     public AnalyticsResponse<UserTrackFeatureStatsMapDto> fetchUserTrackFeatureStats(String spotifyId) {
-        List<String> trackIds = userTopTrackRepository.findTrackIdsByUserSpotifyIdAndTimeRange(spotifyId, "long_term");
-        if (trackIds.isEmpty()) {
-            return new AnalyticsResponse<>("processing", "Data is being processed. Please try again later.", null);
+        List<UserTrackFeatureStats> existingStats = userTrackFeatureStatsRepository.findAllByUserSpotifyId(spotifyId);
+        if (!existingStats.isEmpty()) {
+            UserTrackFeatureStatsMapDto dto = userTrackFeatureStatsMapper.toMapDto(spotifyId, existingStats);
+            return new AnalyticsResponse<>("complete", "Data processing complete", dto);
         }
-        aggregateAndUpsertUserTrackFeatureStats(spotifyId);
-        List<UserTrackFeatureStats> userTrackFeatureStats = userTrackFeatureStatsRepository.findAllByUserSpotifyId(spotifyId);
-        UserTrackFeatureStatsMapDto dto = userTrackFeatureStatsMapper.toMapDto(spotifyId, userTrackFeatureStats);
-        return new AnalyticsResponse<>("complete", "Data processing complete", dto);
+
+        for (String timeRange : Arrays.asList("short_term", "medium_term", "long_term")) {
+            List<String> trackIds = userTopTrackRepository.findTrackIdsByUserSpotifyIdAndTimeRange(spotifyId, timeRange);
+            if (trackIds.isEmpty()) {
+                return new AnalyticsResponse<>("processing", "Data is being processed. Please try again later.", null);
+            }
+        }
+
+        try {
+            aggregateAndUpsertUserTrackFeatureStats(spotifyId);
+            List<UserTrackFeatureStats> newStats = userTrackFeatureStatsRepository.findAllByUserSpotifyId(spotifyId);
+            UserTrackFeatureStatsMapDto dto = userTrackFeatureStatsMapper.toMapDto(spotifyId, newStats);
+            return new AnalyticsResponse<>("complete", "Data processing complete", dto);
+        } catch (Exception e) {
+            return new AnalyticsResponse<>("error", "Error processing track feature stats", null);
+        }
     }
+
 
     @Transactional
     public void aggregateAndUpsertUserTrackFeatureStats(String spotifyUserId) {

@@ -21,19 +21,32 @@ public class UserGenreDistributionService {
     private final UserGenreDistributionMapper userGenreDistributionMapper;
 
 
+
     @Transactional
-    @Retryable(maxAttempts = 12, backoff = @Backoff(delay = 5000))
     public AnalyticsResponse<UserGenreDistributionMapDto> fetchUserGenreDistribution(String spotifyId) {
+        // Check if we already have the distribution data
+        List<UserGenreDistribution> existingDistributions = userGenreDistributionRepository
+                .findByUserSpotifyIdOrderByPercentageDesc(spotifyId);
+        if (!existingDistributions.isEmpty()) {
+            UserGenreDistributionMapDto dto = userGenreDistributionMapper.toMapDto(spotifyId, existingDistributions);
+            return new AnalyticsResponse<>("complete", "Data processing complete", dto);
+        }
+
         List<Object[]> genreData = userTopArtistRepository.findGenresAndCountByUserSpotifyId(spotifyId);
         if (genreData.isEmpty()) {
             return new AnalyticsResponse<>("processing", "Data is being processed. Please try again later.", null);
         }
-        aggregateAndUpsertUserGenreDistribution(spotifyId);
-        List<UserGenreDistribution> userGenreDistributions = userGenreDistributionRepository.findByUserSpotifyIdOrderByPercentageDesc(spotifyId);
-        UserGenreDistributionMapDto dto = userGenreDistributionMapper.toMapDto(spotifyId, userGenreDistributions);
-        return new AnalyticsResponse<>("complete", "Data processing complete", dto);
-    }
 
+        try {
+            aggregateAndUpsertUserGenreDistribution(spotifyId);
+            List<UserGenreDistribution> newDistributions = userGenreDistributionRepository
+                    .findByUserSpotifyIdOrderByPercentageDesc(spotifyId);
+            UserGenreDistributionMapDto dto = userGenreDistributionMapper.toMapDto(spotifyId, newDistributions);
+            return new AnalyticsResponse<>("complete", "Data processing complete", dto);
+        } catch (Exception e) {
+            return new AnalyticsResponse<>("error", "Error processing genre distribution", null);
+        }
+    }
 
     @Transactional
     public void aggregateAndUpsertUserGenreDistribution(String spotifyUserId) {

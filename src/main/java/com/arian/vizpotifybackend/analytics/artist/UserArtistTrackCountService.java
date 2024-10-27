@@ -23,16 +23,28 @@ public class UserArtistTrackCountService {
     private final UserTopTrackRepository userTopTrackRepository;
 
     @Transactional
-    @Retryable(maxAttempts = 12, backoff = @Backoff(delay = 5000))
     public AnalyticsResponse<UserArtistTrackCountMapDto> fetchUserArtistTrackCount(String spotifyId) {
-        List<String> trackIds = userTopTrackRepository.findTrackIdsByUserSpotifyIdAndTimeRange(spotifyId, "long_term");
-        if (trackIds.isEmpty()) {
-            return new AnalyticsResponse<>("processing", "Data is being processed. Please try again later.", null);
+        List<UserArtistTrackCount> existingCounts = userArtistTrackCountRepository.findAllByUserSpotifyId(spotifyId);
+        if (!existingCounts.isEmpty()) {
+            UserArtistTrackCountMapDto dto = userArtistTrackCountMapper.toMapDto(spotifyId, existingCounts);
+            return new AnalyticsResponse<>("complete", "Data processing complete", dto);
         }
-        aggregateAndUpsertUserArtistTrackCount(spotifyId);
-        List<UserArtistTrackCount> userArtistTrackCounts = userArtistTrackCountRepository.findAllByUserSpotifyId(spotifyId);
-        UserArtistTrackCountMapDto dto = userArtistTrackCountMapper.toMapDto(spotifyId, userArtistTrackCounts);
-        return new AnalyticsResponse<>("complete", "Data processing complete", dto);
+
+        for (String timeRange : Arrays.asList("short_term", "medium_term", "long_term")) {
+            List<String> trackIds = userTopTrackRepository.findTrackIdsByUserSpotifyIdAndTimeRange(spotifyId, timeRange);
+            if (trackIds.isEmpty()) {
+                return new AnalyticsResponse<>("processing", "Data is being processed. Please try again later.", null);
+            }
+        }
+
+        try {
+            aggregateAndUpsertUserArtistTrackCount(spotifyId);
+            List<UserArtistTrackCount> newCounts = userArtistTrackCountRepository.findAllByUserSpotifyId(spotifyId);
+            UserArtistTrackCountMapDto dto = userArtistTrackCountMapper.toMapDto(spotifyId, newCounts);
+            return new AnalyticsResponse<>("complete", "Data processing complete", dto);
+        } catch (Exception e) {
+            return new AnalyticsResponse<>("error", "Error processing artist track count", null);
+        }
     }
 
     @Transactional

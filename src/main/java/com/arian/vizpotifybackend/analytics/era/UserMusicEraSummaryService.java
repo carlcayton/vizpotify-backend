@@ -3,8 +3,6 @@ package com.arian.vizpotifybackend.analytics.era;
 import com.arian.vizpotifybackend.analytics.AnalyticsResponse;
 import com.arian.vizpotifybackend.user.topitems.track.UserTopTrackRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,19 +20,29 @@ public class UserMusicEraSummaryService {
 
 
     @Transactional
-    @Retryable(maxAttempts = 12, backoff = @Backoff(delay = 5000))
     public AnalyticsResponse<UserMusicEraSummaryMapDto> fetchUserMusicEraSummary(String spotifyId) {
-        List<String> trackIds = userTopTrackRepository.findTrackIdsByUserSpotifyIdAndTimeRange(spotifyId, "long_term");
-        if (trackIds.isEmpty()) {
-            return new AnalyticsResponse<>("processing", "Data is being processed. Please try again later.", null);
+        List<UserMusicEraSummary> existingSummaries = userMusicEraSummaryRepository.findAllByUserSpotifyId(spotifyId);
+        if (!existingSummaries.isEmpty()) {
+            UserMusicEraSummaryMapDto dto = userMusicEraSummaryMapper.toMapDto(spotifyId, existingSummaries);
+            return new AnalyticsResponse<>("complete", "Data processing complete", dto);
         }
-        aggregateAndUpsertMusicEraSummary(spotifyId);
-        List<UserMusicEraSummary> userMusicEraSummaries = userMusicEraSummaryRepository.findAllByUserSpotifyId(spotifyId);
-        UserMusicEraSummaryMapDto dto = userMusicEraSummaryMapper.toMapDto(spotifyId, userMusicEraSummaries);
-        return new AnalyticsResponse<>("complete", "Data processing complete", dto);
+
+        for (String timeRange : Arrays.asList("short_term", "medium_term", "long_term")) {
+            List<String> trackIds = userTopTrackRepository.findTrackIdsByUserSpotifyIdAndTimeRange(spotifyId, timeRange);
+            if (trackIds.isEmpty()) {
+                return new AnalyticsResponse<>("processing", "Data is being processed. Please try again later.", null);
+            }
+        }
+
+        try {
+            aggregateAndUpsertMusicEraSummary(spotifyId);
+            List<UserMusicEraSummary> newSummaries = userMusicEraSummaryRepository.findAllByUserSpotifyId(spotifyId);
+            UserMusicEraSummaryMapDto dto = userMusicEraSummaryMapper.toMapDto(spotifyId, newSummaries);
+            return new AnalyticsResponse<>("complete", "Data processing complete", dto);
+        } catch (Exception e) {
+            return new AnalyticsResponse<>("error", "Error processing music era summary", null);
+        }
     }
-
-
     @Transactional
     public void aggregateAndUpsertMusicEraSummary(String spotifyUserId) {
         Stream.of("short_term", "medium_term", "long_term")

@@ -37,3 +37,4 @@ src/main/resources/application.properties
 dev.env
 repopack-output.txt
 .aider*
+*claudesync**

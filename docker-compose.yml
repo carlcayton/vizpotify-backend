@@ -9,8 +9,6 @@ services:
       - "5432:5432"
     env_file:
       - vizpotify-db/.env
-    # volumes:
-    #   - ./vizpotify-db/backend-init.sql:/docker-entrypoint-initdb.d/backend-init.sql
     networks:
       - vizpotify-network
     restart: always
@@ -24,6 +22,21 @@ services:
     networks:
       - vizpotify-network
     restart: always
+
+
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - "9090:9090"
+
+    grafana:
+      image: grafana/grafana:10.1.0
+      ports:
+        - "3000:3000"
 
 networks:
   vizpotify-network:
